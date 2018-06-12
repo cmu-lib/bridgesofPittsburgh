@@ -1,0 +1,31 @@
+﻿River,name,start date,end date,transportation type,GPS coordinate for center bridges,start X coordinate,start Y coordinate,end X coordinate,end Y coordinate,start land mass,end land mass
+Ohio River,Ohio River Conecting Railroad(Across Brunot Island),1915,,rail,,40.465543,-80.038859,40.459641,-80.047331,North Bank,South Bank
+Ohio River,McKees Rocks Bridge,1931,,"car,ped",,40.477817,-80.04626,40.476474,-80.050441,North Bank,South Bank
+Ohio River,West End Bridge,1932,,"car,rail,ped",,40.447686,-80.02628,40.444823,-80.027866,North Bank,South Bank
+Allegheny River,Fort Duquesne Bridge,1963,,"car,rail,ped",,40.443064, -80.008850,40.445346,-80.009507,City Center,North Bank
+Allegheny River,Roberto Clemente (6th Street) Bridge,1928,,"car,rail,ped",,40.444341,-80.002866,40.446942,-80.003842,City Center,North Bank
+Allegheny River,Andy Warhol (7th Street) Bridge,1926,,"car,rail,ped",,40.444976,-80.00102,40.447293,-80.001843,City Center,North Bank
+Allegheny River,Rachel Carson (9th Street) Bridge,1927,,"car,ped",,40.44548,-79.999165,40.447739,-80.000299,City Center,North Bank
+Allegheny River,Fort Wayne Railroad,1904,,rail, ,40.446981,-79.995433,40.449304,-79.996984,City Center,North Bank
+Allegheny River,Veterans Bridge,1987,,car,,40.448953,-79.992416,40.450867,-79.994511,City Center,North Bank
+Allegheny River,16th Street Bridge( David McCullough Bridge),1923,,"car,ped",,40.450736,-79.989853,40.452612,-79.991985,City Center,North Bank
+Allegheny River,Herr's (Heir's) Island Railroad (now Three Rivers Heritage Trail),1903,,"ped,rail",,40.460258,-79.981149,40.460249,-79.982165,Herrs Island,North Bank
+Allegheny River,Herr's (Heir's) Island Backchannel (30th St Bridge),1986,,"car,ped",,40.463647,-79.978362,40.464144,-79.979509,Herrs Island,North Bank
+Allegheny River,33rd Street Railroad,1928,,rail,,40.464783,-79.972557,40.468971,-79.976222,City Center,North Bank
+Allegheny River,31st Street Bridge,1927,,"car,ped",,40.462517,-79.974679,40.464546,-79.979297,City Center,North Bank
+Allegheny River,40th Street (Washington Crossing Bridge),1924,,"car,ped",,40.471773,-79.966929,40.474576,-79.971469,City Center,North Bank
+Allegheny River,R.D. Fleming (62 Street),1962,,"car,ped",,40.489715,-79.937653,40.492755,-79.938597,City Center,North Bank
+Allegheny River,Highland Park Bridge,1938,,"car,ped",,40.491862,-79.910754,40.486511,-79.913311,North Bank,City Center
+Allegheny River,Brilliant Branch Bridge,1904,,rail,,40.48839,-79.90472,40.48452,-79.906255,North Bank,City Center
+Monongahela River,Fort Pitt Bridge,1959,,"car,ped",,40.439776,-80.009643,40.438206,-80.012617,City Center,South Bank
+Monongahela River,Smithfield Street Bridge,1883,,"car,ped",,40.436336,-80.001148,40.433416,-80.0031,City Center,South Bank
+Monongahela River,Monongahela River Bridge (Panhandle/light rail),1904,,rail,,40.434594,-79.997202,40.431629,-79.99909,City Center,South Bank
+Monongahela River,Liberty Bridge,1927,,"car,ped",,40.434145,-79.995836,40.430025,-79.998709,City Center,South Bank
+Monongahela River,South 10th Street Bridge,1931,,"car,ped",,40.431357,-79.988871,40.433861,-79.989622,South Bank,City Center
+Monongahela River,Birmingham Bridge,1977,,"car,ped",,40.435898,-79.973003,40.431789,-79.973809,City Center,South Bank
+Monongahela River,Hot Metal Bridge,1900,,car,,40.42985,-79.95799,40.427294,-79.962375,City Center,South Bank
+Monongahela River,Monongahela Connecting Railroad(Great Allegheny Passage),1904,,ped,,40.430087,-79.957751,40.427564,-79.962099,City Center,South Bank
+Monongahela River,Glenwood,1966,,"car,ped",,40.394765,-79.93518,40.399485,-79.935738,South Bank,City Center
+Monongahela River,Glenwood-B&O Railroad Bridge,1915,,rail,,40.397039,-79.930425,40.399578,-79.932482,South Bank,City Center
+Monongahela River,Homestead Grays (High Level),1936,,"car,ped",,40.409867,-79.917342,40.412035,-79.920275,South Bank,City Center
+,,,,,,,,,,,
