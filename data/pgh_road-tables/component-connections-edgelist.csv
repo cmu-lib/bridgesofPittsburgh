@@ -1,0 +1,562 @@
+Source,Target,Type,Id,Label,distance
+1,1,Undirected,8,Penn-Lincoln Parkway East,320.047
+1,1,Undirected,42,Penn-Lincoln Parkway East,1136.425
+2,7,Undirected,130,Pittsburgh McKeesport Boulevard,670.849
+2,2,Undirected,211,Chartiers Avenue,74.417
+6,0,Undirected,301,PA 65,1359.063
+2,2,Undirected,404,Lowe Street,90.817
+8,0,Undirected,517,Butler Street,367.178
+1,1,Undirected,787,Pennwood Avenue,310.822
+1,1,Undirected,842,28th Street Bridge,214.001
+10,0,Undirected,971,,560.68
+10,87,Undirected,972,North Shore Expressway,219.329
+1,1,Undirected,989,East Liberty Boulevard,275.543
+11,3,Undirected,1119,Aiken Road,573.499
+13,141,Undirected,1320,,310.322
+13,1,Undirected,1321,Boulevard of the Allies,217.683
+1,1,Undirected,1356,Schenley Drive,342.898
+1,1,Undirected,1665,Beulah Road,125.725
+2,2,Undirected,1697,Brosville Street,111.989
+0,0,Undirected,2136,Ridge Avenue,60.794
+14,105,Undirected,2156,31st Street Bridge,9.744
+14,0,Undirected,2157,31st Street Bridge,15.758
+14,0,Undirected,2158,Rialto Street,24.28
+0,0,Undirected,2179,Martsolf Avenue,83.076
+15,1,Undirected,2203,"['Glenwood Bridge', 'Second Avenue']",924.906
+16,2,Undirected,2207,,353.72
+16,15,Undirected,2208,,177.88
+2,85,Undirected,2219,PA 885,173.764
+2,19,Undirected,2222,PA 885,199.019
+17,16,Undirected,2228,,30.563
+17,2,Undirected,2229,PA 837,202.233
+2,17,Undirected,2231,PA 837,239.505
+2,19,Undirected,2238,PA 837,255.52
+18,39,Undirected,2247,I 279,196.756
+18,43,Undirected,2248,,40.814
+2,85,Undirected,2261,,193.809
+19,2,Undirected,2265,PA 837,453.722
+19,15,Undirected,2266,Glenwood Bridge,149.263
+0,0,Undirected,2286,California Avenue,281.716
+1,2,Undirected,2351,"['Glenwood Bridge', 'Second Avenue']",1114.761
+0,9,Undirected,2354,Babcock Boulevard,61.454
+1,20,Undirected,2553,Penn-Lincoln Parkway East,443.217
+0,0,Undirected,2830,Ohio River Boulevard,568.685
+0,0,Undirected,2853,Allegheny Valley Expressway,361.415
+0,0,Undirected,2854,,210.559
+2,1,Undirected,2888,"['South 10th Street', 'South 10th Street Bridge']",506.641
+0,0,Undirected,2905,Allegheny Valley Expressway,658.265
+0,0,Undirected,2922,Grant Avenue,170.217
+0,25,Undirected,2923,Ohio River Boulevard,562.005
+21,92,Undirected,3024,I 279,191.989
+23,4,Undirected,3095,Rockwood Drive,403.213
+24,1,Undirected,3096,,272.982
+24,1,Undirected,3097,,290.296
+2,83,Undirected,3167,P J McArdle Roadway,323.875
+1,1,Undirected,3214,Larimer Avenue,273.546
+25,101,Undirected,3275,US 19,588.94
+25,26,Undirected,3276,Ohio River Boulevard,635.025
+1,72,Undirected,3874,Boulevard of the Allies,247.563
+26,0,Undirected,3946,Ohio River Boulevard,532.261
+27,133,Undirected,3947,US 19,465.804
+27,0,Undirected,3948,,199.419
+28,30,Undirected,4013,US 19,164.329
+2,2,Undirected,4051,Saw Mill Run Boulevard,691.004
+2,2,Undirected,4086,,319.341
+2,2,Undirected,4087,Saw Mill Run Boulevard,325.745
+30,148,Undirected,4148,West End Bridge,461.263
+30,79,Undirected,4149,,138.786
+30,0,Undirected,4150,West End Bridge,208.303
+0,78,Undirected,4228,Ohio River Boulevard,375.309
+3,3,Undirected,4234,Morrow Street,63.976
+31,4,Undirected,4273,,143.085
+31,138,Undirected,4274,Highland Park Bridge,180.004
+4,29,Undirected,4357,Alpha Drive,270.488
+1,1,Undirected,4583,"['Washington Street', 'Washington Avenue']",81.925
+33,0,Undirected,4601,Bridge Street,46.95
+33,5,Undirected,4602,Bridge Street,93.602
+33,0,Undirected,4603,,68.654
+0,0,Undirected,4619,Jacks Run Road,239.668
+34,36,Undirected,4624,,382.311
+8,34,Undirected,4633,,433.016
+36,0,Undirected,4657,Allegheny Valley Expressway,527.347
+37,8,Undirected,4728,,412.459
+37,38,Undirected,4729,Allegheny Valley Expressway,746.092
+37,5,Undirected,4752,,313.511
+2,2,Undirected,4801,Glass Run Road,986.241
+2,2,Undirected,4802,Glass Run Road,1267.15
+38,60,Undirected,4857,Allegheny Valley Expressway,1806.12
+1,113,Undirected,4873,,298.369
+0,37,Undirected,4926,Allegheny Valley Expressway,986.408
+39,120,Undirected,5180,,399.127
+39,113,Undirected,5181,Penn-Lincoln Parkway North,143.455
+40,1,Undirected,5199,,377.504
+40,1,Undirected,5200,Birmingham Bridge,437.895
+1,128,Undirected,5338,,324.712
+0,0,Undirected,5359,Lowrie Street,129.463
+41,45,Undirected,5431,62nd Street Bridge,408.683
+42,1,Undirected,5435,,46.093
+42,1,Undirected,5436,62nd Street Bridge,28.45
+1,1,Undirected,5572,Meadow Street,187.975
+0,6,Undirected,5593,Ohio River Boulevard,314.387
+0,0,Undirected,5594,Ohio River Boulevard,861.831
+43,1,Undirected,5618,,244.88
+43,1,Undirected,5619,,266.46
+0,0,Undirected,5652,Shadeland Avenue,301.137
+1,152,Undirected,5697,,529.08
+8,38,Undirected,5710,,553.525
+8,49,Undirected,5711,William Flinn Highway,186.538
+0,0,Undirected,5717,Jackman Avenue,109.393
+1,1,Undirected,5725,Penn-Lincoln Parkway East,2898.671
+1,1,Undirected,5737,,320.755
+6,149,Undirected,5738,McKees Rocks Bridge,50.632
+2,97,Undirected,5833,East 5th Avenue,190.766
+5,46,Undirected,6099,,276.497
+5,33,Undirected,6109,North Main Street,151.33
+44,1,Undirected,6117,Centre Avenue,151.888
+44,1,Undirected,6118,Chatham Street,97.722
+44,1,Undirected,6119,Centre Avenue,80.167
+0,34,Undirected,6120,,233.374
+45,46,Undirected,6205,,61.396
+45,50,Undirected,6206,"['62nd Street Bridge', 'William Flinn Highway']",401.313
+46,47,Undirected,6207,,56.723
+47,42,Undirected,6209,62nd Street Bridge,412.13
+8,36,Undirected,6220,Allegheny Valley Expressway,1067.306
+0,0,Undirected,6226,North Shore Drive,462.206
+1,1,Undirected,6231,Panther Hollow Road,295.205
+1,1,Undirected,6237,"['Boulevard of the Allies', 'Panther Hollow Road']",439.875
+0,0,Undirected,6311,Ohio River Boulevard,667.846
+5,50,Undirected,6320,,206.864
+49,5,Undirected,6340,,200.787
+49,47,Undirected,6341,"['62nd Street Bridge', 'William Flinn Highway']",393.086
+50,8,Undirected,6372,William Flinn Highway,210.101
+35,2,Undirected,6485,Streets Run Road,316.601
+35,2,Undirected,6486,"['Streets Run Road', 'Baldwin Road']",1417.23
+1,41,Undirected,6497,PA 8,38.453
+2,2,Undirected,6527,Bettis Road,457.158
+1,1,Undirected,6529,"['Swinburne Street', 'Frazier Street']",793.76
+1,1,Undirected,6867,One Wild Place,955.743
+3,3,Undirected,6868,I 79,84.453
+0,0,Undirected,6881,Restricted Lane,5459.482
+2,116,Undirected,6991,Penn-Lincoln Parkway West,1419.374
+2,2,Undirected,6994,Bajo Street,191.011
+51,0,Undirected,7147,,618.573
+51,0,Undirected,7148,Veterans Bridge,1076.912
+0,0,Undirected,7178,PA 28,874.078
+0,52,Undirected,7179,,521.769
+0,0,Undirected,7180,,364.95
+52,161,Undirected,7204,Veterans Bridge,436.849
+1,54,Undirected,7300,Highland Park Bridge,237.236
+53,1,Undirected,7326,,252.155
+53,1,Undirected,7327,Highland Park Bridge,363.117
+0,0,Undirected,7371,Columbus Avenue,234.693
+1,54,Undirected,7373,,313.898
+54,69,Undirected,7379,Highland Park Bridge,680.079
+1,1,Undirected,7429,Allegheny River Boulevard,2636.697
+3,104,Undirected,7436,,486.324
+3,127,Undirected,7437,Penn-Lincoln Parkway West,697.935
+2,55,Undirected,7489,Corley Street,39.33
+2,94,Undirected,7490,Calera Street,486.411
+56,2,Undirected,7510,"['Trumbull Drive', 'Maple Avenue']",1351.404
+57,59,Undirected,7586,Allegheny Valley Expressway,436.892
+57,58,Undirected,7587,Green Belt,293.143
+58,31,Undirected,7591,Highland Park Bridge,60.361
+59,8,Undirected,7607,Allegheny Valley Expressway,2090.932
+4,4,Undirected,7617,Allegheny Valley Expressway,965.779
+4,59,Undirected,7623,Blue Belt,321.486
+60,4,Undirected,7639,Allegheny Valley Expressway,590.463
+60,58,Undirected,7640,Blue Belt,439.505
+0,151,Undirected,7645,Brighton Road,71.812
+0,61,Undirected,7726,,50.141
+0,151,Undirected,7727,West North Avenue,33.815
+61,151,Undirected,7728,Brighton Road,34.231
+61,0,Undirected,7729,Brighton Road,46.515
+1,20,Undirected,7813,Greensburg Pike,181.126
+62,99,Undirected,7871,I 79,448.129
+1,1,Undirected,7902,Brinton Road,90.259
+2,96,Undirected,7930,Liberty Bridge,31.803
+2,2,Undirected,7931,Liberty Tunnels,1855.901
+0,0,Undirected,8042,Maple Avenue,234.419
+1,65,Undirected,8140,Liberty Bridge,233.337
+64,1,Undirected,8184,Crosstown Boulevard,20.267
+65,96,Undirected,8242,Liberty Bridge,587.261
+65,66,Undirected,8243,,189.333
+66,74,Undirected,8260,,42.043
+66,67,Undirected,8261,,27.956
+67,72,Undirected,8269,Boulevard of the Allies,98.019
+67,74,Undirected,8270,,38.264
+68,83,Undirected,8286,P J McArdle Roadway,370.115
+68,2,Undirected,8287,"['McArdle Roadway', 'P J McArdle Roadway']",100.086
+2,68,Undirected,8293,"['McArdle Roadway', 'P J McArdle Roadway']",87.478
+2,2,Undirected,8455,East Sycamore Street,766.14
+1,64,Undirected,8612,,393.992
+1,1,Undirected,8613,,229.983
+4,138,Undirected,8645,,138.84
+69,4,Undirected,8654,Highland Park Bridge,100.152
+69,4,Undirected,8655,,248.045
+4,5,Undirected,8677,"['Freeport Road', 'Main Street']",237.126
+4,138,Undirected,8678,,256.224
+2,3,Undirected,8921,"['Arch Street', 'Chestnut Street']",147.403
+70,71,Undirected,8975,,557.612
+70,1,Undirected,8976,,282.556
+2,2,Undirected,9005,Saw Mill Run Boulevard,215.421
+71,143,Undirected,9068,Boulevard of the Allies,1630.875
+72,73,Undirected,9079,Boulevard of the Allies,50.866
+73,65,Undirected,9088,,229.554
+73,67,Undirected,9089,Boulevard of the Allies,46.202
+3,2,Undirected,9091,West Main Street,85.104
+74,71,Undirected,9093,,103.206
+2,126,Undirected,9109,Smithfield Street,494.5
+4,76,Undirected,9128,Allegheny Valley Expressway,491.908
+4,4,Undirected,9148,Allegheny Valley Expressway,1421.606
+1,1,Undirected,9350,Forbes Avenue,1064.538
+4,57,Undirected,9366,Allegheny Valley Expressway,444.186
+75,4,Undirected,9382,Allegheny Valley Expressway,285.592
+75,4,Undirected,9383,,221.609
+76,4,Undirected,9388,,740.809
+77,75,Undirected,9412,Allegheny Valley Expressway,225.951
+78,81,Undirected,9444,Ohio River Boulevard,381.091
+79,0,Undirected,9492,,305.647
+79,78,Undirected,9493,,512.584
+80,0,Undirected,9508,Ohio River Boulevard,140.732
+0,86,Undirected,9549,,795.049
+0,80,Undirected,9563,,313.177
+81,84,Undirected,9568,,705.824
+81,86,Undirected,9569,,429.859
+0,0,Undirected,9602,Restricted Lane,836.873
+82,89,Undirected,9654,,105.614
+82,0,Undirected,9655,,669.316
+82,88,Undirected,9656,,538.401
+84,155,Undirected,9690,North Shore Expressway,248.019
+85,2,Undirected,9705,Mifflin Road,127.942
+86,82,Undirected,9706,,73.751
+87,88,Undirected,9707,,800.121
+87,89,Undirected,9708,North Shore Expressway,599.602
+88,80,Undirected,9721,Ohio River Boulevard,413.002
+89,18,Undirected,9730,Fort Duquesne Bridge,208.242
+90,84,Undirected,9734,North Shore Expressway,512.708
+90,82,Undirected,9735,,105.414
+1,97,Undirected,9746,"['Browns Hill Road', 'Homestead Grays Bridge']",1013.979
+0,91,Undirected,9775,River Avenue,1509.878
+91,102,Undirected,9820,"['30th Street Bridge', '30th Street']",141.527
+91,93,Undirected,9821,River Avenue,48.954
+92,90,Undirected,9826,Fort Duquesne Bridge,208.693
+93,105,Undirected,9836,31st Street Bridge,23.437
+93,1,Undirected,9837,"['31st Street Bridge', '31st Street']",877.305
+2,2,Undirected,9956,Mifflin Road,736.939
+0,1,Undirected,9998,"['Sandusky Street', 'Andy Warhol Bridge', '7th Street']",373.905
+3,2,Undirected,10063,"['Township Road', 'Napor Boulevard']",121.259
+1,1,Undirected,10076,Baum Boulevard,212.268
+4,77,Undirected,10120,,872.833
+3,3,Undirected,10132,Clever Road,378.358
+2,2,Undirected,10206,"['Station Street', 'Bradford Avenue']",173.186
+2,2,Undirected,10271,P J McArdle Roadway,1321.566
+20,95,Undirected,10293,Penn-Lincoln Parkway East,1115.388
+1,2,Undirected,10367,"['Hot Metal Bridge', 'Hot Metal Street']",508.174
+96,2,Undirected,10375,,48.641
+2,2,Undirected,10441,Weyman Road,665.259
+97,2,Undirected,11162,East 5th Avenue,578.524
+97,2,Undirected,11163,Homestead Grays Bridge,226.813
+1,131,Undirected,11441,Lancaster Avenue,338.547
+1,98,Undirected,11582,MacFarren Street,191.696
+1,1,Undirected,11925,,184.395
+0,28,Undirected,12139,US 19,319.173
+1,1,Undirected,12278,South Aiken Avenue,182.669
+2,2,Undirected,12378,Wanley Road,834.39
+0,0,Undirected,12464,Ivory Avenue,187.921
+1,1,Undirected,12468,West Elizabeth Street,176.507
+0,0,Undirected,12490,Tripoli Street,88.292
+0,0,Undirected,12511,McKnight Road,311.173
+8,22,Undirected,12522,Crescent Street,214.251
+1,1,Undirected,12535,Murray Avenue,164.829
+2,100,Undirected,12631,Ensign Avenue,41.705
+0,0,Undirected,12649,McKnight Road,50.153
+3,2,Undirected,12773,"['Windgap Avenue', 'Wind Gap Bridge']",331.927
+2,2,Undirected,12916,Radcliffe Street,59.3
+0,26,Undirected,13103,,456.603
+0,101,Undirected,13104,,405.608
+0,0,Undirected,13110,Perrysville Avenue,181.064
+0,6,Undirected,13138,PA 65,1504.129
+101,0,Undirected,13143,US 19,83.126
+0,133,Undirected,13165,Ohio River Boulevard,1243.72
+2,2,Undirected,13231,,719.511
+0,166,Undirected,13286,,54.448
+2,3,Undirected,13354,Mansfield Boulevard,151.803
+2,2,Undirected,13417,Greentree Road,74.597
+2,2,Undirected,13517,Penn-Lincoln Parkway West,113.887
+2,2,Undirected,13553,Penn-Lincoln Parkway West,737.49
+2,2,Undirected,13558,Penn-Lincoln Parkway West,2276.77
+2,2,Undirected,13610,,371.94
+2,2,Undirected,13620,Penn-Lincoln Parkway West,2477.609
+2,3,Undirected,13626,Penn-Lincoln Parkway West,896.03
+103,104,Undirected,13659,,217.45
+104,3,Undirected,13737,,705.958
+0,105,Undirected,13747,,240.877
+105,0,Undirected,13751,,371.613
+3,3,Undirected,13784,,325.819
+0,0,Undirected,13846,Milroy Street,330.085
+2,40,Undirected,13857,Birmingham Bridge,572.087
+106,5,Undirected,13862,Noble Street,310.264
+2,2,Undirected,14052,Mifflin Road,507.487
+2,2,Undirected,14068,Bell Avenue,317.911
+107,1,Undirected,14322,Penn-Lincoln Parkway East,570.86
+107,1,Undirected,14323,,345.609
+0,0,Undirected,14628,"['Lincoln Avenue', 'California Avenue']",280.498
+62,3,Undirected,14637,Penn-Lincoln Parkway West,775.201
+108,1,Undirected,14891,,641.323
+108,150,Undirected,14892,Penn-Lincoln Parkway East,706.7
+0,0,Undirected,14904,Bellevue Road,261.84
+3,110,Undirected,14956,,149.341
+3,2,Undirected,14960,West Carson Street,98.317
+3,109,Undirected,14969,McKees Rocks Bridge,31.877
+3,110,Undirected,14970,McKees Rocks Bridge,351.952
+109,149,Undirected,14976,McKees Rocks Bridge,1090.831
+110,3,Undirected,14981,McKees Rocks Bridge,191.455
+110,3,Undirected,14982,,148.966
+1,1,Undirected,14987,Forward Avenue,283.516
+3,109,Undirected,14989,,232.631
+2,2,Undirected,15014,Grove Road,87.798
+2,124,Undirected,15135,Terminal Street,227.835
+2,2,Undirected,15608,Liberty Tunnels,1856.65
+2,2,Undirected,15748,Crafton Boulevard,68.69
+111,141,Undirected,15891,Penn-Lincoln Parkway East,605.483
+111,1,Undirected,15892,,553.535
+1,1,Undirected,16045,Lincoln Avenue,202.876
+1,1,Undirected,16115,South Highland Avenue,211.361
+2,2,Undirected,16309,Chestnut Street,79.481
+1,134,Undirected,16458,Bloomfield Bridge,148.863
+1,1,Undirected,16624,Forbes Avenue,481.646
+4,167,Undirected,16650,Fox Chapel Road,309.414
+3,99,Undirected,16678,,1332.741
+3,48,Undirected,16679,,1140.155
+3,119,Undirected,16710,Penn-Lincoln Parkway West,1318.116
+0,0,Undirected,16843,Sheridan Street,65.639
+112,7,Undirected,16904,Fleetwood Manor Road,114.786
+0,0,Undirected,16941,Evergreen Avenue,111.974
+1,1,Undirected,17352,Herron Avenue,280.34
+2,153,Undirected,17584,Timberland Avenue,188.899
+3,2,Undirected,17697,Mansfield Boulevard,156.044
+1,1,Undirected,17854,,459.11
+1,1,Undirected,17926,Penn-Lincoln Parkway East,2844.037
+3,3,Undirected,18082,"['Chartiers Street', 'Campbells Run Road']",1620.256
+2,2,Undirected,18407,McNeilly Road,467.574
+1,0,Undirected,18500,40th Street Bridge,826.575
+2,2,Undirected,18505,Library Road,661.972
+1,1,Undirected,18564,Panther Hollow Road,107.396
+113,128,Undirected,18889,Penn-Lincoln Parkway North,147.546
+114,24,Undirected,18901,,88.021
+114,21,Undirected,18902,I 279,93.353
+2,116,Undirected,18962,,425.077
+115,168,Undirected,18970,Penn-Lincoln Parkway West,212.04
+116,117,Undirected,18999,Penn-Lincoln Parkway West,212.047
+117,118,Undirected,19000,Penn-Lincoln Parkway North,48.987
+117,1,Undirected,19001,Penn-Lincoln Parkway East,864.182
+118,1,Undirected,19002,,151.981
+118,114,Undirected,19003,Penn-Lincoln Parkway North,198.947
+2,2,Undirected,19095,"['E Waterfront Drive', 'Waterfront Drive East']",2550.425
+1,1,Undirected,19535,Centre Avenue,268.936
+3,3,Undirected,19638,Raymond P Shafer Highway,1067.027
+4,4,Undirected,19730,Freeport Road,521.114
+12,0,Undirected,19816,McKnight Road,868.433
+1,41,Undirected,20441,62nd Street Bridge,27.275
+2,2,Undirected,20604,Center Street,67.215
+120,165,Undirected,20977,Fort Pitt Boulevard,181.227
+120,1,Undirected,20978,,576.586
+121,1,Undirected,21000,Fort Pitt Boulevard,186.519
+121,1,Undirected,21001,Smithfield Street,25.158
+121,126,Undirected,21002,Smithfield Street,53.926
+1,135,Undirected,21467,Bigelow Boulevard,2519.651
+0,0,Undirected,21662,Pennsylvania Avenue,312.447
+1,122,Undirected,21727,,340.147
+122,92,Undirected,21732,,27.117
+1,1,Undirected,21735,,131.352
+1,122,Undirected,21736,,341.578
+1,0,Undirected,21799,"['Anderson Street', 'Rachel Carson Bridge', '9th Street']",352.459
+1,0,Undirected,21809,"['6th Street', 'Federal Street', 'Roberto Clemente Bridge']",396.627
+1,1,Undirected,22052,Fort Duquesne Boulevard,30.045
+2,2,Undirected,22123,Saw Mill Run Boulevard,270.947
+2,2,Undirected,22227,Killarney Drive,251.381
+1,1,Undirected,22286,Edgewood Avenue,235.634
+123,2,Undirected,22325,Smithfield Street,154.669
+123,2,Undirected,22326,Smithfield Street,155.728
+2,2,Undirected,22356,Provost Road,71.475
+0,0,Undirected,23600,Sherman Street,55.697
+0,1,Undirected,23710,Restricted Lane,2026.125
+0,0,Undirected,23861,Parkway North,1441.039
+2,2,Undirected,23929,Ramp Street,53.208
+63,22,Undirected,24198,Dewey Street,28.435
+125,164,Undirected,24399,Fort Pitt Boulevard,25.144
+125,1,Undirected,24400,,32.487
+1,108,Undirected,24429,Penn-Lincoln Parkway East,1753.184
+1,111,Undirected,24437,Penn-Lincoln Parkway East,297.665
+111,1,Undirected,24442,,145.657
+2,2,Undirected,24457,,400.672
+126,123,Undirected,24469,Smithfield Street,338.048
+1,1,Undirected,24518,,436.08
+1,1,Undirected,24537,Butler Street,178.969
+1,21,Undirected,24634,,304.146
+127,2,Undirected,24639,,227.748
+127,2,Undirected,24640,Penn-Lincoln Parkway West,298.784
+1,1,Undirected,24725,South Negley Avenue,307.403
+128,115,Undirected,24783,Penn-Lincoln Parkway North,19.714
+8,22,Undirected,24804,Grant Avenue,110.317
+129,2,Undirected,25096,Rankin Bridge,35.172
+129,2,Undirected,25097,,216.355
+2,2,Undirected,25166,Oakwood Road,151.794
+119,48,Undirected,25722,I 79,662.736
+130,3,Undirected,25751,,870.749
+130,119,Undirected,25752,I 79,666.247
+132,1,Undirected,25984,Bloomfield Bridge,453.177
+1,132,Undirected,26142,,168.442
+1,132,Undirected,26146,Bloomfield Bridge,158.348
+2,2,Undirected,26309,East Prospect Avenue,48.732
+133,0,Undirected,26438,Ohio River Boulevard,628.181
+1,1,Undirected,26531,South Braddock Avenue,157.004
+1,134,Undirected,26548,,480.202
+0,12,Undirected,26641,Babcock Boulevard,147.404
+12,0,Undirected,26720,Cemetery Lane,167.145
+134,137,Undirected,26738,Bloomfield Bridge,419.129
+9,144,Undirected,26795,Babcock Boulevard,261.638
+9,144,Undirected,26859,Babcock Boulevard,489.783
+135,136,Undirected,27022,Bigelow Boulevard,307.035
+135,1,Undirected,27023,,418.899
+136,1,Undirected,27027,Bigelow Boulevard,68.356
+1,1,Undirected,27032,Bigelow Boulevard,128.593
+137,1,Undirected,27036,,100.619
+137,1,Undirected,27037,Bloomfield Bridge,59.661
+1,162,Undirected,27053,"['Crosstown Boulevard', 'Veterans Bridge']",843.814
+1,1,Undirected,27054,,580.733
+138,53,Undirected,27126,Highland Park Bridge,685.736
+22,63,Undirected,27145,Leonard Avenue,84.565
+139,2,Undirected,27161,Lebanon Road,742.763
+1,162,Undirected,27225,,642.41
+1,1,Undirected,27251,Penn-Lincoln Parkway East,308.295
+3,62,Undirected,27282,I 79,512.764
+1,140,Undirected,27458,Birmingham Bridge,433.067
+0,0,Undirected,28202,North Avenue,16.502
+0,0,Undirected,28325,Longmount Drive,25.7
+3,142,Undirected,28431,Stanhope Street,77.786
+1,165,Undirected,28633,Stanwix Street,34.533
+1,1,Undirected,28634,,259.928
+0,0,Undirected,28693,Cemetery Lane,128.517
+2,2,Undirected,28864,"['Shaler Street', 'Minnotte Square']",530.459
+140,2,Undirected,29290,Birmingham Bridge,576.851
+0,28,Undirected,29410,,336.288
+2,3,Undirected,29655,Steubenville Pike,282.822
+141,107,Undirected,29868,Penn-Lincoln Parkway East,1130.621
+2,2,Undirected,30026,US 19 Truck,404.739
+142,2,Undirected,30120,Stanhope Street,76.403
+142,3,Undirected,30121,,80.638
+143,150,Undirected,30242,,700.641
+143,1,Undirected,30243,Boulevard of the Allies,470.809
+2,2,Undirected,30624,Penn-Lincoln Parkway West,427.545
+2,2,Undirected,30689,Greentree Road,134.369
+1,1,Undirected,30801,East Liberty Boulevard,278.764
+1,1,Undirected,31014,Boulevard of the Allies,430.978
+1,1,Undirected,31052,Baum Boulevard,210.179
+2,2,Undirected,31412,Carnahan Road,21.895
+1,145,Undirected,31560,Carrie Furnace Boulevard,1074.543
+2,2,Undirected,31876,PA 51,313.58
+2,2,Undirected,31912,South Main Street,39.149
+2,2,Undirected,31919,South Main Street,201.289
+146,2,Undirected,31936,West Carson Street,59.559
+146,2,Undirected,31937,Steuben Street,40.677
+2,2,Undirected,31939,West Carson Street,44.418
+147,148,Undirected,31948,West Carson Street,49.92
+2,147,Undirected,31958,West Carson Street,44.85
+2,2,Undirected,31965,West Carson Street,56.159
+2,147,Undirected,31966,South Main Street,34.66
+148,146,Undirected,31997,West Carson Street,33.407
+148,2,Undirected,31998,Saw Mill Run Boulevard,187.346
+4,4,Undirected,32086,Old Freeport Road,450.271
+2,2,Undirected,32103,Minnotte Square,86.253
+1,140,Undirected,32185,,372.075
+2,2,Undirected,32199,Saw Mill Run Boulevard,168.078
+1,1,Undirected,32222,Penn Avenue,107.633
+2,2,Undirected,32289,US 19 Truck,170.092
+2,2,Undirected,32408,Mission Street,332.49
+0,0,Undirected,32446,East North Avenue,89.436
+1,1,Undirected,32576,South Millvale Avenue,223.408
+2,2,Undirected,32729,Idlewood Avenue,148.34
+149,6,Undirected,32774,PA 65 Truck,78.125
+1,13,Undirected,32800,Boulevard of the Allies,253.904
+1,1,Undirected,32849,Boulevard of the Allies,368.692
+3,32,Undirected,33097,"['3rd Street', 'Carothers Avenue']",118.576
+150,1,Undirected,33296,Penn-Lincoln Parkway East,1109.917
+1,20,Undirected,33710,,1043.109
+1,1,Undirected,33866,US 30,573.079
+0,151,Undirected,34023,West North Avenue,82.638
+1,64,Undirected,34387,,336.109
+152,1,Undirected,34414,,132.783
+152,1,Undirected,34415,,277.774
+1,1,Undirected,34436,Penn-Lincoln Parkway East,567.067
+0,0,Undirected,34518,"['North Charles Street', 'Swindell Bridge', 'Essen Street']",426.176
+1,1,Undirected,35020,"['Greenfield Bridge', 'Beechwood Boulevard', 'Greenfield Road']",792.436
+2,2,Undirected,35097,Saw Mill Run Boulevard,455.062
+2,2,Undirected,35327,,219.105
+154,1,Undirected,35585,,95.418
+154,1,Undirected,35586,,67.511
+1,1,Undirected,35875,,99.674
+0,0,Undirected,35955,Ridge Avenue,68.967
+0,0,Undirected,35970,East Ohio Street,88.33
+1,154,Undirected,36012,,27.645
+0,0,Undirected,36091,,722.486
+0,0,Undirected,36179,Ridge Place,45.101
+2,2,Undirected,36312,Penn-Lincoln Parkway West,436.808
+1,1,Undirected,36340,Penn-Lincoln Parkway East,1589.434
+0,0,Undirected,36406,US 19 Truck,517.604
+0,0,Undirected,36503,East Street,247.341
+0,0,Undirected,36529,Parkway North,2530.647
+0,0,Undirected,36843,Parkway North,1843.605
+1,1,Undirected,36941,Panther Hollow Road,212.312
+155,0,Undirected,37007,,494.159
+155,0,Undirected,37008,North Shore Expressway,1542.099
+0,0,Undirected,37037,Parkway North,1084.304
+0,10,Undirected,37067,North Shore Expressway,261.416
+0,156,Undirected,37104,East Street,39.011
+0,156,Undirected,37109,,42.326
+156,0,Undirected,37115,East Street,70.879
+1,1,Undirected,37166,Penn-Lincoln Parkway East,2124.843
+0,0,Undirected,37168,,144.285
+0,0,Undirected,37169,Chestnut Street,72.145
+1,157,Undirected,37189,Laurel Street,108.686
+0,0,Undirected,37199,East Ohio Street,87.939
+0,52,Undirected,37247,Veterans Bridge,1107.387
+158,1,Undirected,37308,,203.367
+158,136,Undirected,37309,,152.79
+1,70,Undirected,37321,Crosstown Boulevard,41.29
+1,1,Undirected,37332,,293.459
+1,1,Undirected,37365,,83.376
+1,44,Undirected,37408,Centre Avenue,152.303
+1,1,Undirected,37411,,162.615
+1,159,Undirected,37412,,104.219
+159,1,Undirected,37413,,28.593
+159,1,Undirected,37414,,13.709
+160,0,Undirected,37578,Ridgewood Avenue,329.538
+2,2,Undirected,37596,Edgebrook Avenue,194.214
+1,1,Undirected,37645,Penn-Lincoln Parkway East,871.215
+6,0,Undirected,37847,Brighton Heights Boulevard,304.257
+6,149,Undirected,37855,,70.823
+161,158,Undirected,38321,,571.302
+161,1,Undirected,38322,"['Crosstown Boulevard', 'Veterans Bridge']",850.747
+162,51,Undirected,38327,Veterans Bridge,419.11
+163,121,Undirected,38372,Fort Pitt Boulevard,157.207
+163,1,Undirected,38373,,105.489
+164,163,Undirected,38383,Fort Pitt Boulevard,162.764
+1,115,Undirected,38402,Penn-Lincoln Parkway East,158.564
+165,125,Undirected,38407,Fort Pitt Boulevard,101.881
+166,0,Undirected,38504,,210.917
+0,0,Undirected,38560,,442.72
+0,166,Undirected,38623,,16.283
+0,27,Undirected,38641,US 19,100.42
+12,0,Undirected,38728,Brookview Lane,185.303
+0,12,Undirected,38785,McKnight Road,331.605
+1,0,Undirected,38787,"['Chestnut Street', '16th Street', 'David McCullough Bridge']",656.201
+2,2,Undirected,39047,Saw Mill Run Boulevard,433.13
+1,1,Undirected,40433,"['Chestnut Street', 'Elm Street']",265.69
+2,96,Undirected,40897,,47.23
+1,164,Undirected,41016,Market Street,31.419
+1,163,Undirected,41024,Wood Street,31.445
+2,2,Undirected,41373,Creek Street,554.442
+168,2,Undirected,41558,,411.795
+168,2,Undirected,41559,Penn-Lincoln Parkway West,2052.306
+2,2,Undirected,42618,Saw Mill Run Boulevard,691.835

@@ -1,0 +1,2273 @@
+<?xml version="1.0" encoding="UTF-8"?><graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+<key attr.name="label" attr.type="string" for="node" id="label"/>
+<key attr.name="Edge Label" attr.type="string" for="edge" id="edgelabel"/>
+<key attr.name="weight" attr.type="double" for="edge" id="weight"/>
+<graph edgedefault="undirected">
+<node id="1"/>
+<node id="2"/>
+<node id="7"/>
+<node id="6"/>
+<node id="0"/>
+<node id="8"/>
+<node id="10"/>
+<node id="87"/>
+<node id="11"/>
+<node id="3"/>
+<node id="13"/>
+<node id="141"/>
+<node id="14"/>
+<node id="105"/>
+<node id="15"/>
+<node id="16"/>
+<node id="85"/>
+<node id="19"/>
+<node id="17"/>
+<node id="18"/>
+<node id="39"/>
+<node id="43"/>
+<node id="9"/>
+<node id="20"/>
+<node id="25"/>
+<node id="21"/>
+<node id="92"/>
+<node id="23"/>
+<node id="4"/>
+<node id="24"/>
+<node id="83"/>
+<node id="101"/>
+<node id="26"/>
+<node id="72"/>
+<node id="27"/>
+<node id="133"/>
+<node id="28"/>
+<node id="30"/>
+<node id="148"/>
+<node id="79"/>
+<node id="78"/>
+<node id="31"/>
+<node id="138"/>
+<node id="29"/>
+<node id="33"/>
+<node id="5"/>
+<node id="34"/>
+<node id="36"/>
+<node id="37"/>
+<node id="38"/>
+<node id="60"/>
+<node id="113"/>
+<node id="120"/>
+<node id="40"/>
+<node id="128"/>
+<node id="41"/>
+<node id="45"/>
+<node id="42"/>
+<node id="152"/>
+<node id="49"/>
+<node id="149"/>
+<node id="97"/>
+<node id="46"/>
+<node id="44"/>
+<node id="50"/>
+<node id="47"/>
+<node id="35"/>
+<node id="116"/>
+<node id="51"/>
+<node id="52"/>
+<node id="161"/>
+<node id="54"/>
+<node id="53"/>
+<node id="69"/>
+<node id="104"/>
+<node id="127"/>
+<node id="55"/>
+<node id="94"/>
+<node id="56"/>
+<node id="57"/>
+<node id="59"/>
+<node id="58"/>
+<node id="151"/>
+<node id="61"/>
+<node id="62"/>
+<node id="99"/>
+<node id="96"/>
+<node id="65"/>
+<node id="64"/>
+<node id="66"/>
+<node id="74"/>
+<node id="67"/>
+<node id="68"/>
+<node id="70"/>
+<node id="71"/>
+<node id="143"/>
+<node id="73"/>
+<node id="126"/>
+<node id="76"/>
+<node id="75"/>
+<node id="77"/>
+<node id="81"/>
+<node id="80"/>
+<node id="86"/>
+<node id="84"/>
+<node id="82"/>
+<node id="89"/>
+<node id="88"/>
+<node id="155"/>
+<node id="90"/>
+<node id="91"/>
+<node id="102"/>
+<node id="93"/>
+<node id="95"/>
+<node id="131"/>
+<node id="98"/>
+<node id="22"/>
+<node id="100"/>
+<node id="166"/>
+<node id="103"/>
+<node id="106"/>
+<node id="107"/>
+<node id="108"/>
+<node id="150"/>
+<node id="110"/>
+<node id="109"/>
+<node id="124"/>
+<node id="111"/>
+<node id="134"/>
+<node id="167"/>
+<node id="48"/>
+<node id="119"/>
+<node id="112"/>
+<node id="153"/>
+<node id="114"/>
+<node id="115"/>
+<node id="168"/>
+<node id="117"/>
+<node id="118"/>
+<node id="12"/>
+<node id="165"/>
+<node id="121"/>
+<node id="135"/>
+<node id="122"/>
+<node id="123"/>
+<node id="63"/>
+<node id="125"/>
+<node id="164"/>
+<node id="129"/>
+<node id="130"/>
+<node id="132"/>
+<node id="137"/>
+<node id="144"/>
+<node id="136"/>
+<node id="162"/>
+<node id="139"/>
+<node id="140"/>
+<node id="142"/>
+<node id="145"/>
+<node id="146"/>
+<node id="147"/>
+<node id="32"/>
+<node id="154"/>
+<node id="156"/>
+<node id="157"/>
+<node id="158"/>
+<node id="159"/>
+<node id="160"/>
+<node id="163"/>
+<edge id="8" source="1" target="1">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="42" source="1" target="1">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="130" source="2" target="7">
+<data key="edgelabel">Pittsburgh McKeesport Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="211" source="2" target="2">
+<data key="edgelabel">Chartiers Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="301" source="6" target="0">
+<data key="edgelabel">PA 65</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="404" source="2" target="2">
+<data key="edgelabel">Lowe Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="517" source="8" target="0">
+<data key="edgelabel">Butler Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="787" source="1" target="1">
+<data key="edgelabel">Pennwood Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="842" source="1" target="1">
+<data key="edgelabel">28th Street Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="971" source="10" target="0">
+<data key="weight">10.0</data>
+</edge>
+<edge id="972" source="10" target="87">
+<data key="edgelabel">North Shore Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="989" source="1" target="1">
+<data key="edgelabel">East Liberty Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="1119" source="11" target="3">
+<data key="edgelabel">Aiken Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="1320" source="13" target="141">
+<data key="weight">10.0</data>
+</edge>
+<edge id="1321" source="13" target="1">
+<data key="edgelabel">Boulevard of the Allies</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="1356" source="1" target="1">
+<data key="edgelabel">Schenley Drive</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="1665" source="1" target="1">
+<data key="edgelabel">Beulah Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="1697" source="2" target="2">
+<data key="edgelabel">Brosville Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2136" source="0" target="0">
+<data key="edgelabel">Ridge Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2156" source="14" target="105">
+<data key="edgelabel">31st Street Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2157" source="14" target="0">
+<data key="edgelabel">31st Street Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2158" source="14" target="0">
+<data key="edgelabel">Rialto Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2179" source="0" target="0">
+<data key="edgelabel">Martsolf Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2203" source="15" target="1">
+<data key="edgelabel">['Glenwood Bridge', 'Second Avenue']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2207" source="16" target="2">
+<data key="weight">10.0</data>
+</edge>
+<edge id="2208" source="16" target="15">
+<data key="weight">10.0</data>
+</edge>
+<edge id="2219" source="2" target="85">
+<data key="edgelabel">PA 885</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2222" source="2" target="19">
+<data key="edgelabel">PA 885</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2228" source="17" target="16">
+<data key="weight">10.0</data>
+</edge>
+<edge id="2229" source="17" target="2">
+<data key="edgelabel">PA 837</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2231" source="2" target="17">
+<data key="edgelabel">PA 837</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2238" source="2" target="19">
+<data key="edgelabel">PA 837</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2247" source="18" target="39">
+<data key="edgelabel">I 279</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2248" source="18" target="43">
+<data key="weight">10.0</data>
+</edge>
+<edge id="2261" source="2" target="85">
+<data key="weight">10.0</data>
+</edge>
+<edge id="2265" source="19" target="2">
+<data key="edgelabel">PA 837</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2266" source="19" target="15">
+<data key="edgelabel">Glenwood Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2286" source="0" target="0">
+<data key="edgelabel">California Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2351" source="1" target="2">
+<data key="edgelabel">['Glenwood Bridge', 'Second Avenue']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2354" source="0" target="9">
+<data key="edgelabel">Babcock Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2553" source="1" target="20">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2830" source="0" target="0">
+<data key="edgelabel">Ohio River Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2853" source="0" target="0">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2854" source="0" target="0">
+<data key="weight">10.0</data>
+</edge>
+<edge id="2888" source="2" target="1">
+<data key="edgelabel">['South 10th Street', 'South 10th Street Bridge']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2905" source="0" target="0">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2922" source="0" target="0">
+<data key="edgelabel">Grant Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="2923" source="0" target="25">
+<data key="edgelabel">Ohio River Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="3024" source="21" target="92">
+<data key="edgelabel">I 279</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="3095" source="23" target="4">
+<data key="edgelabel">Rockwood Drive</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="3096" source="24" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="3097" source="24" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="3167" source="2" target="83">
+<data key="edgelabel">P J McArdle Roadway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="3214" source="1" target="1">
+<data key="edgelabel">Larimer Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="3275" source="25" target="101">
+<data key="edgelabel">US 19</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="3276" source="25" target="26">
+<data key="edgelabel">Ohio River Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="3874" source="1" target="72">
+<data key="edgelabel">Boulevard of the Allies</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="3946" source="26" target="0">
+<data key="edgelabel">Ohio River Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="3947" source="27" target="133">
+<data key="edgelabel">US 19</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="3948" source="27" target="0">
+<data key="weight">10.0</data>
+</edge>
+<edge id="4013" source="28" target="30">
+<data key="edgelabel">US 19</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4051" source="2" target="2">
+<data key="edgelabel">Saw Mill Run Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4086" source="2" target="2">
+<data key="weight">10.0</data>
+</edge>
+<edge id="4087" source="2" target="2">
+<data key="edgelabel">Saw Mill Run Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4148" source="30" target="148">
+<data key="edgelabel">West End Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4149" source="30" target="79">
+<data key="weight">10.0</data>
+</edge>
+<edge id="4150" source="30" target="0">
+<data key="edgelabel">West End Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4228" source="0" target="78">
+<data key="edgelabel">Ohio River Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4234" source="3" target="3">
+<data key="edgelabel">Morrow Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4273" source="31" target="4">
+<data key="weight">10.0</data>
+</edge>
+<edge id="4274" source="31" target="138">
+<data key="edgelabel">Highland Park Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4357" source="4" target="29">
+<data key="edgelabel">Alpha Drive</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4583" source="1" target="1">
+<data key="edgelabel">['Washington Street', 'Washington Avenue']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4601" source="33" target="0">
+<data key="edgelabel">Bridge Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4602" source="33" target="5">
+<data key="edgelabel">Bridge Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4603" source="33" target="0">
+<data key="weight">10.0</data>
+</edge>
+<edge id="4619" source="0" target="0">
+<data key="edgelabel">Jacks Run Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4624" source="34" target="36">
+<data key="weight">10.0</data>
+</edge>
+<edge id="4633" source="8" target="34">
+<data key="weight">10.0</data>
+</edge>
+<edge id="4657" source="36" target="0">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4728" source="37" target="8">
+<data key="weight">10.0</data>
+</edge>
+<edge id="4729" source="37" target="38">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4752" source="37" target="5">
+<data key="weight">10.0</data>
+</edge>
+<edge id="4801" source="2" target="2">
+<data key="edgelabel">Glass Run Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4802" source="2" target="2">
+<data key="edgelabel">Glass Run Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4857" source="38" target="60">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="4873" source="1" target="113">
+<data key="weight">10.0</data>
+</edge>
+<edge id="4926" source="0" target="37">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="5180" source="39" target="120">
+<data key="weight">10.0</data>
+</edge>
+<edge id="5181" source="39" target="113">
+<data key="edgelabel">Penn-Lincoln Parkway North</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="5199" source="40" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="5200" source="40" target="1">
+<data key="edgelabel">Birmingham Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="5338" source="1" target="128">
+<data key="weight">10.0</data>
+</edge>
+<edge id="5359" source="0" target="0">
+<data key="edgelabel">Lowrie Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="5431" source="41" target="45">
+<data key="edgelabel">62nd Street Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="5435" source="42" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="5436" source="42" target="1">
+<data key="edgelabel">62nd Street Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="5572" source="1" target="1">
+<data key="edgelabel">Meadow Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="5593" source="0" target="6">
+<data key="edgelabel">Ohio River Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="5594" source="0" target="0">
+<data key="edgelabel">Ohio River Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="5618" source="43" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="5619" source="43" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="5652" source="0" target="0">
+<data key="edgelabel">Shadeland Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="5697" source="1" target="152">
+<data key="weight">10.0</data>
+</edge>
+<edge id="5710" source="8" target="38">
+<data key="weight">10.0</data>
+</edge>
+<edge id="5711" source="8" target="49">
+<data key="edgelabel">William Flinn Highway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="5717" source="0" target="0">
+<data key="edgelabel">Jackman Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="5725" source="1" target="1">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="5737" source="1" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="5738" source="6" target="149">
+<data key="edgelabel">McKees Rocks Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="5833" source="2" target="97">
+<data key="edgelabel">East 5th Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6099" source="5" target="46">
+<data key="weight">10.0</data>
+</edge>
+<edge id="6109" source="5" target="33">
+<data key="edgelabel">North Main Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6117" source="44" target="1">
+<data key="edgelabel">Centre Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6118" source="44" target="1">
+<data key="edgelabel">Chatham Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6119" source="44" target="1">
+<data key="edgelabel">Centre Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6120" source="0" target="34">
+<data key="weight">10.0</data>
+</edge>
+<edge id="6205" source="45" target="46">
+<data key="weight">10.0</data>
+</edge>
+<edge id="6206" source="45" target="50">
+<data key="edgelabel">['62nd Street Bridge', 'William Flinn Highway']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6207" source="46" target="47">
+<data key="weight">10.0</data>
+</edge>
+<edge id="6209" source="47" target="42">
+<data key="edgelabel">62nd Street Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6220" source="8" target="36">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6226" source="0" target="0">
+<data key="edgelabel">North Shore Drive</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6231" source="1" target="1">
+<data key="edgelabel">Panther Hollow Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6237" source="1" target="1">
+<data key="edgelabel">['Boulevard of the Allies', 'Panther Hollow Road']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6311" source="0" target="0">
+<data key="edgelabel">Ohio River Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6320" source="5" target="50">
+<data key="weight">10.0</data>
+</edge>
+<edge id="6340" source="49" target="5">
+<data key="weight">10.0</data>
+</edge>
+<edge id="6341" source="49" target="47">
+<data key="edgelabel">['62nd Street Bridge', 'William Flinn Highway']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6372" source="50" target="8">
+<data key="edgelabel">William Flinn Highway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6485" source="35" target="2">
+<data key="edgelabel">Streets Run Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6486" source="35" target="2">
+<data key="edgelabel">['Streets Run Road', 'Baldwin Road']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6497" source="1" target="41">
+<data key="edgelabel">PA 8</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6527" source="2" target="2">
+<data key="edgelabel">Bettis Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6529" source="1" target="1">
+<data key="edgelabel">['Swinburne Street', 'Frazier Street']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6867" source="1" target="1">
+<data key="edgelabel">One Wild Place</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6868" source="3" target="3">
+<data key="edgelabel">I 79</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6881" source="0" target="0">
+<data key="edgelabel">Restricted Lane</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6991" source="2" target="116">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="6994" source="2" target="2">
+<data key="edgelabel">Bajo Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7147" source="51" target="0">
+<data key="weight">10.0</data>
+</edge>
+<edge id="7148" source="51" target="0">
+<data key="edgelabel">Veterans Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7178" source="0" target="0">
+<data key="edgelabel">PA 28</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7179" source="0" target="52">
+<data key="weight">10.0</data>
+</edge>
+<edge id="7180" source="0" target="0">
+<data key="weight">10.0</data>
+</edge>
+<edge id="7204" source="52" target="161">
+<data key="edgelabel">Veterans Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7300" source="1" target="54">
+<data key="edgelabel">Highland Park Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7326" source="53" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="7327" source="53" target="1">
+<data key="edgelabel">Highland Park Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7371" source="0" target="0">
+<data key="edgelabel">Columbus Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7373" source="1" target="54">
+<data key="weight">10.0</data>
+</edge>
+<edge id="7379" source="54" target="69">
+<data key="edgelabel">Highland Park Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7429" source="1" target="1">
+<data key="edgelabel">Allegheny River Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7436" source="3" target="104">
+<data key="weight">10.0</data>
+</edge>
+<edge id="7437" source="3" target="127">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7489" source="2" target="55">
+<data key="edgelabel">Corley Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7490" source="2" target="94">
+<data key="edgelabel">Calera Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7510" source="56" target="2">
+<data key="edgelabel">['Trumbull Drive', 'Maple Avenue']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7586" source="57" target="59">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7587" source="57" target="58">
+<data key="edgelabel">Green Belt</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7591" source="58" target="31">
+<data key="edgelabel">Highland Park Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7607" source="59" target="8">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7617" source="4" target="4">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7623" source="4" target="59">
+<data key="edgelabel">Blue Belt</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7639" source="60" target="4">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7640" source="60" target="58">
+<data key="edgelabel">Blue Belt</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7645" source="0" target="151">
+<data key="edgelabel">Brighton Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7726" source="0" target="61">
+<data key="weight">10.0</data>
+</edge>
+<edge id="7727" source="0" target="151">
+<data key="edgelabel">West North Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7728" source="61" target="151">
+<data key="edgelabel">Brighton Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7729" source="61" target="0">
+<data key="edgelabel">Brighton Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7813" source="1" target="20">
+<data key="edgelabel">Greensburg Pike</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7871" source="62" target="99">
+<data key="edgelabel">I 79</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7902" source="1" target="1">
+<data key="edgelabel">Brinton Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7930" source="2" target="96">
+<data key="edgelabel">Liberty Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="7931" source="2" target="2">
+<data key="edgelabel">Liberty Tunnels</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="8042" source="0" target="0">
+<data key="edgelabel">Maple Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="8140" source="1" target="65">
+<data key="edgelabel">Liberty Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="8184" source="64" target="1">
+<data key="edgelabel">Crosstown Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="8242" source="65" target="96">
+<data key="edgelabel">Liberty Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="8243" source="65" target="66">
+<data key="weight">10.0</data>
+</edge>
+<edge id="8260" source="66" target="74">
+<data key="weight">10.0</data>
+</edge>
+<edge id="8261" source="66" target="67">
+<data key="weight">10.0</data>
+</edge>
+<edge id="8269" source="67" target="72">
+<data key="edgelabel">Boulevard of the Allies</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="8270" source="67" target="74">
+<data key="weight">10.0</data>
+</edge>
+<edge id="8286" source="68" target="83">
+<data key="edgelabel">P J McArdle Roadway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="8287" source="68" target="2">
+<data key="edgelabel">['McArdle Roadway', 'P J McArdle Roadway']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="8293" source="2" target="68">
+<data key="edgelabel">['McArdle Roadway', 'P J McArdle Roadway']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="8455" source="2" target="2">
+<data key="edgelabel">East Sycamore Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="8612" source="1" target="64">
+<data key="weight">10.0</data>
+</edge>
+<edge id="8613" source="1" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="8645" source="4" target="138">
+<data key="weight">10.0</data>
+</edge>
+<edge id="8654" source="69" target="4">
+<data key="edgelabel">Highland Park Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="8655" source="69" target="4">
+<data key="weight">10.0</data>
+</edge>
+<edge id="8677" source="4" target="5">
+<data key="edgelabel">['Freeport Road', 'Main Street']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="8678" source="4" target="138">
+<data key="weight">10.0</data>
+</edge>
+<edge id="8921" source="2" target="3">
+<data key="edgelabel">['Arch Street', 'Chestnut Street']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="8975" source="70" target="71">
+<data key="weight">10.0</data>
+</edge>
+<edge id="8976" source="70" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9005" source="2" target="2">
+<data key="edgelabel">Saw Mill Run Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9068" source="71" target="143">
+<data key="edgelabel">Boulevard of the Allies</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9079" source="72" target="73">
+<data key="edgelabel">Boulevard of the Allies</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9088" source="73" target="65">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9089" source="73" target="67">
+<data key="edgelabel">Boulevard of the Allies</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9091" source="3" target="2">
+<data key="edgelabel">West Main Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9093" source="74" target="71">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9109" source="2" target="126">
+<data key="edgelabel">Smithfield Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9128" source="4" target="76">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9148" source="4" target="4">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9350" source="1" target="1">
+<data key="edgelabel">Forbes Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9366" source="4" target="57">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9382" source="75" target="4">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9383" source="75" target="4">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9388" source="76" target="4">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9412" source="77" target="75">
+<data key="edgelabel">Allegheny Valley Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9444" source="78" target="81">
+<data key="edgelabel">Ohio River Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9492" source="79" target="0">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9493" source="79" target="78">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9508" source="80" target="0">
+<data key="edgelabel">Ohio River Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9549" source="0" target="86">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9563" source="0" target="80">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9568" source="81" target="84">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9569" source="81" target="86">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9602" source="0" target="0">
+<data key="edgelabel">Restricted Lane</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9654" source="82" target="89">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9655" source="82" target="0">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9656" source="82" target="88">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9690" source="84" target="155">
+<data key="edgelabel">North Shore Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9705" source="85" target="2">
+<data key="edgelabel">Mifflin Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9706" source="86" target="82">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9707" source="87" target="88">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9708" source="87" target="89">
+<data key="edgelabel">North Shore Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9721" source="88" target="80">
+<data key="edgelabel">Ohio River Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9730" source="89" target="18">
+<data key="edgelabel">Fort Duquesne Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9734" source="90" target="84">
+<data key="edgelabel">North Shore Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9735" source="90" target="82">
+<data key="weight">10.0</data>
+</edge>
+<edge id="9746" source="1" target="97">
+<data key="edgelabel">['Browns Hill Road', 'Homestead Grays Bridge']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9775" source="0" target="91">
+<data key="edgelabel">River Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9820" source="91" target="102">
+<data key="edgelabel">['30th Street Bridge', '30th Street']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9821" source="91" target="93">
+<data key="edgelabel">River Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9826" source="92" target="90">
+<data key="edgelabel">Fort Duquesne Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9836" source="93" target="105">
+<data key="edgelabel">31st Street Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9837" source="93" target="1">
+<data key="edgelabel">['31st Street Bridge', '31st Street']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9956" source="2" target="2">
+<data key="edgelabel">Mifflin Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="9998" source="0" target="1">
+<data key="edgelabel">['Sandusky Street', 'Andy Warhol Bridge', '7th Street']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="10063" source="3" target="2">
+<data key="edgelabel">['Township Road', 'Napor Boulevard']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="10076" source="1" target="1">
+<data key="edgelabel">Baum Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="10120" source="4" target="77">
+<data key="weight">10.0</data>
+</edge>
+<edge id="10132" source="3" target="3">
+<data key="edgelabel">Clever Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="10206" source="2" target="2">
+<data key="edgelabel">['Station Street', 'Bradford Avenue']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="10271" source="2" target="2">
+<data key="edgelabel">P J McArdle Roadway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="10293" source="20" target="95">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="10367" source="1" target="2">
+<data key="edgelabel">['Hot Metal Bridge', 'Hot Metal Street']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="10375" source="96" target="2">
+<data key="weight">10.0</data>
+</edge>
+<edge id="10441" source="2" target="2">
+<data key="edgelabel">Weyman Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="11162" source="97" target="2">
+<data key="edgelabel">East 5th Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="11163" source="97" target="2">
+<data key="edgelabel">Homestead Grays Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="11441" source="1" target="131">
+<data key="edgelabel">Lancaster Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="11582" source="1" target="98">
+<data key="edgelabel">MacFarren Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="11925" source="1" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="12139" source="0" target="28">
+<data key="edgelabel">US 19</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="12278" source="1" target="1">
+<data key="edgelabel">South Aiken Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="12378" source="2" target="2">
+<data key="edgelabel">Wanley Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="12464" source="0" target="0">
+<data key="edgelabel">Ivory Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="12468" source="1" target="1">
+<data key="edgelabel">West Elizabeth Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="12490" source="0" target="0">
+<data key="edgelabel">Tripoli Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="12511" source="0" target="0">
+<data key="edgelabel">McKnight Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="12522" source="8" target="22">
+<data key="edgelabel">Crescent Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="12535" source="1" target="1">
+<data key="edgelabel">Murray Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="12631" source="2" target="100">
+<data key="edgelabel">Ensign Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="12649" source="0" target="0">
+<data key="edgelabel">McKnight Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="12773" source="3" target="2">
+<data key="edgelabel">['Windgap Avenue', 'Wind Gap Bridge']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="12916" source="2" target="2">
+<data key="edgelabel">Radcliffe Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="13103" source="0" target="26">
+<data key="weight">10.0</data>
+</edge>
+<edge id="13104" source="0" target="101">
+<data key="weight">10.0</data>
+</edge>
+<edge id="13110" source="0" target="0">
+<data key="edgelabel">Perrysville Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="13138" source="0" target="6">
+<data key="edgelabel">PA 65</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="13143" source="101" target="0">
+<data key="edgelabel">US 19</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="13165" source="0" target="133">
+<data key="edgelabel">Ohio River Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="13231" source="2" target="2">
+<data key="weight">10.0</data>
+</edge>
+<edge id="13286" source="0" target="166">
+<data key="weight">10.0</data>
+</edge>
+<edge id="13354" source="2" target="3">
+<data key="edgelabel">Mansfield Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="13417" source="2" target="2">
+<data key="edgelabel">Greentree Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="13517" source="2" target="2">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="13553" source="2" target="2">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="13558" source="2" target="2">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="13610" source="2" target="2">
+<data key="weight">10.0</data>
+</edge>
+<edge id="13620" source="2" target="2">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="13626" source="2" target="3">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="13659" source="103" target="104">
+<data key="weight">10.0</data>
+</edge>
+<edge id="13737" source="104" target="3">
+<data key="weight">10.0</data>
+</edge>
+<edge id="13747" source="0" target="105">
+<data key="weight">10.0</data>
+</edge>
+<edge id="13751" source="105" target="0">
+<data key="weight">10.0</data>
+</edge>
+<edge id="13784" source="3" target="3">
+<data key="weight">10.0</data>
+</edge>
+<edge id="13846" source="0" target="0">
+<data key="edgelabel">Milroy Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="13857" source="2" target="40">
+<data key="edgelabel">Birmingham Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="13862" source="106" target="5">
+<data key="edgelabel">Noble Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="14052" source="2" target="2">
+<data key="edgelabel">Mifflin Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="14068" source="2" target="2">
+<data key="edgelabel">Bell Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="14322" source="107" target="1">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="14323" source="107" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="14628" source="0" target="0">
+<data key="edgelabel">['Lincoln Avenue', 'California Avenue']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="14637" source="62" target="3">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="14891" source="108" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="14892" source="108" target="150">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="14904" source="0" target="0">
+<data key="edgelabel">Bellevue Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="14956" source="3" target="110">
+<data key="weight">10.0</data>
+</edge>
+<edge id="14960" source="3" target="2">
+<data key="edgelabel">West Carson Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="14969" source="3" target="109">
+<data key="edgelabel">McKees Rocks Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="14970" source="3" target="110">
+<data key="edgelabel">McKees Rocks Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="14976" source="109" target="149">
+<data key="edgelabel">McKees Rocks Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="14981" source="110" target="3">
+<data key="edgelabel">McKees Rocks Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="14982" source="110" target="3">
+<data key="weight">10.0</data>
+</edge>
+<edge id="14987" source="1" target="1">
+<data key="edgelabel">Forward Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="14989" source="3" target="109">
+<data key="weight">10.0</data>
+</edge>
+<edge id="15014" source="2" target="2">
+<data key="edgelabel">Grove Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="15135" source="2" target="124">
+<data key="edgelabel">Terminal Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="15608" source="2" target="2">
+<data key="edgelabel">Liberty Tunnels</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="15748" source="2" target="2">
+<data key="edgelabel">Crafton Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="15891" source="111" target="141">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="15892" source="111" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="16045" source="1" target="1">
+<data key="edgelabel">Lincoln Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="16115" source="1" target="1">
+<data key="edgelabel">South Highland Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="16309" source="2" target="2">
+<data key="edgelabel">Chestnut Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="16458" source="1" target="134">
+<data key="edgelabel">Bloomfield Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="16624" source="1" target="1">
+<data key="edgelabel">Forbes Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="16650" source="4" target="167">
+<data key="edgelabel">Fox Chapel Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="16678" source="3" target="99">
+<data key="weight">10.0</data>
+</edge>
+<edge id="16679" source="3" target="48">
+<data key="weight">10.0</data>
+</edge>
+<edge id="16710" source="3" target="119">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="16843" source="0" target="0">
+<data key="edgelabel">Sheridan Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="16904" source="112" target="7">
+<data key="edgelabel">Fleetwood Manor Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="16941" source="0" target="0">
+<data key="edgelabel">Evergreen Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="17352" source="1" target="1">
+<data key="edgelabel">Herron Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="17584" source="2" target="153">
+<data key="edgelabel">Timberland Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="17697" source="3" target="2">
+<data key="edgelabel">Mansfield Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="17854" source="1" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="17926" source="1" target="1">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="18082" source="3" target="3">
+<data key="edgelabel">['Chartiers Street', 'Campbells Run Road']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="18407" source="2" target="2">
+<data key="edgelabel">McNeilly Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="18500" source="1" target="0">
+<data key="edgelabel">40th Street Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="18505" source="2" target="2">
+<data key="edgelabel">Library Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="18564" source="1" target="1">
+<data key="edgelabel">Panther Hollow Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="18889" source="113" target="128">
+<data key="edgelabel">Penn-Lincoln Parkway North</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="18901" source="114" target="24">
+<data key="weight">10.0</data>
+</edge>
+<edge id="18902" source="114" target="21">
+<data key="edgelabel">I 279</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="18962" source="2" target="116">
+<data key="weight">10.0</data>
+</edge>
+<edge id="18970" source="115" target="168">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="18999" source="116" target="117">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="19000" source="117" target="118">
+<data key="edgelabel">Penn-Lincoln Parkway North</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="19001" source="117" target="1">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="19002" source="118" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="19003" source="118" target="114">
+<data key="edgelabel">Penn-Lincoln Parkway North</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="19095" source="2" target="2">
+<data key="edgelabel">['E Waterfront Drive', 'Waterfront Drive East']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="19535" source="1" target="1">
+<data key="edgelabel">Centre Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="19638" source="3" target="3">
+<data key="edgelabel">Raymond P Shafer Highway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="19730" source="4" target="4">
+<data key="edgelabel">Freeport Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="19816" source="12" target="0">
+<data key="edgelabel">McKnight Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="20441" source="1" target="41">
+<data key="edgelabel">62nd Street Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="20604" source="2" target="2">
+<data key="edgelabel">Center Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="20977" source="120" target="165">
+<data key="edgelabel">Fort Pitt Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="20978" source="120" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="21000" source="121" target="1">
+<data key="edgelabel">Fort Pitt Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="21001" source="121" target="1">
+<data key="edgelabel">Smithfield Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="21002" source="121" target="126">
+<data key="edgelabel">Smithfield Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="21467" source="1" target="135">
+<data key="edgelabel">Bigelow Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="21662" source="0" target="0">
+<data key="edgelabel">Pennsylvania Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="21727" source="1" target="122">
+<data key="weight">10.0</data>
+</edge>
+<edge id="21732" source="122" target="92">
+<data key="weight">10.0</data>
+</edge>
+<edge id="21735" source="1" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="21736" source="1" target="122">
+<data key="weight">10.0</data>
+</edge>
+<edge id="21799" source="1" target="0">
+<data key="edgelabel">['Anderson Street', 'Rachel Carson Bridge', '9th Street']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="21809" source="1" target="0">
+<data key="edgelabel">['6th Street', 'Federal Street', 'Roberto Clemente Bridge']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="22052" source="1" target="1">
+<data key="edgelabel">Fort Duquesne Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="22123" source="2" target="2">
+<data key="edgelabel">Saw Mill Run Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="22227" source="2" target="2">
+<data key="edgelabel">Killarney Drive</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="22286" source="1" target="1">
+<data key="edgelabel">Edgewood Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="22325" source="123" target="2">
+<data key="edgelabel">Smithfield Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="22326" source="123" target="2">
+<data key="edgelabel">Smithfield Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="22356" source="2" target="2">
+<data key="edgelabel">Provost Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="23600" source="0" target="0">
+<data key="edgelabel">Sherman Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="23710" source="0" target="1">
+<data key="edgelabel">Restricted Lane</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="23861" source="0" target="0">
+<data key="edgelabel">Parkway North</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="23929" source="2" target="2">
+<data key="edgelabel">Ramp Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="24198" source="63" target="22">
+<data key="edgelabel">Dewey Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="24399" source="125" target="164">
+<data key="edgelabel">Fort Pitt Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="24400" source="125" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="24429" source="1" target="108">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="24437" source="1" target="111">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="24442" source="111" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="24457" source="2" target="2">
+<data key="weight">10.0</data>
+</edge>
+<edge id="24469" source="126" target="123">
+<data key="edgelabel">Smithfield Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="24518" source="1" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="24537" source="1" target="1">
+<data key="edgelabel">Butler Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="24634" source="1" target="21">
+<data key="weight">10.0</data>
+</edge>
+<edge id="24639" source="127" target="2">
+<data key="weight">10.0</data>
+</edge>
+<edge id="24640" source="127" target="2">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="24725" source="1" target="1">
+<data key="edgelabel">South Negley Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="24783" source="128" target="115">
+<data key="edgelabel">Penn-Lincoln Parkway North</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="24804" source="8" target="22">
+<data key="edgelabel">Grant Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="25096" source="129" target="2">
+<data key="edgelabel">Rankin Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="25097" source="129" target="2">
+<data key="weight">10.0</data>
+</edge>
+<edge id="25166" source="2" target="2">
+<data key="edgelabel">Oakwood Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="25722" source="119" target="48">
+<data key="edgelabel">I 79</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="25751" source="130" target="3">
+<data key="weight">10.0</data>
+</edge>
+<edge id="25752" source="130" target="119">
+<data key="edgelabel">I 79</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="25984" source="132" target="1">
+<data key="edgelabel">Bloomfield Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="26142" source="1" target="132">
+<data key="weight">10.0</data>
+</edge>
+<edge id="26146" source="1" target="132">
+<data key="edgelabel">Bloomfield Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="26309" source="2" target="2">
+<data key="edgelabel">East Prospect Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="26438" source="133" target="0">
+<data key="edgelabel">Ohio River Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="26531" source="1" target="1">
+<data key="edgelabel">South Braddock Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="26548" source="1" target="134">
+<data key="weight">10.0</data>
+</edge>
+<edge id="26641" source="0" target="12">
+<data key="edgelabel">Babcock Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="26720" source="12" target="0">
+<data key="edgelabel">Cemetery Lane</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="26738" source="134" target="137">
+<data key="edgelabel">Bloomfield Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="26795" source="9" target="144">
+<data key="edgelabel">Babcock Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="26859" source="9" target="144">
+<data key="edgelabel">Babcock Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="27022" source="135" target="136">
+<data key="edgelabel">Bigelow Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="27023" source="135" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="27027" source="136" target="1">
+<data key="edgelabel">Bigelow Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="27032" source="1" target="1">
+<data key="edgelabel">Bigelow Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="27036" source="137" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="27037" source="137" target="1">
+<data key="edgelabel">Bloomfield Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="27053" source="1" target="162">
+<data key="edgelabel">['Crosstown Boulevard', 'Veterans Bridge']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="27054" source="1" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="27126" source="138" target="53">
+<data key="edgelabel">Highland Park Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="27145" source="22" target="63">
+<data key="edgelabel">Leonard Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="27161" source="139" target="2">
+<data key="edgelabel">Lebanon Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="27225" source="1" target="162">
+<data key="weight">10.0</data>
+</edge>
+<edge id="27251" source="1" target="1">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="27282" source="3" target="62">
+<data key="edgelabel">I 79</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="27458" source="1" target="140">
+<data key="edgelabel">Birmingham Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="28202" source="0" target="0">
+<data key="edgelabel">North Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="28325" source="0" target="0">
+<data key="edgelabel">Longmount Drive</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="28431" source="3" target="142">
+<data key="edgelabel">Stanhope Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="28633" source="1" target="165">
+<data key="edgelabel">Stanwix Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="28634" source="1" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="28693" source="0" target="0">
+<data key="edgelabel">Cemetery Lane</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="28864" source="2" target="2">
+<data key="edgelabel">['Shaler Street', 'Minnotte Square']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="29290" source="140" target="2">
+<data key="edgelabel">Birmingham Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="29410" source="0" target="28">
+<data key="weight">10.0</data>
+</edge>
+<edge id="29655" source="2" target="3">
+<data key="edgelabel">Steubenville Pike</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="29868" source="141" target="107">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="30026" source="2" target="2">
+<data key="edgelabel">US 19 Truck</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="30120" source="142" target="2">
+<data key="edgelabel">Stanhope Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="30121" source="142" target="3">
+<data key="weight">10.0</data>
+</edge>
+<edge id="30242" source="143" target="150">
+<data key="weight">10.0</data>
+</edge>
+<edge id="30243" source="143" target="1">
+<data key="edgelabel">Boulevard of the Allies</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="30624" source="2" target="2">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="30689" source="2" target="2">
+<data key="edgelabel">Greentree Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="30801" source="1" target="1">
+<data key="edgelabel">East Liberty Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31014" source="1" target="1">
+<data key="edgelabel">Boulevard of the Allies</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31052" source="1" target="1">
+<data key="edgelabel">Baum Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31412" source="2" target="2">
+<data key="edgelabel">Carnahan Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31560" source="1" target="145">
+<data key="edgelabel">Carrie Furnace Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31876" source="2" target="2">
+<data key="edgelabel">PA 51</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31912" source="2" target="2">
+<data key="edgelabel">South Main Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31919" source="2" target="2">
+<data key="edgelabel">South Main Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31936" source="146" target="2">
+<data key="edgelabel">West Carson Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31937" source="146" target="2">
+<data key="edgelabel">Steuben Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31939" source="2" target="2">
+<data key="edgelabel">West Carson Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31948" source="147" target="148">
+<data key="edgelabel">West Carson Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31958" source="2" target="147">
+<data key="edgelabel">West Carson Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31965" source="2" target="2">
+<data key="edgelabel">West Carson Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31966" source="2" target="147">
+<data key="edgelabel">South Main Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31997" source="148" target="146">
+<data key="edgelabel">West Carson Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="31998" source="148" target="2">
+<data key="edgelabel">Saw Mill Run Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="32086" source="4" target="4">
+<data key="edgelabel">Old Freeport Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="32103" source="2" target="2">
+<data key="edgelabel">Minnotte Square</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="32185" source="1" target="140">
+<data key="weight">10.0</data>
+</edge>
+<edge id="32199" source="2" target="2">
+<data key="edgelabel">Saw Mill Run Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="32222" source="1" target="1">
+<data key="edgelabel">Penn Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="32289" source="2" target="2">
+<data key="edgelabel">US 19 Truck</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="32408" source="2" target="2">
+<data key="edgelabel">Mission Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="32446" source="0" target="0">
+<data key="edgelabel">East North Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="32576" source="1" target="1">
+<data key="edgelabel">South Millvale Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="32729" source="2" target="2">
+<data key="edgelabel">Idlewood Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="32774" source="149" target="6">
+<data key="edgelabel">PA 65 Truck</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="32800" source="1" target="13">
+<data key="edgelabel">Boulevard of the Allies</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="32849" source="1" target="1">
+<data key="edgelabel">Boulevard of the Allies</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="33097" source="3" target="32">
+<data key="edgelabel">['3rd Street', 'Carothers Avenue']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="33296" source="150" target="1">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="33710" source="1" target="20">
+<data key="weight">10.0</data>
+</edge>
+<edge id="33866" source="1" target="1">
+<data key="edgelabel">US 30</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="34023" source="0" target="151">
+<data key="edgelabel">West North Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="34387" source="1" target="64">
+<data key="weight">10.0</data>
+</edge>
+<edge id="34414" source="152" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="34415" source="152" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="34436" source="1" target="1">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="34518" source="0" target="0">
+<data key="edgelabel">['North Charles Street', 'Swindell Bridge', 'Essen Street']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="35020" source="1" target="1">
+<data key="edgelabel">['Greenfield Bridge', 'Beechwood Boulevard', 'Greenfield Road']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="35097" source="2" target="2">
+<data key="edgelabel">Saw Mill Run Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="35327" source="2" target="2">
+<data key="weight">10.0</data>
+</edge>
+<edge id="35585" source="154" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="35586" source="154" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="35875" source="1" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="35955" source="0" target="0">
+<data key="edgelabel">Ridge Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="35970" source="0" target="0">
+<data key="edgelabel">East Ohio Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="36012" source="1" target="154">
+<data key="weight">10.0</data>
+</edge>
+<edge id="36091" source="0" target="0">
+<data key="weight">10.0</data>
+</edge>
+<edge id="36179" source="0" target="0">
+<data key="edgelabel">Ridge Place</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="36312" source="2" target="2">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="36340" source="1" target="1">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="36406" source="0" target="0">
+<data key="edgelabel">US 19 Truck</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="36503" source="0" target="0">
+<data key="edgelabel">East Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="36529" source="0" target="0">
+<data key="edgelabel">Parkway North</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="36843" source="0" target="0">
+<data key="edgelabel">Parkway North</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="36941" source="1" target="1">
+<data key="edgelabel">Panther Hollow Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37007" source="155" target="0">
+<data key="weight">10.0</data>
+</edge>
+<edge id="37008" source="155" target="0">
+<data key="edgelabel">North Shore Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37037" source="0" target="0">
+<data key="edgelabel">Parkway North</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37067" source="0" target="10">
+<data key="edgelabel">North Shore Expressway</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37104" source="0" target="156">
+<data key="edgelabel">East Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37109" source="0" target="156">
+<data key="weight">10.0</data>
+</edge>
+<edge id="37115" source="156" target="0">
+<data key="edgelabel">East Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37166" source="1" target="1">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37168" source="0" target="0">
+<data key="weight">10.0</data>
+</edge>
+<edge id="37169" source="0" target="0">
+<data key="edgelabel">Chestnut Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37189" source="1" target="157">
+<data key="edgelabel">Laurel Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37199" source="0" target="0">
+<data key="edgelabel">East Ohio Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37247" source="0" target="52">
+<data key="edgelabel">Veterans Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37308" source="158" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="37309" source="158" target="136">
+<data key="weight">10.0</data>
+</edge>
+<edge id="37321" source="1" target="70">
+<data key="edgelabel">Crosstown Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37332" source="1" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="37365" source="1" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="37408" source="1" target="44">
+<data key="edgelabel">Centre Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37411" source="1" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="37412" source="1" target="159">
+<data key="weight">10.0</data>
+</edge>
+<edge id="37413" source="159" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="37414" source="159" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="37578" source="160" target="0">
+<data key="edgelabel">Ridgewood Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37596" source="2" target="2">
+<data key="edgelabel">Edgebrook Avenue</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37645" source="1" target="1">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37847" source="6" target="0">
+<data key="edgelabel">Brighton Heights Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="37855" source="6" target="149">
+<data key="weight">10.0</data>
+</edge>
+<edge id="38321" source="161" target="158">
+<data key="weight">10.0</data>
+</edge>
+<edge id="38322" source="161" target="1">
+<data key="edgelabel">['Crosstown Boulevard', 'Veterans Bridge']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="38327" source="162" target="51">
+<data key="edgelabel">Veterans Bridge</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="38372" source="163" target="121">
+<data key="edgelabel">Fort Pitt Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="38373" source="163" target="1">
+<data key="weight">10.0</data>
+</edge>
+<edge id="38383" source="164" target="163">
+<data key="edgelabel">Fort Pitt Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="38402" source="1" target="115">
+<data key="edgelabel">Penn-Lincoln Parkway East</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="38407" source="165" target="125">
+<data key="edgelabel">Fort Pitt Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="38504" source="166" target="0">
+<data key="weight">10.0</data>
+</edge>
+<edge id="38560" source="0" target="0">
+<data key="weight">10.0</data>
+</edge>
+<edge id="38623" source="0" target="166">
+<data key="weight">10.0</data>
+</edge>
+<edge id="38641" source="0" target="27">
+<data key="edgelabel">US 19</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="38728" source="12" target="0">
+<data key="edgelabel">Brookview Lane</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="38785" source="0" target="12">
+<data key="edgelabel">McKnight Road</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="38787" source="1" target="0">
+<data key="edgelabel">['Chestnut Street', '16th Street', 'David McCullough Bridge']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="39047" source="2" target="2">
+<data key="edgelabel">Saw Mill Run Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="40433" source="1" target="1">
+<data key="edgelabel">['Chestnut Street', 'Elm Street']</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="40897" source="2" target="96">
+<data key="weight">10.0</data>
+</edge>
+<edge id="41016" source="1" target="164">
+<data key="edgelabel">Market Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="41024" source="1" target="163">
+<data key="edgelabel">Wood Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="41373" source="2" target="2">
+<data key="edgelabel">Creek Street</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="41558" source="168" target="2">
+<data key="weight">10.0</data>
+</edge>
+<edge id="41559" source="168" target="2">
+<data key="edgelabel">Penn-Lincoln Parkway West</data>
+<data key="weight">10.0</data>
+</edge>
+<edge id="42618" source="2" target="2">
+<data key="edgelabel">Saw Mill Run Boulevard</data>
+<data key="weight">10.0</data>
+</edge>
+</graph>
+</graphml>
