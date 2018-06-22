@@ -6,6 +6,8 @@ Created on Thu Jun 21 19:17:20 2018
 """
 
 import postman_problems
+from postman_problems.solver import cpp
+from postman_problems.stats import calculate_postman_solution_stats
 
 # find CPP solution
 circuitSmall, graphSmall = cpp(edgelist_filename='component-connections-edgelist-reduced-degree-2.csv', start_node='1')
