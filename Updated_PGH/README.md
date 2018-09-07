@@ -1,7 +1,7 @@
 ### This is a folder for updated data.  
 
 - **edges.csv**<br> 
-This data file is exported from ArcGIS. I used ArcGIS tool to identify river bridges and edges that are outside Pittsburgh. In ArcGIS, I added two additional columns and value every column with 0 or 1 to store river_bridge and out_pittsburgh information. I also used this file later to add additional attributes in Python code.
+This data file is exported from ArcGIS. I used ArcGIS tool to identify river bridges and edges that are outside Pittsburgh. In ArcGIS, I added two additional columns and value every column with 0 or 1 to store river_bridge and out_pittsburgh information. I also used this file later to add additional attributes in Python code.
 
 - **nodes.csv**<br>
 This data file is exported from ArcGIS with similar steps as edges.csv file did.
@@ -19,7 +19,7 @@ This is a folder to store shapefiles of edges and nodes.
 This folder includes data and code that I used to create pseudo nodes(some README details are in this folder).
 
 - **add_attr.ipynb**<br>
-This is a python code file which is used to add addtional attributes from "edges.csv" and "nodes.csv" file. The input files are "edges.csv" and "nodes.csv". The output file is "pgh_road_marked.graphml".
+This is a python code file which is used to create street network with 900 meters buffer of Pittsburgh's city boundary, add addtional attributes from "edges.csv" and "nodes.csv" file, and save output as a graphml file. The input files are "edges.csv" and "nodes.csv". The output file is "pgh_road_marked.graphml".
 
 - **build_graph.py**<br>
 This is a python code file which is used for testing whether the number of edges and nodes built by networkX and OSMnx package are the same.
