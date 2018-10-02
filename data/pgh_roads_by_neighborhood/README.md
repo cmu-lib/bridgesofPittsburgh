@@ -1,0 +1,2 @@
+- **pgh_roads_by_neighborhood** <br>
+This folder contains all the files necessary to visualize and analyze road intersections by neighborhoods.  This includes a CSV of gephi-generated modularity data for each intersection and shapefiles for the pittsburgh roads/intersections; pittsburgh neighborhoods as downloaded from WPRDC; pittsburgh neighborhoods with a corrected CRS; and pittsburgh neighborhoods to the roads
