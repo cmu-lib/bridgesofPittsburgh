@@ -1,0 +1,29 @@
+---
+title: "Bridge Decomposition"
+author: "Matthew Lincoln"
+date: "10/2/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("osmar_graph.R")
+make(pgh_plan)
+loadd(lazy = TRUE)
+```
+
+
+```{r tiny}
+node_positions <- tiny_tidy_graph %>% activate(nodes) %>% as_tibble() %>% select(x = lon, y = lat)
+tiny_layout <- create_layout(tiny_tidy_graph, layout = "manual", node.positions = node_positions)
+
+ggraph(tiny_layout) +
+  geom_edge_link(aes(color = bridge), alpha = 0.5) +
+  scale_edge_color_manual(values = c("black", "red")) +
+  theme_graph()
+```
+
+```{r bridges_only}
+bridge_positions <- bridges_only %>% activate(nodes) %>% as_tibble() %>% select(x = lon, y = lat)
+
+```
