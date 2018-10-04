@@ -1,3 +1,5 @@
+# Drake ----
+
 pkgconfig::set_config("drake::strings_in_dots" = "literals")
 library(drake)
 library(osmar)
@@ -18,27 +20,51 @@ pgh_plan <- drake_plan(
   tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, tiny_bridges, tiny_limits),
   tiny_layout = lat_lon_layout(tiny_tidy_graph),
   tiny_plot = bridge_plot(tiny_layout),
-  tiny_plot_image = ggsave(tiny_plot, filename = file_out("tiny_image.png"), width = 20, height = 20),
+  #tiny_plot_image = target(
+   # command = ggsave(tiny_plot, filename = file_out("tiny_image.png"), width = 20, height = 20),
+    #trigger = trigger(command = FALSE, depend = FALSE, file = FALSE, missing = TRUE)),
   pgh_layout = lat_lon_layout(tidy_pgh_graph),
+  #pgh_plot_image = target(
+   # command = ggsave(pgh_plot, filename = file_out("pgh_image.png"), width = 40, height = 30),
+    #trigger = trigger(command = FALSE, depend = FALSE, file = FALSE, missing = TRUE))
   pgh_plot = bridge_plot(pgh_layout),
-  pgh_plot_image = ggsave(pgh_plot, filename = file_out("pgh_image.png"), width = 40, height = 30)
+  tiny_unique_bridges = unique_bridges(tiny_tidy_graph),
+  pgh_unique_bridges = unique_bridges(tidy_pgh_graph),
+  tiny_needs_rewiring = map_lgl(tiny_unique_bridges, needs_rewire, graph = tiny_tidy_graph),
+  pgh_needs_rewiring = map_lgl(pgh_unique_bridges, needs_rewire, graph = tidy_pgh_graph)
 )
 
+# Identifying bridges ----
+
 osm_node_attributes <- function(src) {
+  node_keys <- c("name")
+  
   base_attrs <- src$nodes$attrs %>% 
     select(id, lat, lon)
   
+  node_tags <- src$nodes$tags %>% 
+    filter(k %in% node_keys) %>% 
+    mutate_at(vars(v), as.character) %>%
+    spread(k, v, drop = TRUE) %>% 
+    # To avoid collision with the "name" id used by igraph/tidygraph, use the
+    # term "label" for OSM name
+    rename(label = name)
+  
   base_attrs %>% 
+    left_join(node_tags, by = "id") %>% 
     mutate_at(vars(id), as.character)
 }
 
 osm_edge_attributes <- function(src) {
-  edge_tags <- c("highway", "bridge", "bridge_name", "bridge:name", "wikipedia")
+  edge_keys <- c("name", "highway", "bridge", "bridge_name", "bridge:name", "wikipedia")
   
   way_tags <- src$ways$tags %>% 
-    filter(k %in% edge_tags) %>% 
+    filter(k %in% edge_keys) %>% 
     mutate_at(vars(v), as.character) %>%
-    spread(k, v, drop = TRUE)
+    spread(k, v, drop = TRUE) %>% 
+    # To avoid collision with the "name" id used by igraph/tidygraph, use the
+    # term "label" for OSM name
+    rename(label = name)
   
   way_tags %>% 
     mutate_at(vars(id), as.character)
@@ -75,11 +101,6 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, limits = NULL) {
   only_roadways(res)
 }
 
-lat_lon_layout <- function(graph) {
-  node_positions <- graph %>% activate(nodes) %>% as_tibble() %>% select(x = lon, y = lat)
-  create_layout(graph, layout = "manual", node.positions = node_positions)
-}
-
 find_bridge_waysets <- function(raw_osm) {
   bridge_ways <- raw_osm$ways$tags %>% 
     filter(k == "bridge", v == "yes")
@@ -109,10 +130,57 @@ find_bridge_waysets <- function(raw_osm) {
     mutate_at(vars(way_id), as.character)
 }
 
+# Plotting ----
+
+lat_lon_layout <- function(graph) {
+  node_positions <- graph %>% activate(nodes) %>% as_tibble() %>% select(x = lon, y = lat) %>% mutate_at(vars(x, y), scales::rescale)
+  create_layout(graph, layout = "manual", node.positions = node_positions)
+}
+
 bridge_plot <- function(layout) {
   ggraph(layout, layout = "manual") + 
     geom_edge_link(aes(color = bridge_id == "pgh-47")) +
     scale_edge_color_manual(values = c("TRUE" = "red", "FALSE" = "red"), na.value = "gray", guide = FALSE) +
     theme_graph() +
     coord_map()
+}
+
+# Rewiring ----
+
+unique_bridges <- function(graph) {
+  graph %>% 
+    activate(edges) %>% 
+    as_tibble() %>% 
+    pull(bridge_id) %>% 
+    unique() %>% 
+    na.omit()
+}
+
+# Which Bridge relations _need_ rewiring?
+# Find this by getting the subgraphs for each bridge relation and checking for connectedness
+needs_rewire <- function(x, graph) {
+  message("Testing ", x, "...", appendLF = FALSE)
+  res <- graph %>% 
+    activate(edges) %>% 
+    # Keep only edges for this specific bridge
+    filter(bridge_id == x) %>% 
+    activate(nodes) %>% 
+    # Remove the remaining unconnected nodes
+    filter(centrality_degree(mode = "all") > 0) %>% 
+    # IF the graph is not connected, return TRUE - we DO need to rewuire
+    with_graph(!graph_is_connected())
+  message(res)
+  res
+}
+
+# Replace each bridge edgeset in the graph with a single synthetic edge with new
+# endpoints
+rewire_bridges <- function(osm_graph) {
+  
+}
+
+# For a given bridge ID, create two new endpoints, connect the original 2+
+# terminal points to these new endpoints, and remove the original edges/nodes
+rewire_bridge <- function(osm_graph, bridge_id) {
+  
 }
