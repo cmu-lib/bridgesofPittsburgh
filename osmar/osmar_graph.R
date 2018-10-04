@@ -5,33 +5,38 @@ library(tidyverse)
 library(tidygraph)
 library(ggraph)
 
-edge_tags <- c("bridge", "bridge_name", "bridge:name", "wikipedia")
+tiny_limits <- list(xlim = c(-80.0106, -79.9872), ylim = c(40.4429, 40.4551))
 
 pgh_plan <- drake_plan(
   pgh_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/pgh_osm.xml"))),
   pgh_graph = as_igraph(pgh_raw),
+  pgh_bridges = find_bridge_waysets(pgh_raw),
+  tidy_pgh_graph = enrich_osmar_graph(pgh_raw, pgh_graph, pgh_bridges),
   tiny_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/tiny.xml"))),
   tiny_graph = as_igraph(tiny_raw),
   tiny_bridges = find_bridge_waysets(tiny_raw),
-  tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, tiny_bridges),
-  tiny_layout = lat_lon_layout(tiny_tidy_graph)
+  tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, tiny_bridges, tiny_limits),
+  tiny_layout = lat_lon_layout(tiny_tidy_graph),
+  tiny_plot = bridge_plot(tiny_layout),
+  tiny_plot_image = ggsave(tiny_plot, filename = file_out("tiny_image.png"), width = 20, height = 20),
+  pgh_layout = lat_lon_layout(tidy_pgh_graph),
+  pgh_plot = bridge_plot(pgh_layout),
+  pgh_plot_image = ggsave(pgh_plot, filename = file_out("pgh_image.png"), width = 40, height = 30)
 )
 
 osm_node_attributes <- function(src) {
   base_attrs <- src$nodes$attrs %>% 
     select(id, lat, lon)
   
-  tags <- src$nodes$tags %>% 
-    mutate_at(vars(v), as.character) %>% 
-    spread(k, v)
-  
-  left_join(base_attrs, tags, by = "id") %>% 
+  base_attrs %>% 
     mutate_at(vars(id), as.character)
 }
 
 osm_edge_attributes <- function(src) {
+  edge_tags <- c("highway", "bridge", "bridge_name", "bridge:name", "wikipedia")
+  
   way_tags <- src$ways$tags %>% 
-    filter(k %in% bridge_keys) %>% 
+    filter(k %in% edge_tags) %>% 
     mutate_at(vars(v), as.character) %>%
     spread(k, v, drop = TRUE)
   
@@ -39,11 +44,17 @@ osm_edge_attributes <- function(src) {
     mutate_at(vars(id), as.character)
 }
 
-enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges) {
+only_roadways <- function(osmar_graph) {
+  osmar_graph %>% 
+    activate(edges) %>% 
+    filter(!is.na(highway))
+}
+
+enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, limits = NULL) {
   osmar_nodes <- osm_node_attributes(raw_osmar)
   osmar_edges <- osm_edge_attributes(raw_osmar)
   
-  as_tbl_graph(graph_osmar) %>% 
+  res <- as_tbl_graph(graph_osmar) %>% 
     activate(nodes) %>% 
     left_join(osmar_nodes, by = c("name" = "id")) %>% 
     activate(edges) %>% 
@@ -51,6 +62,17 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges) {
     left_join(osmar_edges, by = c("name" = "id")) %>% 
     left_join(bridges, by = c("name" = "way_id")) %>% 
     mutate(is_bridge = !is.na(bridge_id))
+  
+  if (!is.null(limits)) {
+    res <- res %>%
+      activate(nodes) %>% 
+      filter(
+        between(lon, left = limits$xlim[1], right = limits$xlim[2]),
+        between(lat, left = limits$ylim[1], right = limits$ylim[2]))
+  }
+  
+  # Finally, filter only down to the roadways
+  only_roadways(res)
 }
 
 lat_lon_layout <- function(graph) {
@@ -87,14 +109,10 @@ find_bridge_waysets <- function(raw_osm) {
     mutate_at(vars(way_id), as.character)
 }
 
-make(pgh_plan)
-loadd(lazy = TRUE)
-
-library(ggrepel)
-
-ggraph(tiny_layout, layout = "manual") + 
-  geom_edge_link(aes(color = bridge_id)) +
-  #scale_edge_color_manual(values = c("TRUE" = "red", "FALSE" = "black")) +
-  theme_graph() +
-  coord_map(xlim = c(-80.0106, -79.9872), ylim = c(40.4429, 40.4551))
-
+bridge_plot <- function(layout) {
+  ggraph(layout, layout = "manual") + 
+    geom_edge_link(aes(color = bridge_id == "pgh-47")) +
+    scale_edge_color_manual(values = c("TRUE" = "red", "FALSE" = "red"), na.value = "gray", guide = FALSE) +
+    theme_graph() +
+    coord_map()
+}
