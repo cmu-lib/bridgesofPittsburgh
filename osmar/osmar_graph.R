@@ -36,6 +36,14 @@ pgh_plan <- drake_plan(
   pgh_needs_rewiring = map_lgl(pgh_unique_bridges, needs_rewire, graph = tidy_pgh_graph)
 )
 
+# Graph utilities ----
+
+remove_unreachable_nodes <- function(graph) {
+  graph %>%
+    activate(nodes) %>% 
+    filter(centrality_degree(mode = "all") > 0)
+}
+
 # Identifying bridges ----
 
 osm_node_attributes <- function(src) {
@@ -51,7 +59,7 @@ osm_node_attributes <- function(src) {
     # To avoid collision with the "name" id used by igraph/tidygraph, use the
     # term "label" for OSM name
     rename(label = name)
-  
+
   base_attrs %>% 
     left_join(node_tags, by = "id") %>% 
     mutate_at(vars(id), as.character)
@@ -188,9 +196,7 @@ needs_rewire <- function(x, graph) {
     activate(edges) %>% 
     # Keep only edges for this specific bridge
     filter(bridge_id == x) %>% 
-    activate(nodes) %>% 
-    # Remove the remaining unconnected nodes
-    filter(centrality_degree(mode = "all") > 0) %>% 
+    remove_unreachable_nodes() %>% 
     # IF the graph is not connected, return TRUE - we DO need to rewuire
     with_graph(!graph_is_connected())
   message(res)
