@@ -33,7 +33,8 @@ pgh_plan <- drake_plan(
   tiny_unique_bridges = unique_bridges(tiny_tidy_graph),
   pgh_unique_bridges = unique_bridges(tidy_pgh_graph),
   tiny_needs_rewiring = map_lgl(tiny_unique_bridges, needs_rewire, graph = tiny_tidy_graph),
-  pgh_needs_rewiring = map_lgl(pgh_unique_bridges, needs_rewire, graph = tidy_pgh_graph)
+  pgh_needs_rewiring = map_lgl(pgh_unique_bridges, needs_rewire, graph = tidy_pgh_graph),
+  rewired_pgh_graph = rewire_graph_singleton_ways(tidy_pgh_graph, ways = unique(pgh_bridges$way_id), way_termini = pgh_termini)
 )
 
 # Graph utilities ----
@@ -213,4 +214,41 @@ rewire_bridges <- function(osm_graph) {
 # terminal points to these new endpoints, and remove the original edges/nodes
 rewire_bridge <- function(osm_graph, bridge_id) {
   
+}
+
+node_number <- function(graph, name) {
+  which(as_tibble(graph, active = "nodes")$name == name)
+}
+
+# Rewire a simple multi-Node Way with an explicit start and end node
+singleton_rewire_handler <- function(graph, way_id, start_node, end_node) {
+  # Collect metadata from the original way, then create a new edge connecting
+  # the start and end nodes
+  new_edge <- graph %>% 
+    as_tibble(active = "edges") %>% 
+    filter(name == way_id) %>% 
+    slice(1) %>% 
+    select(name, bridge_id, label, wikipedia, bridge_id, id_type, is_bridge) %>% 
+    mutate(rewired = TRUE) %>% 
+    mutate(
+      from = node_number(graph, start_node),
+      to = node_number(graph, end_node))
+  
+  graph %>%
+    # Remove original edges representing the way
+    activate(edges) %>% 
+    filter(name != way_id) %>% 
+    # Add the new edge and return the graph
+    bind_edges(new_edge)
+}
+
+rewire_graph_singleton_ways <- function(graph, ways, way_termini) {
+  reduce(ways, .init = graph, .f = function(a, b) {
+    message(b)
+    
+    terminals <- way_termini %>% 
+      filter(way_id == b) 
+    
+    single_rewire(a, way_id = b, start_node = terminals$start_node, end_node = terminals$end_node)
+  })
 }
