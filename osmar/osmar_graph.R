@@ -20,6 +20,8 @@ pgh_plan <- drake_plan(
   tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, tiny_bridges, tiny_limits),
   tiny_layout = lat_lon_layout(tiny_tidy_graph),
   tiny_plot = bridge_plot(tiny_layout),
+  tiny_termini = way_termini(tiny_raw),
+  pgh_termini = way_termini(pgh_raw),
   #tiny_plot_image = target(
    # command = ggsave(tiny_plot, filename = file_out("tiny_image.png"), width = 20, height = 20),
     #trigger = trigger(command = FALSE, depend = FALSE, file = FALSE, missing = TRUE)),
@@ -68,6 +70,28 @@ osm_edge_attributes <- function(src) {
   
   way_tags %>% 
     mutate_at(vars(id), as.character)
+}
+
+way_termini <- function(src) {
+  long_termini <- src$ways$refs %>% 
+    group_by(id) %>% 
+    mutate(
+      index = row_number(),
+      first = row_number(index) == 1,
+      last = row_number(desc(index)) == 1) %>% 
+    filter(first | last) %>% 
+    ungroup()
+  
+  firsts <- long_termini %>% 
+    filter(first) %>% 
+    select(way_id = id, start_node = ref)
+  
+  lasts <- long_termini %>% 
+    filter(last) %>% 
+    select(way_id = id, end_node = ref)
+  
+  left_join(firsts, lasts, by = "way_id") %>% 
+    mutate_all(as.character)
 }
 
 only_roadways <- function(osmar_graph) {
