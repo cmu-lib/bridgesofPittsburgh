@@ -268,14 +268,14 @@ cluster_points <- function(g, bridge_identifier) {
   
   new_edges <- kmnodes$cluster %>% 
     # Use the cluster memberships to synthesize new from-to edge list
-    enframe(name = "from", value = "to") %>% 
-    mutate(to = paste(to, bridge_identifier, sep = "-")) %>% 
+    enframe(name = "from_name", value = "to_name") %>% 
+    mutate(to_name = paste(to_name, bridge_identifier, sep = "-")) %>% 
     # Add new edge between the new nodes
-    bind_rows(tibble(from = new_nodes[[1, "name"]], 
-            to = new_nodes[[2, "name"]], 
+    bind_rows(tibble(from_name = new_nodes[[1, "name"]], 
+            to_name = new_nodes[[2, "name"]], 
             bridge_id = bridge_identifier)) %>% 
-    left_join(node_tbl, by = c("from" = "name")) %>% 
-    left_join(new_nodes, by = c("to" = "name")) %>% 
+    left_join(node_tbl, by = c("from_name" = "name")) %>% 
+    left_join(new_nodes, by = c("to_name" = "name")) %>% 
     # Make sure the new nodes also get a lat & lon
     mutate(
       lat.x = coalesce(lat.x, new_nodes[[1, "lat"]]),
@@ -284,7 +284,7 @@ cluster_points <- function(g, bridge_identifier) {
       weight = sqrt((lat.x - lat.y)^2 + (lon.x - lon.y)^2),
       synthetic = TRUE,
       associated_bridge = bridge_identifier) %>% 
-    select(from, to, bridge_id, weight, synthetic, associated_bridge)
+    select(from_name, to_name, bridge_id, weight, synthetic, associated_bridge)
 
   list(
     nodes = new_nodes,
@@ -300,17 +300,25 @@ rewire_bridge <- function(osm_graph, b) {
   # Remove unwanted edges
   new_graph <- osm_graph %>% 
     activate(edges) %>% 
-    filter(bridge_id != b) %>% 
-    # Now add new nodes
-    bind_nodes(cluster_results$nodes) %>% 
+    filter(is.na(bridge_id) | bridge_id != b) %>% 
+    activate(nodes) %>% 
+    bind_nodes(cluster_results$nodes)
+  
+  
+  # Get proper node indices now that the new synthetic nodes have been added
+  indexed_edges <- mutate(cluster_results$edges,
+                          from = node_number(new_graph, from_name),
+                          to = node_number(new_graph, to_name))
+  
+  ng <- new_graph %>% 
     # And wire them up to the old nodes
-    bind_edges(cluster_results$edges)
+    bind_edges(indexed_edges)
   
   new_graph
 }
 
 node_number <- function(graph, name) {
-  which(as_tibble(graph, active = "nodes")$name == name)
+  match(name, as_tibble(graph, active = "nodes")[["name"]])
 }
 
 # Rewire a simple multi-Node Way with an explicit start and end node
