@@ -46,7 +46,7 @@ pgh_plan <- drake_plan(
 remove_unreachable_nodes <- function(graph) {
   graph %>%
     activate(nodes) %>% 
-    filter(!node_is_isolated())
+    filter(!(node_is_isolated()))
 }
 
 # Weights by carteisan distance of from and to nodes
@@ -235,49 +235,56 @@ needs_rewire <- function(x, graph) {
   res
 }
 
-# Replace each bridge edgeset in the graph with a single synthetic edge with new
-# endpoints
-rewire_bridges <- function(osm_graph) {
+# Replace each complex bridge edgeset in the graph with a single synthetic edge
+# with new endpoints
+rewire_bridges <- function(osm_graph, bridges, rewire_needed) {
+  ids_to_rewire <- bridges[rewire_needed]
   
+  # Loop through bridge ids to be rewired
+  res <- reduce(ids_to_rewire, rewire_bridge, .init = osm_graph)
 }
 
 # From a table of nodes that we know to be the same bridge, cluster into two groups to form
 cluster_points <- function(g, bridge_identifier) {
-  node_tbl <- rewired_tiny_graph %>% 
+  node_tbl <- g %>% 
     activate(edges) %>% 
     filter(bridge_id == bridge_identifier) %>% 
     remove_unreachable_nodes() %>% 
     as_tibble(active = "nodes")
   
-  kmnodes <- node_tbl %>% 
-    select(name, lat, lon) %>% 
-    column_to_rownames(var = "name") %>% 
-    as.matrix() %>% 
-    kmeans(2)
-  
+  suppressWarnings({
+    kmnodes <- node_tbl %>% 
+      select(name, lat, lon) %>% 
+      column_to_rownames(var = "name") %>% 
+      as.matrix() %>% 
+      kmeans(2)
+  })
  
   new_nodes <- kmnodes$centers %>% 
-    as.data.frame() %>% 
-    mutate(name = paste(1:2, bridge_identifier, sep = "-"))
+    as_tibble() %>% 
+    mutate(
+      name = paste(1:2, bridge_identifier, sep = "-"),
+      label = NA_character_)
   
   new_edges <- kmnodes$cluster %>% 
     # Use the cluster memberships to synthesize new from-to edge list
     enframe(name = "from", value = "to") %>% 
     mutate(to = paste(to, bridge_identifier, sep = "-")) %>% 
     # Add new edge between the new nodes
-    bind_rows(tibble(from = new_nodes[1, "name"], 
-            to = new_nodes[2, "name"], 
+    bind_rows(tibble(from = new_nodes[[1, "name"]], 
+            to = new_nodes[[2, "name"]], 
             bridge_id = bridge_identifier)) %>% 
     left_join(node_tbl, by = c("from" = "name")) %>% 
     left_join(new_nodes, by = c("to" = "name")) %>% 
     # Make sure the new nodes also get a lat & lon
     mutate(
-      lat.x = coalesce(lat.x, new_nodes[1, "lat"]),
-      lon.x = coalesce(lon.x, new_nodes[1, "lon"])) %>% 
+      lat.x = coalesce(lat.x, new_nodes[[1, "lat"]]),
+      lon.x = coalesce(lon.x, new_nodes[[1, "lon"]])) %>% 
     mutate(
       weight = sqrt((lat.x - lat.y)^2 + (lon.x - lon.y)^2),
       synthetic = TRUE,
-      associated_bridge = bridge_identifier)
+      associated_bridge = bridge_identifier) %>% 
+    select(from, to, bridge_id, weight, synthetic, associated_bridge)
 
   list(
     nodes = new_nodes,
