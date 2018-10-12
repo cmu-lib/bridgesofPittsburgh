@@ -10,31 +10,35 @@ library(ggraph)
 tiny_limits <- list(xlim = c(-80.0106, -79.9872), ylim = c(40.4429, 40.4551))
 
 pgh_plan <- drake_plan(
+  in_pgh_nodes = read_csv(file_in("Updated_PGH/nodes.csv"), col_types = "icnnccll") %>% pull(osmid),
+  in_pgh_edges = read_csv(file_in("Updated_PGH/edges.csv")) %>% pull(osmid),
+  expanded_pgh_ways = tangent_ways(pgh_raw, in_pgh_nodes),
+  within_ways = find_down(pgh_raw, relation("188553")),
   pgh_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/pgh_osm.xml"))),
   pgh_graph = as_igraph(pgh_raw),
   pgh_bridges = find_bridge_waysets(pgh_raw),
-  tidy_pgh_graph = enrich_osmar_graph(pgh_raw, pgh_graph, pgh_bridges),
+  uncensored_pgh_graph = enrich_osmar_graph(pgh_raw, pgh_graph, pgh_bridges),
+  tidy_pgh_graph = enrich_osmar_graph(pgh_raw, pgh_graph, pgh_bridges, in_pgh_edges = expanded_pgh_ways),
   tiny_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/tiny.xml"))),
   tiny_graph = as_igraph(tiny_raw),
   tiny_bridges = find_bridge_waysets(tiny_raw),
-  tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, tiny_bridges, tiny_limits),
+  tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, tiny_bridges, limits = tiny_limits),
   tiny_layout = lat_lon_layout(tiny_tidy_graph),
   tiny_plot = bridge_plot(tiny_layout),
   tiny_termini = way_termini(tiny_raw),
   pgh_termini = way_termini(pgh_raw),
-  #tiny_plot_image = target(
-   # command = ggsave(tiny_plot, filename = file_out("tiny_image.png"), width = 20, height = 20),
-    #trigger = trigger(command = FALSE, depend = FALSE, file = FALSE, missing = TRUE)),
+  tiny_plot_image = ggsave(tiny_plot, filename = file_out("tiny_image.png"), width = 20, height = 20),
   pgh_layout = lat_lon_layout(tidy_pgh_graph),
-  #pgh_plot_image = target(
-   # command = ggsave(pgh_plot, filename = file_out("pgh_image.png"), width = 40, height = 30),
-    #trigger = trigger(command = FALSE, depend = FALSE, file = FALSE, missing = TRUE))
+  pgh_plot_image = ggsave(pgh_plot, filename = file_out("pgh_image.png"), width = 40, height = 30),
   pgh_plot = bridge_plot(pgh_layout),
+  uncensored_pgh_layout = lat_lon_layout(uncensored_pgh_graph),
+  uncensored_pgh_plot_image = ggsave(bridge_plot(lat_lon_layout(uncensored_pgh_graph)), filename = file_out("uncensored_pgh_image.png"), width = 40, height = 30),
   tiny_unique_bridges = unique_bridges(tiny_tidy_graph),
   pgh_unique_bridges = unique_bridges(tidy_pgh_graph),
   tiny_needs_rewiring = map_lgl(tiny_unique_bridges, needs_rewire, graph = tiny_tidy_graph),
   pgh_needs_rewiring = map_lgl(pgh_unique_bridges, needs_rewire, graph = tidy_pgh_graph),
-  rewired_pgh_graph = rewire_graph_singleton_ways(tidy_pgh_graph, ways = unique(pgh_bridges$way_id), way_termini = pgh_termini)
+  #rewired_pgh_graph = rewire_graph_singleton_ways(tidy_pgh_graph, ways = unique(pgh_bridges$way_id), way_termini = pgh_termini),
+  rewired_tiny_graph = rewire_graph_singleton_ways(tiny_tidy_graph, ways = unique(tiny_bridges$way_id), way_termini = tiny_termini)
 )
 
 # Graph utilities ----
@@ -42,7 +46,20 @@ pgh_plan <- drake_plan(
 remove_unreachable_nodes <- function(graph) {
   graph %>%
     activate(nodes) %>% 
-    filter(centrality_degree(mode = "all") > 0)
+    filter(!node_is_isolated())
+}
+
+# Weights by carteisan distance of from and to nodes
+weight_by_distance <- function(graph) {
+  graph %>% 
+    activate(edges) %>% 
+    mutate(weight = sqrt((.N()$lat[from] - .N()$lat[to])^2 + 
+                           (.N()$lon[from] - .N()$lon[to])^2))
+}
+
+tangent_ways <- function(src, osm_nodes) {
+  upsearch <- find_up(src, node(osm_nodes))
+  upsearch[["way_ids"]]
 }
 
 # Identifying bridges ----
@@ -109,7 +126,7 @@ only_roadways <- function(osmar_graph) {
     filter(!is.na(highway))
 }
 
-enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, limits = NULL) {
+enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = NULL, in_pgh_edges = NULL, limits = NULL) {
   osmar_nodes <- osm_node_attributes(raw_osmar)
   osmar_edges <- osm_edge_attributes(raw_osmar)
   
@@ -121,6 +138,20 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, limits = NULL) {
     left_join(osmar_edges, by = c("name" = "id")) %>% 
     left_join(bridges, by = c("name" = "way_id")) %>% 
     mutate(is_bridge = !is.na(bridge_id))
+  
+  if (!is.null(in_pgh_nodes)) {
+    # Only keep nodes that are inside a defined boundary near the Pittsburgh
+    # administrative border
+    res <- res %>% 
+      activate(nodes) %>% 
+      filter(name %in% in_pgh_nodes)
+  }
+  
+  if (!is.null(in_pgh_edges)) {
+    res <- res %>% 
+      activate(edges) %>% 
+      filter(name %in% in_pgh_edges)
+  } 
   
   if (!is.null(limits)) {
     res <- res %>%
@@ -210,10 +241,65 @@ rewire_bridges <- function(osm_graph) {
   
 }
 
+# From a table of nodes that we know to be the same bridge, cluster into two groups to form
+cluster_points <- function(g, bridge_identifier) {
+  node_tbl <- rewired_tiny_graph %>% 
+    activate(edges) %>% 
+    filter(bridge_id == bridge_identifier) %>% 
+    remove_unreachable_nodes() %>% 
+    as_tibble(active = "nodes")
+  
+  kmnodes <- node_tbl %>% 
+    select(name, lat, lon) %>% 
+    column_to_rownames(var = "name") %>% 
+    as.matrix() %>% 
+    kmeans(2)
+  
+ 
+  new_nodes <- kmnodes$centers %>% 
+    as.data.frame() %>% 
+    mutate(name = paste(1:2, bridge_identifier, sep = "-"))
+  
+  new_edges <- kmnodes$cluster %>% 
+    # Use the cluster memberships to synthesize new from-to edge list
+    enframe(name = "from", value = "to") %>% 
+    mutate(to = paste(to, bridge_identifier, sep = "-")) %>% 
+    # Add new edge between the new nodes
+    bind_rows(tibble(from = new_nodes[1, "name"], 
+            to = new_nodes[2, "name"], 
+            bridge_id = bridge_identifier)) %>% 
+    left_join(node_tbl, by = c("from" = "name")) %>% 
+    left_join(new_nodes, by = c("to" = "name")) %>% 
+    # Make sure the new nodes also get a lat & lon
+    mutate(
+      lat.x = coalesce(lat.x, new_nodes[1, "lat"]),
+      lon.x = coalesce(lon.x, new_nodes[1, "lon"])) %>% 
+    mutate(
+      weight = sqrt((lat.x - lat.y)^2 + (lon.x - lon.y)^2),
+      synthetic = TRUE,
+      associated_bridge = bridge_identifier)
+
+  list(
+    nodes = new_nodes,
+    edges = new_edges
+  )    
+}
+
 # For a given bridge ID, create two new endpoints, connect the original 2+
 # terminal points to these new endpoints, and remove the original edges/nodes
-rewire_bridge <- function(osm_graph, bridge_id) {
+rewire_bridge <- function(osm_graph, b) {
+  cluster_results <- cluster_points(osm_graph, b)
   
+  # Remove unwanted edges
+  new_graph <- osm_graph %>% 
+    activate(edges) %>% 
+    filter(bridge_id != b) %>% 
+    # Now add new nodes
+    bind_nodes(cluster_results$nodes) %>% 
+    # And wire them up to the old nodes
+    bind_edges(cluster_results$edges)
+  
+  new_graph
 }
 
 node_number <- function(graph, name) {
@@ -250,5 +336,6 @@ rewire_graph_singleton_ways <- function(graph, ways, way_termini) {
       filter(way_id == b) 
     
     single_rewire(a, way_id = b, start_node = terminals$start_node, end_node = terminals$end_node)
-  })
+  }) %>% 
+    remove_unreachable_nodes()
 }
