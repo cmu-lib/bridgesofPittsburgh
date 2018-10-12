@@ -23,14 +23,12 @@ pgh_plan <- drake_plan(
   tiny_graph = as_igraph(tiny_raw),
   tiny_bridges = find_bridge_waysets(tiny_raw),
   tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, tiny_bridges, limits = tiny_limits),
-  tiny_layout = lat_lon_layout(tiny_tidy_graph),
-  tiny_plot = bridge_plot(tiny_layout),
+  tiny_plot = bridge_plot(tiny_tidy_graph),
   tiny_termini = way_termini(tiny_raw),
   pgh_termini = way_termini(pgh_raw),
   tiny_plot_image = ggsave(tiny_plot, filename = file_out("tiny_image.png"), width = 20, height = 20),
-  pgh_layout = lat_lon_layout(tidy_pgh_graph),
   pgh_plot_image = ggsave(pgh_plot, filename = file_out("pgh_image.png"), width = 40, height = 30),
-  pgh_plot = bridge_plot(pgh_layout),
+  pgh_plot = bridge_plot(tidy_pgh_graph),
   uncensored_pgh_layout = lat_lon_layout(uncensored_pgh_graph),
   uncensored_pgh_plot_image = ggsave(bridge_plot(lat_lon_layout(uncensored_pgh_graph)), filename = file_out("uncensored_pgh_image.png"), width = 40, height = 30),
   tiny_unique_bridges = unique_bridges(tiny_tidy_graph),
@@ -38,7 +36,8 @@ pgh_plan <- drake_plan(
   tiny_needs_rewiring = map_lgl(tiny_unique_bridges, needs_rewire, graph = tiny_tidy_graph),
   pgh_needs_rewiring = map_lgl(pgh_unique_bridges, needs_rewire, graph = tidy_pgh_graph),
   #rewired_pgh_graph = rewire_graph_singleton_ways(tidy_pgh_graph, ways = unique(pgh_bridges$way_id), way_termini = pgh_termini),
-  rewired_tiny_graph = rewire_graph_singleton_ways(tiny_tidy_graph, ways = unique(tiny_bridges$way_id), way_termini = tiny_termini)
+  single_rewired_tiny_graph = rewire_graph_singleton_ways(tiny_tidy_graph, ways = unique(tiny_bridges$way_id), way_termini = tiny_termini),
+  rewired_tiny_graph = rewire_bridges(single_rewired_tiny_graph, bridges = tiny_unique_bridges, rewire_needed = tiny_needs_rewiring)
 )
 
 # Graph utilities ----
@@ -201,8 +200,9 @@ lat_lon_layout <- function(graph) {
   create_layout(graph, layout = "manual", node.positions = node_positions)
 }
 
-bridge_plot <- function(layout) {
-  ggraph(layout, layout = "manual") + 
+bridge_plot <- function(graph) {
+  lat_lon_layout(graph) %>% 
+    ggraph(layout = "manual") + 
     geom_edge_link(aes(color = bridge_id == "pgh-47")) +
     scale_edge_color_manual(values = c("TRUE" = "red", "FALSE" = "red"), na.value = "gray", guide = FALSE) +
     theme_graph() +
@@ -241,7 +241,7 @@ rewire_bridges <- function(osm_graph, bridges, rewire_needed) {
   ids_to_rewire <- bridges[rewire_needed]
   
   # Loop through bridge ids to be rewired
-  res <- reduce(ids_to_rewire, rewire_bridge, .init = osm_graph)
+  reduce(ids_to_rewire, rewire_bridge, .init = osm_graph)
 }
 
 # From a table of nodes that we know to be the same bridge, cluster into two groups to form
@@ -252,6 +252,9 @@ cluster_points <- function(g, bridge_identifier) {
     remove_unreachable_nodes() %>% 
     as_tibble(active = "nodes")
   
+  # Use kmeans to find the points most likely to be on either side of a bridge
+  # TODO this WILL cause problems when the bridge as defined in OSM is wider
+  # than it is long, but we'll have to cross that bridge when we come to it.
   suppressWarnings({
     kmnodes <- node_tbl %>% 
       select(name, lat, lon) %>% 
@@ -310,11 +313,9 @@ rewire_bridge <- function(osm_graph, b) {
                           from = node_number(new_graph, from_name),
                           to = node_number(new_graph, to_name))
   
-  ng <- new_graph %>% 
+  new_graph %>% 
     # And wire them up to the old nodes
     bind_edges(indexed_edges)
-  
-  new_graph
 }
 
 node_number <- function(graph, name) {
