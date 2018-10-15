@@ -359,7 +359,12 @@ rewire_graph_singleton_ways <- function(graph, ways, way_termini) {
     terminals <- way_termini %>% 
       filter(way_id == b) 
     
-    single_rewire(a, way_id = b, start_node = terminals$start_node, end_node = terminals$end_node)
+    singleton_rewire_handler(a, way_id = b, start_node = terminals$start_node, end_node = terminals$end_node)
   }) %>% 
     remove_unreachable_nodes()
 }
+
+select_main_component <- function(graph) {
+  graph %>% 
+    activate(nodes) %>% 
+    filter(graph_component_count() == 1)
