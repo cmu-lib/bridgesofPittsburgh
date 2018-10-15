@@ -1,6 +1,8 @@
 # Drake ----
 
-pkgconfig::set_config("drake::strings_in_dots" = "literals")
+pkgconfig::set_config(
+  "drake::strings_in_dots" = "literals",
+  "drake::verbose" = 4)
 library(drake)
 library(osmar)
 library(tidyverse)
@@ -18,7 +20,7 @@ pgh_plan <- drake_plan(
   pgh_graph = as_igraph(pgh_raw),
   pgh_bridges = find_bridge_waysets(pgh_raw),
   uncensored_pgh_graph = enrich_osmar_graph(pgh_raw, pgh_graph, pgh_bridges),
-  tidy_pgh_graph = enrich_osmar_graph(pgh_raw, pgh_graph, pgh_bridges, in_pgh_edges = expanded_pgh_ways),
+  tidy_pgh_graph = enrich_osmar_graph(pgh_raw, pgh_graph, pgh_bridges),
   tiny_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/tiny.xml"))),
   tiny_graph = as_igraph(tiny_raw),
   tiny_bridges = find_bridge_waysets(tiny_raw),
@@ -29,15 +31,20 @@ pgh_plan <- drake_plan(
   tiny_plot_image = ggsave(tiny_plot, filename = file_out("tiny_image.png"), width = 20, height = 20),
   pgh_plot_image = ggsave(pgh_plot, filename = file_out("pgh_image.png"), width = 40, height = 30),
   pgh_plot = bridge_plot(tidy_pgh_graph),
-  uncensored_pgh_layout = lat_lon_layout(uncensored_pgh_graph),
-  uncensored_pgh_plot_image = ggsave(bridge_plot(lat_lon_layout(uncensored_pgh_graph)), filename = file_out("uncensored_pgh_image.png"), width = 40, height = 30),
+  uncensored_pgh_plot = bridge_plot(uncensored_pgh_graph),
+  uncensored_pgh_plot_image = ggsave(uncensored_pgh_plot, filename = file_out("uncensored_pgh_image.png"), width = 40, height = 30),
   tiny_unique_bridges = unique_bridges(tiny_tidy_graph),
   pgh_unique_bridges = unique_bridges(tidy_pgh_graph),
   tiny_needs_rewiring = map_lgl(tiny_unique_bridges, needs_rewire, graph = tiny_tidy_graph),
   pgh_needs_rewiring = map_lgl(pgh_unique_bridges, needs_rewire, graph = tidy_pgh_graph),
-  #rewired_pgh_graph = rewire_graph_singleton_ways(tidy_pgh_graph, ways = unique(pgh_bridges$way_id), way_termini = pgh_termini),
+  single_rewired_pgh_graph = rewire_graph_singleton_ways(tidy_pgh_graph, ways = unique(pgh_bridges$way_id), way_termini = pgh_termini),
+  rewired_pgh_graph = rewire_bridges(single_rewired_pgh_graph, bridges = pgh_unique_bridges, rewire_needed = pgh_needs_rewiring),
   single_rewired_tiny_graph = rewire_graph_singleton_ways(tiny_tidy_graph, ways = unique(tiny_bridges$way_id), way_termini = tiny_termini),
-  rewired_tiny_graph = rewire_bridges(single_rewired_tiny_graph, bridges = tiny_unique_bridges, rewire_needed = tiny_needs_rewiring)
+  rewired_tiny_graph = rewire_bridges(single_rewired_tiny_graph, bridges = tiny_unique_bridges, rewire_needed = tiny_needs_rewiring),
+  rewired_pgh_plot = bridge_plot(rewired_pgh_graph),
+  rewired_pgh_plot_image = ggsave(rewired_pgh_plot, filename = file_out("rewired_pgh_image.png"), width = 40, height = 30),
+  final_tiny_graph = weight_by_distance(rewired_tiny_graph),
+  final_tiny_plot = bridge_plot(rewired_tiny_graph)
 )
 
 # Graph utilities ----
@@ -49,11 +56,12 @@ remove_unreachable_nodes <- function(graph) {
 }
 
 # Weights by carteisan distance of from and to nodes
-weight_by_distance <- function(graph) {
+# the "conversion" factor is 
+weight_by_distance <- function(graph, conversion = 91805.38) {
   graph %>% 
     activate(edges) %>% 
-    mutate(weight = sqrt((.N()$lat[from] - .N()$lat[to])^2 + 
-                           (.N()$lon[from] - .N()$lon[to])^2))
+    mutate(distance = sqrt((.N()$lat[from] - .N()$lat[to])^2 + 
+                           (.N()$lon[from] - .N()$lon[to])^2) * conversion)
 }
 
 tangent_ways <- function(src, osm_nodes) {
@@ -203,8 +211,7 @@ lat_lon_layout <- function(graph) {
 bridge_plot <- function(graph) {
   lat_lon_layout(graph) %>% 
     ggraph(layout = "manual") + 
-    geom_edge_link(aes(color = bridge_id == "pgh-47")) +
-    scale_edge_color_manual(values = c("TRUE" = "red", "FALSE" = "red"), na.value = "gray", guide = FALSE) +
+    geom_edge_link(aes(color = distance)) +
     theme_graph() +
     coord_map()
 }
@@ -284,10 +291,10 @@ cluster_points <- function(g, bridge_identifier) {
       lat.x = coalesce(lat.x, new_nodes[[1, "lat"]]),
       lon.x = coalesce(lon.x, new_nodes[[1, "lon"]])) %>% 
     mutate(
-      weight = sqrt((lat.x - lat.y)^2 + (lon.x - lon.y)^2),
+      distance = sqrt((lat.x - lat.y)^2 + (lon.x - lon.y)^2),
       synthetic = TRUE,
       associated_bridge = bridge_identifier) %>% 
-    select(from_name, to_name, bridge_id, weight, synthetic, associated_bridge)
+    select(from_name, to_name, bridge_id, distance, synthetic, associated_bridge)
 
   list(
     nodes = new_nodes,
