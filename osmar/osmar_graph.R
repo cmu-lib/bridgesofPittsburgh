@@ -211,7 +211,8 @@ lat_lon_layout <- function(graph) {
 bridge_plot <- function(graph) {
   lat_lon_layout(graph) %>% 
     ggraph(layout = "manual") + 
-    geom_edge_link(aes(color = distance)) +
+    geom_edge_link(aes(color = bridge_id == "pgh-47")) +
+    scale_edge_color_manual(values = c("TRUE" = "red", "FALSE" = "red"), na.value = "gray", guide = FALSE) +    
     theme_graph() +
     coord_map()
 }
