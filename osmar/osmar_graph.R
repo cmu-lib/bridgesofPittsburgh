@@ -137,7 +137,7 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = N
   osmar_nodes <- osm_node_attributes(raw_osmar)
   osmar_edges <- osm_edge_attributes(raw_osmar)
   
-  res <- as_tbl_graph(graph_osmar) %>% 
+  res <- as_tbl_graph(graph_osmar, directed = FALSE) %>% 
     activate(nodes) %>% 
     left_join(osmar_nodes, by = c("name" = "id")) %>% 
     activate(edges) %>% 
