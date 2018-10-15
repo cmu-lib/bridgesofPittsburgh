@@ -43,11 +43,18 @@ pgh_plan <- drake_plan(
   rewired_tiny_graph = rewire_bridges(single_rewired_tiny_graph, bridges = tiny_unique_bridges, rewire_needed = tiny_needs_rewiring),
   rewired_pgh_plot = bridge_plot(rewired_pgh_graph),
   rewired_pgh_plot_image = ggsave(rewired_pgh_plot, filename = file_out("rewired_pgh_image.png"), width = 40, height = 30),
-  final_tiny_graph = weight_by_distance(rewired_tiny_graph),
-  final_tiny_plot = bridge_plot(rewired_tiny_graph)
+  final_tiny_graph = rewired_tiny_graph %>% weight_by_distance() %>% select_main_component(),
+  final_tiny_plot = bridge_plot(rewired_tiny_graph),
+  final_pgh_graph = rewired_pgh_graph %>% weight_by_distance() %>% select_main_component(),
+  final_pgh_nodes = write_csv(as_tibble(final_pgh_graph, "nodes"), path = file_out(report_file("rewired_pgh_nodes.csv")), na = ""),
+  final_pgh_edges = write_csv(as_tibble(final_pgh_graph, "edges") %>% select(-weight), path = file_out(report_file("rewired_pgh_edges.csv")), na = "")
 )
 
 # Graph utilities ----
+
+report_file <- function(path) {
+  paste(Sys.Date(), path, sep = "_")
+}
 
 remove_unreachable_nodes <- function(graph) {
   graph %>%
@@ -368,3 +375,4 @@ select_main_component <- function(graph) {
   graph %>% 
     activate(nodes) %>% 
     filter(graph_component_count() == 1)
+}
