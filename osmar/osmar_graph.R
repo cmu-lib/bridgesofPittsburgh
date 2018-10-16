@@ -8,45 +8,63 @@ library(osmar)
 library(tidyverse)
 library(tidygraph)
 library(ggraph)
+library(rgdal)
 
 tiny_limits <- list(xlim = c(-80.0106, -79.9872), ylim = c(40.4429, 40.4551))
 
 pgh_plan <- drake_plan(
-  in_pgh_nodes = read_csv(file_in("Updated_PGH/nodes.csv"), col_types = "icnnccll") %>% pull(osmid),
-  in_pgh_edges = read_csv(file_in("Updated_PGH/edges.csv")) %>% pull(osmid),
-  expanded_pgh_ways = tangent_ways(pgh_raw, in_pgh_nodes),
-  within_ways = find_down(pgh_raw, relation("188553")),
+  
+  # Shapefile for PGH boundaries
+  pgh_boundary_shp = as(readOGR("osmar/input_data/Pittsburgh_Buffered_Boundary/"), "SpatialPolygons"),
   pgh_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/input_data/pgh_osm.xml"))),
-  pgh_graph = as_igraph(pgh_raw),
-  pgh_bridges = find_bridge_waysets(pgh_raw),
-  tidy_pgh_graph = enrich_osmar_graph(pgh_raw, pgh_graph, pgh_bridges),
+  pgh_points_sp = as_sp(pgh_raw, "points"),
+  point_overlap = over(pgh_points_sp, pgh_boundary_shp),
+  in_bound_points = names(na.omit(point_overlap)),
+  in_bound_pgh = subset(pgh_raw, ids = find_up(pgh_raw, node(in_bound_points))),
+  
+  # Sample Graph
   tiny_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/input_data/tiny.xml"))),
   tiny_graph = as_igraph(tiny_raw),
   tiny_bridges = find_bridge_waysets(tiny_raw),
   tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, tiny_bridges, limits = tiny_limits),
   tiny_plot = bridge_plot(tiny_tidy_graph),
   tiny_termini = way_termini(tiny_raw),
-  pgh_termini = way_termini(pgh_raw),
-  tiny_plot_image = ggsave(tiny_plot, filename = file_out("tiny_image.png"), width = 20, height = 20),
-  pgh_plot_image = ggsave(pgh_plot, filename = file_out("pgh_image.png"), width = 40, height = 30),
-  pgh_plot = bridge_plot(tidy_pgh_graph),
+  tiny_plot_image = ggsave(tiny_plot, filename = file_out("osmar/output_data/tiny_image.png"), width = 20, height = 20),
   tiny_unique_bridges = unique_bridges(tiny_tidy_graph),
-  pgh_unique_bridges = unique_bridges(tidy_pgh_graph),
   tiny_needs_rewiring = map_lgl(tiny_unique_bridges, needs_rewire, graph = tiny_tidy_graph),
+  rewired_tiny_graph = rewire_bridges(single_rewired_tiny_graph, bridges = tiny_unique_bridges, rewire_needed = tiny_needs_rewiring),
+  final_tiny_graph = rewired_tiny_graph %>% weight_by_distance() %>% select_main_component(),
+  final_tiny_plot = bridge_plot(rewired_tiny_graph),
+  
+  # Full Graph
+  pgh_graph = as_igraph(pgh_raw),
+  pgh_bridges = find_bridge_waysets(pgh_raw),
+  pgh_termini = way_termini(pgh_raw),
+  
+  censored_graph = as_igraph(in_bound_pgh),
+  censored_bridges = find_bridge_waysets(in_bound_pgh),
+  censored_tidy_pgh_graph = enrich_osmar_graph(in_bound_pgh, censored_graph, censored_bridges),
+  
+  pgh_plot = bridge_plot(tidy_pgh_graph),
+  pgh_plot_image = ggsave(pgh_plot, filename = file_out("osmar/output_data/pgh_image.png"), width = 40, height = 30),
+  
+  censored_pgh_plot = bridge_plot(censored_tidy_pgh_graph),
+  censored_pgh_plot_image = ggsave(censored_pgh_plot, filename = file_out("osmar/output_data/censored_pgh_image.png"), width = 40, height = 30),
+  
+  pgh_unique_bridges = unique_bridges(tidy_pgh_graph),
   pgh_needs_rewiring = map_lgl(pgh_unique_bridges, needs_rewire, graph = tidy_pgh_graph),
   single_rewired_pgh_graph = rewire_graph_singleton_ways(tidy_pgh_graph, ways = unique(pgh_bridges$way_id), way_termini = pgh_termini),
   rewired_pgh_graph = rewire_bridges(single_rewired_pgh_graph, bridges = pgh_unique_bridges, rewire_needed = pgh_needs_rewiring),
   single_rewired_tiny_graph = rewire_graph_singleton_ways(tiny_tidy_graph, ways = unique(tiny_bridges$way_id), way_termini = tiny_termini),
-  rewired_tiny_graph = rewire_bridges(single_rewired_tiny_graph, bridges = tiny_unique_bridges, rewire_needed = tiny_needs_rewiring),
   rewired_pgh_plot = bridge_plot(rewired_pgh_graph),
-  rewired_pgh_plot_image = ggsave(rewired_pgh_plot, filename = file_out("rewired_pgh_image.png"), width = 40, height = 30),
-  final_tiny_graph = rewired_tiny_graph %>% weight_by_distance() %>% select_main_component(),
-  final_tiny_plot = bridge_plot(rewired_tiny_graph),
+  rewired_pgh_plot_image = ggsave(rewired_pgh_plot, filename = file_out("osmar/output_data/rewired_pgh_image.png"), width = 40, height = 30),
+  
+  # Finalize output plot
   final_pgh_graph = rewired_pgh_graph %>% weight_by_distance() %>% select_main_component(),
-  final_pgh_nodes = write_csv(as_tibble(final_pgh_graph, "nodes"), path = file_out(report_file("rewired_pgh_nodes.csv")), na = ""),
-  final_pgh_edges = write_csv(as_tibble(final_pgh_graph, "edges") %>% select(-weight), path = file_out(report_file("rewired_pgh_edges.csv")), na = ""),
+  final_pgh_nodes = write_csv(as_tibble(final_pgh_graph, "nodes"), path = file_out(report_file("osmar/output_data/rewired_pgh_nodes.csv")), na = ""),
+  final_pgh_edges = write_csv(as_tibble(final_pgh_graph, "edges") %>% select(-weight), path = file_out(report_file("osmar/output_data/rewired_pgh_edges.csv")), na = ""),
   final_pgh_plot = bridge_plot(final_pgh_graph),
-  final_pgh_plot_image = ggsave(final_pgh_plot, filename = file_out("final_pgh_image.png"), width = 40, height = 30)
+  final_pgh_plot_image = ggsave(final_pgh_plot, filename = file_out("osmar/output_data/final_pgh_image.png"), width = 40, height = 30)
 )
 
 # Graph utilities ----
