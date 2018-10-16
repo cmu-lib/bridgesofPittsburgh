@@ -32,28 +32,26 @@ pgh_plan <- drake_plan(
   tiny_plot_image = ggsave(tiny_plot, filename = file_out("osmar/output_data/tiny_image.png"), width = 20, height = 20),
   tiny_unique_bridges = unique_bridges(tiny_tidy_graph),
   tiny_needs_rewiring = map_lgl(tiny_unique_bridges, needs_rewire, graph = tiny_tidy_graph),
-  rewired_tiny_graph = rewire_bridges(single_rewired_tiny_graph, bridges = tiny_unique_bridges, rewire_needed = tiny_needs_rewiring),
-  final_tiny_graph = rewired_tiny_graph %>% weight_by_distance() %>% select_main_component(),
-  final_tiny_plot = bridge_plot(rewired_tiny_graph),
+  tiny_rewired_graph = rewire_bridges(single_rewired_tiny_graph, bridges = tiny_unique_bridges, rewire_needed = tiny_needs_rewiring),
+  final_tiny_graph = tiny_rewired_graph %>% weight_by_distance() %>% select_main_component(),
+  final_tiny_plot = bridge_plot(final_tiny_graph),
+  final_tiny_plot_image = ggsave(final_tiny_plot, filename = file_out("osmar/output_data/final_tiny_plot_image.png"), width = 40, height = 30),
+  
   
   # Full Graph
-  pgh_graph = as_igraph(pgh_raw),
-  pgh_bridges = find_bridge_waysets(pgh_raw),
-  pgh_termini = way_termini(pgh_raw),
-  
-  censored_graph = as_igraph(in_bound_pgh),
-  censored_bridges = find_bridge_waysets(in_bound_pgh),
-  censored_tidy_pgh_graph = enrich_osmar_graph(in_bound_pgh, censored_graph, censored_bridges),
-  
-  pgh_plot = bridge_plot(tidy_pgh_graph),
+  pgh_graph = as_igraph(in_bound_pgh),
+  pgh_bridges = find_bridge_waysets(in_bound_pgh),
+  pgh_tidy_graph = enrich_osmar_graph(in_bound_pgh, pgh_graph, pgh_bridges),
+  pgh_termini = way_termini(in_bound_pgh),
+  pgh_plot = bridge_plot(pgh_tidy_graph),
   pgh_plot_image = ggsave(pgh_plot, filename = file_out("osmar/output_data/pgh_image.png"), width = 40, height = 30),
   
-  censored_pgh_plot = bridge_plot(censored_tidy_pgh_graph),
+  censored_pgh_plot = bridge_plot(censored_pgh_tidy_graph),
   censored_pgh_plot_image = ggsave(censored_pgh_plot, filename = file_out("osmar/output_data/censored_pgh_image.png"), width = 40, height = 30),
   
-  pgh_unique_bridges = unique_bridges(tidy_pgh_graph),
-  pgh_needs_rewiring = map_lgl(pgh_unique_bridges, needs_rewire, graph = tidy_pgh_graph),
-  single_rewired_pgh_graph = rewire_graph_singleton_ways(tidy_pgh_graph, ways = unique(pgh_bridges$way_id), way_termini = pgh_termini),
+  pgh_unique_bridges = unique_bridges(pgh_tidy_graph),
+  pgh_needs_rewiring = map_lgl(pgh_unique_bridges, needs_rewire, graph = pgh_tidy_graph),
+  single_rewired_pgh_graph = rewire_graph_singleton_ways(pgh_tidy_graph, ways = unique(pgh_bridges$way_id), way_termini = pgh_termini),
   rewired_pgh_graph = rewire_bridges(single_rewired_pgh_graph, bridges = pgh_unique_bridges, rewire_needed = pgh_needs_rewiring),
   single_rewired_tiny_graph = rewire_graph_singleton_ways(tiny_tidy_graph, ways = unique(tiny_bridges$way_id), way_termini = tiny_termini),
   rewired_pgh_plot = bridge_plot(rewired_pgh_graph),
