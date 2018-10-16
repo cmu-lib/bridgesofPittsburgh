@@ -268,6 +268,7 @@ needs_rewire <- function(x, graph) {
 # Replace each complex bridge edgeset in the graph with a single synthetic edge
 # with new endpoints
 rewire_bridges <- function(osm_graph, bridges, rewire_needed) {
+  # Only pass through those bridges that actually have to be rewired
   ids_to_rewire <- bridges[rewire_needed]
   
   # Loop through bridge ids to be rewired
@@ -327,11 +328,17 @@ cluster_points <- function(g, bridge_identifier) {
 
 # For a given bridge ID, create two new endpoints, connect the original 2+
 # terminal points to these new endpoints, and remove the original edges/nodes
-rewire_bridge <- function(osm_graph, b) {
-  cluster_results <- cluster_points(osm_graph, b)
+rewire_bridge <- function(osm_graph, b, termini) {
+  
+  # First, simplify the edges belonging to the bridge
+  terminals <- termini %>% filter(way_id == b)
+  
+  presimplified_graph <- singleton_rewire_handler(osm_graph, way_id = b, start_node = terminals[["start_node"]], end_node = terminals[["end_node"]])
+  
+  cluster_results <- cluster_points(presimplified_graph, b)
   
   # Remove unwanted edges
-  new_graph <- osm_graph %>% 
+  new_graph <- presimplified_graph %>% 
     activate(edges) %>% 
     filter(is.na(bridge_id) | bridge_id != b) %>% 
     activate(nodes) %>% 
