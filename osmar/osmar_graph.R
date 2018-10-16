@@ -333,7 +333,8 @@ rewire_bridge <- function(osm_graph, b, termini) {
   # First, simplify the edges belonging to the bridge
   terminals <- termini %>% filter(way_id == b)
   
-  presimplified_graph <- singleton_rewire_handler(osm_graph, way_id = b, start_node = terminals[["start_node"]], end_node = terminals[["end_node"]])
+  presimplified_graph <- singleton_rewire_handler(osm_graph, way_id = b, start_node = terminals[["start_node"]], end_node = terminals[["end_node"]]) %>% 
+    remove_unreachable_nodes()
   
   cluster_results <- cluster_points(presimplified_graph, b)
   
