@@ -19,7 +19,6 @@ pgh_plan <- drake_plan(
   pgh_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/pgh_osm.xml"))),
   pgh_graph = as_igraph(pgh_raw),
   pgh_bridges = find_bridge_waysets(pgh_raw),
-  uncensored_pgh_graph = enrich_osmar_graph(pgh_raw, pgh_graph, pgh_bridges),
   tidy_pgh_graph = enrich_osmar_graph(pgh_raw, pgh_graph, pgh_bridges),
   tiny_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/tiny.xml"))),
   tiny_graph = as_igraph(tiny_raw),
@@ -31,8 +30,6 @@ pgh_plan <- drake_plan(
   tiny_plot_image = ggsave(tiny_plot, filename = file_out("tiny_image.png"), width = 20, height = 20),
   pgh_plot_image = ggsave(pgh_plot, filename = file_out("pgh_image.png"), width = 40, height = 30),
   pgh_plot = bridge_plot(tidy_pgh_graph),
-  uncensored_pgh_plot = bridge_plot(uncensored_pgh_graph),
-  uncensored_pgh_plot_image = ggsave(uncensored_pgh_plot, filename = file_out("uncensored_pgh_image.png"), width = 40, height = 30),
   tiny_unique_bridges = unique_bridges(tiny_tidy_graph),
   pgh_unique_bridges = unique_bridges(tidy_pgh_graph),
   tiny_needs_rewiring = map_lgl(tiny_unique_bridges, needs_rewire, graph = tiny_tidy_graph),
@@ -47,7 +44,9 @@ pgh_plan <- drake_plan(
   final_tiny_plot = bridge_plot(rewired_tiny_graph),
   final_pgh_graph = rewired_pgh_graph %>% weight_by_distance() %>% select_main_component(),
   final_pgh_nodes = write_csv(as_tibble(final_pgh_graph, "nodes"), path = file_out(report_file("rewired_pgh_nodes.csv")), na = ""),
-  final_pgh_edges = write_csv(as_tibble(final_pgh_graph, "edges") %>% select(-weight), path = file_out(report_file("rewired_pgh_edges.csv")), na = "")
+  final_pgh_edges = write_csv(as_tibble(final_pgh_graph, "edges") %>% select(-weight), path = file_out(report_file("rewired_pgh_edges.csv")), na = ""),
+  final_pgh_plot = bridge_plot(final_pgh_graph),
+  final_pgh_plot_image = ggsave(final_pgh_plot, filename = file_out("final_pgh_image.png"), width = 40, height = 30)
 )
 
 # Graph utilities ----
@@ -374,5 +373,6 @@ rewire_graph_singleton_ways <- function(graph, ways, way_termini) {
 select_main_component <- function(graph) {
   graph %>% 
     activate(nodes) %>% 
-    filter(graph_component_count() == 1)
+    mutate(component = group_components()) %>% 
+    filter(component == 1)
 }
