@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+<idinfo>
+<citation>
+<citeinfo>
+<title>Pittsburgh City Boundary</title>
+</citeinfo>
+</citation>
+<descript>
+<abstract>Pittsburgh City Boundary Metadata: https://www.arcgis.com/sharing/rest/content/items/a99f25fffb7b41c8a4adf9ea676a3a0b/info/metadata/metadata.xml?format=default&amp;amp;output=html</abstract>
+<purpose>city boundary</purpose>
+</descript>
+<keywords>
+<theme>
+<themekt>None</themekt>
+<themekey>Pittsburgh</themekey>
+<themekey>Geography</themekey>
+</theme>
+</keywords>
+<accconst>None</accconst>
+<useconst>None</useconst>
+</idinfo>
+<metainfo>
+<metd>20151015</metd>
+<metc>
+<cntinfo>
+<!--no contact person or organization name available-->
+<cntaddr>
+<addrtype>unknown</addrtype>
+<country>AF</country>
+</cntaddr>
+</cntinfo>
+</metc>
+<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+<metstdv>FGDC-STD-001-1998</metstdv>
+<mettc>local time</mettc>
+</metainfo>
+</metadata>
