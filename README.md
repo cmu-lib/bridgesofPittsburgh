@@ -1,5 +1,5 @@
 # bridgesofPittsburgh
-Code and documents associated with the Bridges of Pittsburgh DH project at CMU
+Code and documents associated with the Bridges of Pittsburgh DH project at Carnegie Mellon University
 
 ## The Bridges of Pittsburgh
 The Bridges of Pittsburgh is a highly interdisciplinary and collaborative public-facing project that pays homage both to an innovative, field-defining mathematical problem and to one of the defining features of our city. We propose to discover how many of Pittsburgh’s 446 bridges can be traversed without crossing the same bridge twice, then publish our findings both in traditional scholarly venues and as an online interactive map. Our project will educate CMU affiliates, engage the public, and aid our professional development through publications and skill-building. We will draw from history of science, graph theory, digital mapping, and public humanities to achieve our goals.
