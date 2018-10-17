@@ -51,7 +51,6 @@ pgh_plan <- drake_plan(
   censored_pgh_plot = bridge_plot(censored_pgh_tidy_graph),
   censored_pgh_plot_image = ggsave(censored_pgh_plot, filename = file_out("osmar/output_data/censored_pgh_image.png"), width = 40, height = 30),
   
-  pgh_unique_bridges = unique_bridges(pgh_tidy_graph),
   pgh_needs_rewiring = bridges_to_rewire(pgh_tidy_graph),
   rewired_pgh_graph = rewire_bridges(pgh_tidy_graph, bridges = pgh_needs_rewiring, termini = pgh_termini),
   rewired_pgh_plot = bridge_plot(rewired_pgh_graph),
@@ -166,7 +165,10 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = N
     mutate_at(vars(name), as.character) %>% 
     left_join(osmar_edges, by = c("name" = "id")) %>% 
     left_join(bridges, by = c("name" = "way_id")) %>% 
-    mutate(is_bridge = !is.na(bridge_id))
+    mutate(
+      is_bridge = !is.na(bridge_id),
+      rewired = if_else(is_bridge, FALSE, NA),
+      synthetic = NA)
   
   if (!is.null(in_pgh_nodes)) {
     # Only keep nodes that are inside a defined boundary near the Pittsburgh
@@ -231,10 +233,20 @@ lat_lon_layout <- function(graph) {
 }
 
 bridge_plot <- function(graph) {
-  lat_lon_layout(graph) %>% 
+  graph %>% 
+    activate(edges) %>% 
+    mutate(
+      edge_flag = case_when(
+        synthetic == TRUE ~ "green",
+        rewired == TRUE ~ "red",
+        is_bridge == TRUE ~ "blue",
+        TRUE ~ "gray"
+      )
+    ) %>% 
+    lat_lon_layout() %>% 
     ggraph(layout = "manual") + 
-    geom_edge_link(aes(color = bridge_id == "pgh-47")) +
-    scale_edge_color_manual(values = c("TRUE" = "red", "FALSE" = "red"), na.value = "gray", guide = FALSE) +    
+    geom_edge_link(aes(color = edge_flag)) +
+    scale_edge_color_identity() +    
     theme_graph() +
     coord_map()
 }
@@ -254,16 +266,27 @@ bridges_to_rewire <- function(graph) {
 # with new endpoints
 rewire_bridges <- function(osm_graph, bridges, termini) {
   # Loop through bridge ids to be rewired
-  accumulate(bridges, rewire_bridge, termini = termini, .init = osm_graph)
+  reduce(bridges, rewire_bridge, termini = termini, .init = osm_graph)
 }
 
 # From a table of nodes that we know to be the same bridge, cluster into two groups to form
 cluster_points <- function(g, bridge_identifier) {
+  message(bridge_identifier, "...", appendLF = FALSE)
+  
   node_tbl <- g %>% 
     activate(edges) %>% 
     filter(bridge_id == bridge_identifier) %>% 
     remove_unreachable_nodes() %>% 
     as_tibble(active = "nodes")
+  
+  message(nrow(node_tbl), "...", appendLF = FALSE)
+  
+  # If only two nodes are present, then immediately return the table because no
+  # clustering needs to be done
+  if (nrow(node_tbl) <= 2) {
+    message("skipped")
+    return(NULL)
+  }
   
   # Use kmeans to find the points most likely to be on either side of a bridge
   # TODO this WILL cause problems when the bridge as defined in OSM is wider
@@ -302,6 +325,8 @@ cluster_points <- function(g, bridge_identifier) {
       associated_bridge = bridge_identifier) %>% 
     select(from_name, to_name, bridge_id, distance, synthetic, associated_bridge)
 
+  message("done")
+  
   list(
     nodes = new_nodes,
     edges = new_edges
@@ -327,22 +352,27 @@ rewire_bridge <- function(osm_graph, b, termini) {
                              start_node = terminals[["start_node"]], 
                              end_node = terminals[["end_node"]])
   }, .init = osm_graph)
-  
+  bridge_plot(presimplified_graph)
   cluster_results <- cluster_points(presimplified_graph, b)
+  
+  # If cluster_results returned null, then exit early
+  if (is.null(cluster_results)) return(presimplified_graph)
   
   # Remove unwanted edges
   new_graph <- presimplified_graph %>% 
     activate(edges) %>% 
     filter(is.na(bridge_id) | bridge_id != b) %>% 
+    # Bind the newly-created nodes
     activate(nodes) %>% 
     bind_nodes(cluster_results$nodes)
   
   # Get proper node indices now that the new synthetic nodes have been added
-  indexed_edges <- mutate(cluster_results$edges,
-                          from = node_number(new_graph, from_name),
-                          to = node_number(new_graph, to_name))
+  indexed_edges <- cluster_results$edges %>% 
+    mutate(
+      from = node_number(new_graph, from_name),
+      to = node_number(new_graph, to_name))
   
-  new_graph %>% 
+  res <- new_graph %>% 
     # And wire them up to the old nodes
     bind_edges(indexed_edges)
 }
@@ -374,17 +404,6 @@ singleton_rewire_handler <- function(graph, way_id, start_node, end_node) {
     bind_edges(new_edge)
 }
 
-# rewire_graph_singleton_ways <- function(graph, ways, way_termini) {
-#   reduce(ways, .init = graph, .f = function(a, b) {
-#     message(b)
-#     
-#     terminals <- way_termini %>% 
-#       filter(way_id == b) 
-#     
-#     singleton_rewire_handler(a, way_id = b, start_node = terminals$start_node, end_node = terminals$end_node)
-#   }) %>% 
-#     remove_unreachable_nodes()
-# }
 
 select_main_component <- function(graph) {
   graph %>% 
