@@ -399,7 +399,7 @@ singleton_rewire_handler <- function(graph, way_id, start_node, end_node) {
   graph %>%
     # Remove original edges representing the way
     activate(edges) %>% 
-    filter(name != way_id) %>% 
+    filter(is.na(name) | name != way_id) %>% 
     # Add the new edge and return the graph
     bind_edges(new_edge)
 }
