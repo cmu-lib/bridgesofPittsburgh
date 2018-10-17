@@ -9,6 +9,7 @@ library(tidyverse)
 library(tidygraph)
 library(ggraph)
 library(rgdal)
+library(assertr)
 
 tiny_limits <- list(xlim = c(-80.0106, -79.9872), ylim = c(40.4429, 40.4551))
 
@@ -30,11 +31,9 @@ pgh_plan <- drake_plan(
   tiny_plot = bridge_plot(tiny_tidy_graph),
   tiny_termini = way_termini(tiny_raw),
   tiny_plot_image = ggsave(tiny_plot, filename = file_out("osmar/output_data/tiny_image.png"), width = 20, height = 20),
-  tiny_unique_bridges = unique_bridges(tiny_tidy_graph),
-  tiny_needs_rewiring = map_lgl(tiny_unique_bridges, needs_rewire, graph = tiny_tidy_graph),
-  tiny_rewired_graph = rewire_bridges(single_rewired_tiny_graph, 
-                                      bridges = tiny_unique_bridges, 
-                                      rewire_needed = tiny_needs_rewiring,
+  tiny_needs_rewiring = bridges_to_rewire(tiny_tidy_graph),
+  tiny_rewired_graph = rewire_bridges(tiny_tidy_graph, 
+                                      bridges = tiny_needs_rewiring,
                                       termini = tiny_termini),
   final_tiny_graph = tiny_rewired_graph %>% weight_by_distance() %>% select_main_component(),
   final_tiny_plot = bridge_plot(final_tiny_graph),
@@ -53,10 +52,8 @@ pgh_plan <- drake_plan(
   censored_pgh_plot_image = ggsave(censored_pgh_plot, filename = file_out("osmar/output_data/censored_pgh_image.png"), width = 40, height = 30),
   
   pgh_unique_bridges = unique_bridges(pgh_tidy_graph),
-  pgh_needs_rewiring = map_lgl(pgh_unique_bridges, needs_rewire, graph = pgh_tidy_graph),
-  single_rewired_pgh_graph = rewire_graph_singleton_ways(pgh_tidy_graph, ways = unique(pgh_bridges$way_id), way_termini = pgh_termini),
-  rewired_pgh_graph = rewire_bridges(single_rewired_pgh_graph, bridges = pgh_unique_bridges, rewire_needed = pgh_needs_rewiring),
-  single_rewired_tiny_graph = rewire_graph_singleton_ways(tiny_tidy_graph, ways = unique(tiny_bridges$way_id), way_termini = tiny_termini),
+  pgh_needs_rewiring = bridges_to_rewire(pgh_tidy_graph),
+  rewired_pgh_graph = rewire_bridges(pgh_tidy_graph, bridges = pgh_needs_rewiring, termini = pgh_termini),
   rewired_pgh_plot = bridge_plot(rewired_pgh_graph),
   rewired_pgh_plot_image = ggsave(rewired_pgh_plot, filename = file_out("osmar/output_data/rewired_pgh_image.png"), width = 40, height = 30),
   
@@ -244,38 +241,20 @@ bridge_plot <- function(graph) {
 
 # Rewiring ----
 
-unique_bridges <- function(graph) {
-  graph %>% 
-    activate(edges) %>% 
-    as_tibble() %>% 
+bridges_to_rewire <- function(graph) {
+  graph %>%
+    as_tibble("edges") %>% 
+    filter(id_type == "osm") %>% 
     pull(bridge_id) %>% 
     unique() %>% 
     na.omit()
 }
 
-# Which Bridge relations _need_ rewiring?
-# Find this by getting the subgraphs for each bridge relation and checking for connectedness
-needs_rewire <- function(x, graph) {
-  message("Testing ", x, "...", appendLF = FALSE)
-  res <- graph %>% 
-    activate(edges) %>% 
-    # Keep only edges for this specific bridge
-    filter(bridge_id == x) %>% 
-    remove_unreachable_nodes() %>% 
-    # IF the graph is not connected, return TRUE - we DO need to rewuire
-    with_graph(!graph_is_connected())
-  message(res)
-  res
-}
-
 # Replace each complex bridge edgeset in the graph with a single synthetic edge
 # with new endpoints
-rewire_bridges <- function(osm_graph, bridges, rewire_needed, termini) {
-  # Only pass through those bridges that actually have to be rewired
-  ids_to_rewire <- bridges[rewire_needed]
-  
+rewire_bridges <- function(osm_graph, bridges, termini) {
   # Loop through bridge ids to be rewired
-  reduce(ids_to_rewire, rewire_bridge, termini = termini, .init = osm_graph)
+  accumulate(bridges, rewire_bridge, termini = termini, .init = osm_graph)
 }
 
 # From a table of nodes that we know to be the same bridge, cluster into two groups to form
@@ -336,12 +315,10 @@ rewire_bridge <- function(osm_graph, b, termini) {
   # First, simplify the Ways belonging to the bridge
   # Get all Ways belonging to the bridge
   waylist <- osm_graph %>% 
-    activate(edges) %>% 
     as_tibble("edges") %>% 
     filter(bridge_id == b) %>% 
     pull(name) %>%
     unique()
-  
   
   presimplified_graph <- reduce(waylist, function(x, y) {
     terminals <- termini %>% filter(way_id == y)
@@ -349,8 +326,7 @@ rewire_bridge <- function(osm_graph, b, termini) {
     singleton_rewire_handler(x, way_id = y, 
                              start_node = terminals[["start_node"]], 
                              end_node = terminals[["end_node"]])
-  }, .init = osm_graph) %>% 
-    remove_unreachable_nodes()
+  }, .init = osm_graph)
   
   cluster_results <- cluster_points(presimplified_graph, b)
   
@@ -387,7 +363,8 @@ singleton_rewire_handler <- function(graph, way_id, start_node, end_node) {
     mutate(rewired = TRUE) %>% 
     mutate(
       from = node_number(graph, start_node),
-      to = node_number(graph, end_node))
+      to = node_number(graph, end_node)) %>% 
+    assert(is_uniq, name)
   
   graph %>%
     # Remove original edges representing the way
