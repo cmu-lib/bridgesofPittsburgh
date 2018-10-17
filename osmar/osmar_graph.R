@@ -32,7 +32,10 @@ pgh_plan <- drake_plan(
   tiny_plot_image = ggsave(tiny_plot, filename = file_out("osmar/output_data/tiny_image.png"), width = 20, height = 20),
   tiny_unique_bridges = unique_bridges(tiny_tidy_graph),
   tiny_needs_rewiring = map_lgl(tiny_unique_bridges, needs_rewire, graph = tiny_tidy_graph),
-  tiny_rewired_graph = rewire_bridges(single_rewired_tiny_graph, bridges = tiny_unique_bridges, rewire_needed = tiny_needs_rewiring),
+  tiny_rewired_graph = rewire_bridges(single_rewired_tiny_graph, 
+                                      bridges = tiny_unique_bridges, 
+                                      rewire_needed = tiny_needs_rewiring,
+                                      termini = tiny_termini),
   final_tiny_graph = tiny_rewired_graph %>% weight_by_distance() %>% select_main_component(),
   final_tiny_plot = bridge_plot(final_tiny_graph),
   final_tiny_plot_image = ggsave(final_tiny_plot, filename = file_out("osmar/output_data/final_tiny_plot_image.png"), width = 40, height = 30),
@@ -267,12 +270,12 @@ needs_rewire <- function(x, graph) {
 
 # Replace each complex bridge edgeset in the graph with a single synthetic edge
 # with new endpoints
-rewire_bridges <- function(osm_graph, bridges, rewire_needed) {
+rewire_bridges <- function(osm_graph, bridges, rewire_needed, termini) {
   # Only pass through those bridges that actually have to be rewired
   ids_to_rewire <- bridges[rewire_needed]
   
   # Loop through bridge ids to be rewired
-  reduce(ids_to_rewire, rewire_bridge, .init = osm_graph)
+  reduce(ids_to_rewire, rewire_bridge, termini = termini, .init = osm_graph)
 }
 
 # From a table of nodes that we know to be the same bridge, cluster into two groups to form
@@ -330,10 +333,23 @@ cluster_points <- function(g, bridge_identifier) {
 # terminal points to these new endpoints, and remove the original edges/nodes
 rewire_bridge <- function(osm_graph, b, termini) {
   
-  # First, simplify the edges belonging to the bridge
-  terminals <- termini %>% filter(way_id == b)
+  # First, simplify the Ways belonging to the bridge
+  # Get all Ways belonging to the bridge
+  waylist <- osm_graph %>% 
+    activate(edges) %>% 
+    as_tibble("edges") %>% 
+    filter(bridge_id == b) %>% 
+    pull(name) %>%
+    unique()
   
-  presimplified_graph <- singleton_rewire_handler(osm_graph, way_id = b, start_node = terminals[["start_node"]], end_node = terminals[["end_node"]]) %>% 
+  
+  presimplified_graph <- reduce(waylist, function(x, y) {
+    terminals <- termini %>% filter(way_id == y)
+    
+    singleton_rewire_handler(x, way_id = y, 
+                             start_node = terminals[["start_node"]], 
+                             end_node = terminals[["end_node"]])
+  }, .init = osm_graph) %>% 
     remove_unreachable_nodes()
   
   cluster_results <- cluster_points(presimplified_graph, b)
@@ -344,7 +360,6 @@ rewire_bridge <- function(osm_graph, b, termini) {
     filter(is.na(bridge_id) | bridge_id != b) %>% 
     activate(nodes) %>% 
     bind_nodes(cluster_results$nodes)
-  
   
   # Get proper node indices now that the new synthetic nodes have been added
   indexed_edges <- mutate(cluster_results$edges,
@@ -382,17 +397,17 @@ singleton_rewire_handler <- function(graph, way_id, start_node, end_node) {
     bind_edges(new_edge)
 }
 
-rewire_graph_singleton_ways <- function(graph, ways, way_termini) {
-  reduce(ways, .init = graph, .f = function(a, b) {
-    message(b)
-    
-    terminals <- way_termini %>% 
-      filter(way_id == b) 
-    
-    singleton_rewire_handler(a, way_id = b, start_node = terminals$start_node, end_node = terminals$end_node)
-  }) %>% 
-    remove_unreachable_nodes()
-}
+# rewire_graph_singleton_ways <- function(graph, ways, way_termini) {
+#   reduce(ways, .init = graph, .f = function(a, b) {
+#     message(b)
+#     
+#     terminals <- way_termini %>% 
+#       filter(way_id == b) 
+#     
+#     singleton_rewire_handler(a, way_id = b, start_node = terminals$start_node, end_node = terminals$end_node)
+#   }) %>% 
+#     remove_unreachable_nodes()
+# }
 
 select_main_component <- function(graph) {
   graph %>% 
