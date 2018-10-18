@@ -48,9 +48,6 @@ pgh_plan <- drake_plan(
   pgh_plot = bridge_plot(pgh_tidy_graph),
   pgh_plot_image = ggsave(pgh_plot, filename = file_out("osmar/output_data/pgh_image.png"), width = 40, height = 30),
   
-  censored_pgh_plot = bridge_plot(censored_pgh_tidy_graph),
-  censored_pgh_plot_image = ggsave(censored_pgh_plot, filename = file_out("osmar/output_data/censored_pgh_image.png"), width = 40, height = 30),
-  
   pgh_needs_rewiring = bridges_to_rewire(pgh_tidy_graph),
   rewired_pgh_graph = rewire_bridges(pgh_tidy_graph, bridges = pgh_needs_rewiring, termini = pgh_termini),
   rewired_pgh_plot = bridge_plot(rewired_pgh_graph),
@@ -58,17 +55,13 @@ pgh_plan <- drake_plan(
   
   # Finalize output plot
   final_pgh_graph = rewired_pgh_graph %>% weight_by_distance() %>% select_main_component(),
-  final_pgh_nodes = write_csv(as_tibble(final_pgh_graph, "nodes"), path = file_out(report_file("osmar/output_data/rewired_pgh_nodes.csv")), na = ""),
-  final_pgh_edges = write_csv(as_tibble(final_pgh_graph, "edges") %>% select(-weight), path = file_out(report_file("osmar/output_data/rewired_pgh_edges.csv")), na = ""),
+  final_pgh_nodes = write_csv(as_tibble(final_pgh_graph, "nodes"), path = file_out("osmar/output_data/rewired_pgh_nodes.csv"), na = ""),
+  final_pgh_edges = write_csv(as_tibble(final_pgh_graph, "edges") %>% select(-weight), path = file_out("osmar/output_data/rewired_pgh_edges.csv"), na = ""),
   final_pgh_plot = bridge_plot(final_pgh_graph),
   final_pgh_plot_image = ggsave(final_pgh_plot, filename = file_out("osmar/output_data/final_pgh_image.png"), width = 40, height = 30)
 )
 
 # Graph utilities ----
-
-report_file <- function(path) {
-  paste(Sys.Date(), path, sep = "_")
-}
 
 remove_unreachable_nodes <- function(graph) {
   graph %>%
@@ -372,7 +365,7 @@ rewire_bridge <- function(osm_graph, b, termini) {
       from = node_number(new_graph, from_name),
       to = node_number(new_graph, to_name))
   
-  res <- new_graph %>% 
+  new_graph %>% 
     # And wire them up to the old nodes
     bind_edges(indexed_edges)
 }
