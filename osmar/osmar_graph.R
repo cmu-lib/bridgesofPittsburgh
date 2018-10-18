@@ -35,7 +35,7 @@ pgh_plan <- drake_plan(
   tiny_rewired_graph = rewire_bridges(tiny_tidy_graph, 
                                       bridges = tiny_needs_rewiring,
                                       termini = tiny_termini),
-  final_tiny_graph = tiny_rewired_graph %>% weight_by_distance() %>% select_main_component(),
+  final_tiny_graph = tiny_rewired_graph %>% weight_by_distance(),
   final_tiny_plot = bridge_plot(final_tiny_graph),
   final_tiny_plot_image = ggsave(final_tiny_plot, filename = file_out("osmar/output_data/final_tiny_plot_image.png"), width = 40, height = 30),
   
