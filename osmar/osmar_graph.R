@@ -21,7 +21,6 @@ pgh_plan <- drake_plan(
   pgh_points_sp = as_sp(pgh_raw, "points"),
   point_overlap = over(pgh_points_sp, pgh_boundary_shp),
   in_bound_points = names(na.omit(point_overlap)),
-  in_bound_pgh = subset(pgh_raw, ids = find_up(pgh_raw, node(in_bound_points))),
   
   # Sample Graph
   tiny_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/input_data/tiny.xml"))),
@@ -39,19 +38,22 @@ pgh_plan <- drake_plan(
   final_tiny_plot = bridge_plot(final_tiny_graph),
   final_tiny_plot_image = ggsave(final_tiny_plot, filename = file_out("osmar/output_data/final_tiny_plot_image.png"), width = 40, height = 30),
   
-  
   # Full Graph
-  pgh_graph = as_igraph(in_bound_pgh),
-  pgh_bridges = find_bridge_waysets(in_bound_pgh),
-  pgh_tidy_graph = enrich_osmar_graph(in_bound_pgh, pgh_graph, pgh_bridges),
-  pgh_termini = way_termini(in_bound_pgh),
+  pgh_graph = as_igraph(pgh_raw),
+  pgh_bridges = find_bridge_waysets(pgh_raw),
+  pgh_tidy_graph = enrich_osmar_graph(pgh_raw, pgh_graph, pgh_bridges, in_pgh_nodes = in_bound_points),
+  pgh_termini = way_termini(pgh_raw),
   pgh_plot = bridge_plot(pgh_tidy_graph),
-  pgh_plot_image = ggsave(pgh_plot, filename = file_out("osmar/output_data/pgh_image.png"), width = 40, height = 30),
+  # pgh_plot_image = target(
+  #   ggsave(pgh_plot, filename = file_out("osmar/output_data/pgh_image.png"), width = 40, height = 30),
+  #   trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)),
   
   pgh_needs_rewiring = bridges_to_rewire(pgh_tidy_graph),
   rewired_pgh_graph = rewire_bridges(pgh_tidy_graph, bridges = pgh_needs_rewiring, termini = pgh_termini),
   rewired_pgh_plot = bridge_plot(rewired_pgh_graph),
-  rewired_pgh_plot_image = ggsave(rewired_pgh_plot, filename = file_out("osmar/output_data/rewired_pgh_image.png"), width = 40, height = 30),
+  # rewired_pgh_plot_image = target(
+  #   ggsave(rewired_pgh_plot, filename = file_out("osmar/output_data/rewired_pgh_image.png"), width = 40, height = 30),
+  #   trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)),
   
   # Finalize output plot
   final_pgh_graph = rewired_pgh_graph %>% weight_by_distance() %>% select_main_component(),
@@ -144,10 +146,12 @@ way_termini <- function(src) {
 only_roadways <- function(osmar_graph) {
   osmar_graph %>% 
     activate(edges) %>% 
-    filter(!is.na(highway))
+    # Either exclude non highway lines, or any highways marked as "footways" (OSM-speak for sidewalks)
+    filter(!is.na(highway)) %>% 
+    filter(highway != "footway")
 }
 
-enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = NULL, in_pgh_edges = NULL, limits = NULL) {
+enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = NULL, limits = NULL) {
   osmar_nodes <- osm_node_attributes(raw_osmar)
   osmar_edges <- osm_edge_attributes(raw_osmar)
   
@@ -164,18 +168,14 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = N
       synthetic = NA)
   
   if (!is.null(in_pgh_nodes)) {
-    # Only keep nodes that are inside a defined boundary near the Pittsburgh
-    # administrative border
-    res <- res %>% 
-      activate(nodes) %>% 
-      filter(name %in% in_pgh_nodes)
-  }
-  
-  if (!is.null(in_pgh_edges)) {
-    res <- res %>% 
+    # Only keep edges that contain at least one node within the defined boundary
+    node_indices <- node_number(res, in_pgh_nodes) %>% na.omit()
+    
+    sub_res <- res %>% 
       activate(edges) %>% 
-      filter(name %in% in_pgh_edges)
-  } 
+      filter(from %in% node_indices | to %in% node_indices) %>% 
+      remove_unreachable_nodes()
+  }
   
   if (!is.null(limits)) {
     res <- res %>%
