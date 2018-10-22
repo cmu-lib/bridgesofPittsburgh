@@ -151,6 +151,25 @@ only_roadways <- function(osmar_graph) {
     filter(highway != "footway")
 }
 
+# Only keep those nodes in the graph that are within a specified bounding box
+filter_to_limits <- function(graph, limits) {
+  res %>%
+    activate(nodes) %>% 
+    filter(
+      between(lon, left = limits$xlim[1], right = limits$xlim[2]),
+      between(lat, left = limits$ylim[1], right = limits$ylim[2]))
+}
+
+# Only keep edges that contain at least one node within the spedified set
+filter_to_nodes <- function(graph, node_ids) {
+  node_indices <- node_number(res, node_ids) %>% na.omit()
+  
+  graph %>% 
+    activate(edges) %>% 
+    filter(from %in% node_indices | to %in% node_indices) %>% 
+    remove_unreachable_nodes()
+}
+
 enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = NULL, limits = NULL) {
   osmar_nodes <- osm_node_attributes(raw_osmar)
   osmar_edges <- osm_edge_attributes(raw_osmar)
@@ -167,23 +186,9 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = N
       rewired = if_else(is_bridge, FALSE, NA),
       synthetic = NA)
   
-  if (!is.null(in_pgh_nodes)) {
-    # Only keep edges that contain at least one node within the defined boundary
-    node_indices <- node_number(res, in_pgh_nodes) %>% na.omit()
-    
-    res <- res %>% 
-      activate(edges) %>% 
-      filter(from %in% node_indices | to %in% node_indices) %>% 
-      remove_unreachable_nodes()
-  }
+  if (!is.null(in_pgh_nodes)) res <- filter_to_nodes(graph, in_pgh_nodes)
   
-  if (!is.null(limits)) {
-    res <- res %>%
-      activate(nodes) %>% 
-      filter(
-        between(lon, left = limits$xlim[1], right = limits$xlim[2]),
-        between(lat, left = limits$ylim[1], right = limits$ylim[2]))
-  }
+  if (!is.null(limits)) res <- filter_to_limits(graph, limits)
   
   # Finally, filter only down to the roadways
   only_roadways(res)
