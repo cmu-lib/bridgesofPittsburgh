@@ -3,6 +3,9 @@ make(pgh_plan, verbose = 4)
 loadd(lazy = TRUE)
 
 
+pgh_layout <- lat_lon_layout(final_pgh_graph)
+
+
 tiny_layout %>% 
   ggraph(layout = "manual") + 
   geom_edge_link(aes(color = bridge_id == "pgh-47")) +
@@ -12,8 +15,11 @@ tiny_layout %>%
 
 library(sigmajs)
 sigmajs(height = 900, width = 1600) %>% 
-  sg_from_igraph(tidy_pgh_graph, pgh_layout) %>% 
-  sg_settings(drawNodes = FALSE)
+  sg_from_igraph(final_pgh_graph, pgh_layout) %>% 
+  sg_settings(
+    drawNodes = FALSE, 
+    drawEdgeLabels = FALSE,
+    drawNodeLabels = FALSE)
 
 is_internal_bridge_node <- function(neighborhood, graph, node, ...) {
   as_tibble(neighborhood, active = "edges") %>% 
