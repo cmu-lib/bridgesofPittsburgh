@@ -207,6 +207,7 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = N
 }
 
 find_bridge_waysets <- function(raw_osm) {
+  # Pull ways that are classed as bridges
   bridge_ways <- raw_osm$ways$tags %>% 
     filter(k == "bridge", v == "yes")
   
