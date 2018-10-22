@@ -171,7 +171,7 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = N
     # Only keep edges that contain at least one node within the defined boundary
     node_indices <- node_number(res, in_pgh_nodes) %>% na.omit()
     
-    sub_res <- res %>% 
+    res <- res %>% 
       activate(edges) %>% 
       filter(from %in% node_indices | to %in% node_indices) %>% 
       remove_unreachable_nodes()
