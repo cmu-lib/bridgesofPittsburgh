@@ -107,7 +107,7 @@ osm_node_attributes <- function(src) {
 }
 
 osm_edge_attributes <- function(src) {
-  edge_keys <- c("name", "highway", "bridge", "bridge_name", "bridge:name", "wikipedia")
+  edge_keys <- c("name", "access", "highway", "bridge", "bridge_name", "bridge:name", "wikipedia")
   
   way_tags <- src$ways$tags %>% 
     filter(k %in% edge_keys) %>% 
@@ -143,14 +143,6 @@ way_termini <- function(src) {
     mutate_all(as.character)
 }
 
-only_roadways <- function(osmar_graph) {
-  osmar_graph %>% 
-    activate(edges) %>% 
-    # Either exclude non highway lines, or any highways marked as "footways" (OSM-speak for sidewalks)
-    filter(!is.na(highway)) %>% 
-    filter(highway != "footway")
-}
-
 # Only keep those nodes in the graph that are within a specified bounding box
 filter_to_limits <- function(graph, limits) {
   res %>%
@@ -162,12 +154,37 @@ filter_to_limits <- function(graph, limits) {
 
 # Only keep edges that contain at least one node within the spedified set
 filter_to_nodes <- function(graph, node_ids) {
-  node_indices <- node_number(res, node_ids) %>% na.omit()
+  node_indices <- node_number(graph, node_ids) %>% na.omit()
   
   graph %>% 
     activate(edges) %>% 
     filter(from %in% node_indices | to %in% node_indices) %>% 
     remove_unreachable_nodes()
+}
+
+# Filter edges down to the desired paths based on OSM tags (e.g. no sidewalks, no private roads, etc)
+filter_to_allowed_paths <- function(graph) {
+  excluded_highways <- c("pedestrian", "footway")
+  
+  graph %>% 
+    activate(edges) %>% 
+    filter(
+      is.na(access) | access != "no",
+      !is.na(highway) & !(highway %in% excluded_highways)
+    )
+}
+
+# For those edges that have earlier been marked as bridges, designate which are required
+mark_required_edges <- function(graph) {
+  allowed_bridge_attributes <- c("motorway", "primary", "secondary", "tertiary")
+  
+  graph %>% 
+    activate(edges) %>% 
+    mutate(
+      is_bridge = !is.na(bridge_id) & highway %in% allowed_bridge_attributes,
+      # Add some attributes that will be used later on but are mostly NA for now
+      rewired = if_else(is_bridge, FALSE, NA),
+      synthetic = NA)
 }
 
 enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = NULL, limits = NULL) {
@@ -181,17 +198,12 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = N
     mutate_at(vars(name), as.character) %>% 
     left_join(osmar_edges, by = c("name" = "id")) %>% 
     left_join(bridges, by = c("name" = "way_id")) %>% 
-    mutate(
-      is_bridge = !is.na(bridge_id),
-      rewired = if_else(is_bridge, FALSE, NA),
-      synthetic = NA)
+    filter_to_allowed_paths() %>% 
+    mark_required_edges()
   
-  if (!is.null(in_pgh_nodes)) res <- filter_to_nodes(graph, in_pgh_nodes)
+  if (!is.null(in_pgh_nodes)) res <- filter_to_nodes(res, in_pgh_nodes)
   
-  if (!is.null(limits)) res <- filter_to_limits(graph, limits)
-  
-  # Finally, filter only down to the roadways
-  only_roadways(res)
+  if (!is.null(limits)) res <- filter_to_limits(res, limits)
 }
 
 find_bridge_waysets <- function(raw_osm) {
