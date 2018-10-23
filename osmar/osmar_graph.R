@@ -169,8 +169,8 @@ filter_to_allowed_paths <- function(graph) {
   graph %>% 
     activate(edges) %>% 
     filter(
-      is.na(access) | access != "no",
-      !is.na(highway) & !(highway %in% excluded_highways)
+      (is.na(access) | access != "no") &
+      (!is.na(highway) & !(highway %in% excluded_highways))
     )
 }
 
@@ -204,6 +204,8 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = N
   if (!is.null(in_pgh_nodes)) res <- filter_to_nodes(res, in_pgh_nodes)
   
   if (!is.null(limits)) res <- filter_to_limits(res, limits)
+  
+  res
 }
 
 find_bridge_waysets <- function(raw_osm) {
