@@ -145,7 +145,7 @@ way_termini <- function(src) {
 
 # Only keep those nodes in the graph that are within a specified bounding box
 filter_to_limits <- function(graph, limits) {
-  res %>%
+  graph %>%
     activate(nodes) %>% 
     filter(
       between(lon, left = limits$xlim[1], right = limits$xlim[2]),
