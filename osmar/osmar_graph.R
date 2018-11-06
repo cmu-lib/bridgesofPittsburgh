@@ -25,8 +25,7 @@ pgh_plan <- drake_plan(
   # Sample Graph
   tiny_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/input_data/tiny.xml"))),
   tiny_graph = as_igraph(tiny_raw),
-  tiny_bridges = find_bridge_waysets(tiny_raw),
-  tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, tiny_bridges, limits = tiny_limits),
+  tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, limits = tiny_limits),
   tiny_plot = bridge_plot(tiny_tidy_graph),
   tiny_termini = way_termini(tiny_raw),
   tiny_plot_image = ggsave(tiny_plot, filename = file_out("osmar/output_data/tiny_image.png"), width = 20, height = 20),
@@ -40,8 +39,7 @@ pgh_plan <- drake_plan(
   
   # Full Graph
   pgh_graph = as_igraph(pgh_raw),
-  pgh_bridges = find_bridge_waysets(pgh_raw),
-  pgh_tidy_graph = enrich_osmar_graph(pgh_raw, pgh_graph, pgh_bridges, in_pgh_nodes = in_bound_points),
+  pgh_tidy_graph = enrich_osmar_graph(pgh_raw, pgh_graph, in_pgh_nodes = in_bound_points),
   pgh_termini = way_termini(pgh_raw),
   pgh_plot = bridge_plot(pgh_tidy_graph),
   # pgh_plot_image = target(
@@ -107,7 +105,9 @@ osm_node_attributes <- function(src) {
 }
 
 osm_edge_attributes <- function(src) {
-  edge_keys <- c("name", "access", "highway", "bridge", "bridge_name", "bridge:name", "wikipedia")
+  # Pull basic way tags
+  
+  edge_keys <- c("name", "access", "highway", "bridge", "bridge_name")
   
   way_tags <- src$ways$tags %>% 
     filter(k %in% edge_keys) %>% 
@@ -182,33 +182,13 @@ mark_required_edges <- function(graph) {
     activate(edges) %>% 
     mutate(
       is_bridge = !is.na(bridge_id) & highway %in% allowed_bridge_attributes,
+      bridge_id = if_else(is_bridge, bridge_id, NA_character_),
       # Add some attributes that will be used later on but are mostly NA for now
       rewired = if_else(is_bridge, FALSE, NA),
       synthetic = NA)
 }
 
-enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = NULL, limits = NULL) {
-  osmar_nodes <- osm_node_attributes(raw_osmar)
-  osmar_edges <- osm_edge_attributes(raw_osmar)
-  
-  res <- as_tbl_graph(graph_osmar, directed = FALSE) %>% 
-    activate(nodes) %>% 
-    left_join(osmar_nodes, by = c("name" = "id")) %>% 
-    activate(edges) %>% 
-    mutate_at(vars(name), as.character) %>% 
-    left_join(osmar_edges, by = c("name" = "id")) %>% 
-    left_join(bridges, by = c("name" = "way_id")) %>% 
-    filter_to_allowed_paths() %>% 
-    mark_required_edges()
-  
-  if (!is.null(in_pgh_nodes)) res <- filter_to_nodes(res, in_pgh_nodes)
-  
-  if (!is.null(limits)) res <- filter_to_limits(res, limits)
-  
-  res
-}
-
-find_bridge_waysets <- function(raw_osm) {
+bind_bridge_ids <- function(graph, raw_osm) {
   # Pull ways that are classed as bridges
   bridge_ways <- raw_osm$ways$tags %>% 
     filter(k == "bridge", v == "yes")
@@ -236,6 +216,31 @@ find_bridge_waysets <- function(raw_osm) {
   
   union_bridge_ways <- bind_rows(bridge_singleton_ways, bridge_relations) %>% 
     mutate_at(vars(way_id), as.character)
+  
+  graph %>% 
+    activate(edges) %>% 
+    left_join(union_bridge_ways, by = c("name" = "way_id"))
+}
+
+enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limits = NULL) {
+  osmar_nodes <- osm_node_attributes(raw_osmar)
+  osmar_edges <- osm_edge_attributes(raw_osmar)
+  
+  res <- as_tbl_graph(graph_osmar, directed = FALSE) %>% 
+    activate(nodes) %>% 
+    left_join(osmar_nodes, by = c("name" = "id")) %>% 
+    activate(edges) %>% 
+    mutate_at(vars(name), as.character) %>% 
+    left_join(osmar_edges, by = c("name" = "id")) %>% 
+    bind_bridge_ids(raw_osmar) %>% 
+    filter_to_allowed_paths() %>% 
+    mark_required_edges()
+  
+  if (!is.null(in_pgh_nodes)) res <- filter_to_nodes(res, in_pgh_nodes)
+  
+  if (!is.null(limits)) res <- filter_to_limits(res, limits)
+  
+  res
 }
 
 # Plotting ----
