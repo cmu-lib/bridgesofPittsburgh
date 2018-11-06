@@ -78,6 +78,20 @@ weight_by_distance <- function(graph, conversion = 91805.38) {
                            (.N()$lon[from] - .N()$lon[to])^2) * conversion)
 }
 
+# Match UIDs for nodes even after a graph has been modified and the node index
+# in a given graph has changed.
+node_number <- function(graph, name) {
+  match(name, as_tibble(graph, active = "nodes")[["name"]])
+}
+
+# Keep only the biggest connected component of a graph
+select_main_component <- function(graph) {
+  graph %>% 
+    activate(nodes) %>% 
+    mutate(component = group_components()) %>% 
+    filter(component == 1)
+}
+
 # Identifying bridges ----
 
 osm_node_attributes <- function(src) {
@@ -390,10 +404,6 @@ rewire_bridge <- function(osm_graph, b, termini) {
     bind_edges(indexed_edges)
 }
 
-node_number <- function(graph, name) {
-  match(name, as_tibble(graph, active = "nodes")[["name"]])
-}
-
 # Rewire a simple multi-Node Way with an explicit start and end node
 singleton_rewire_handler <- function(graph, way_id, start_node, end_node) {
   # Collect metadata from the original way, then create a new edge connecting
@@ -415,12 +425,4 @@ singleton_rewire_handler <- function(graph, way_id, start_node, end_node) {
     filter(is.na(name) | name != way_id) %>% 
     # Add the new edge and return the graph
     bind_edges(new_edge)
-}
-
-
-select_main_component <- function(graph) {
-  graph %>% 
-    activate(nodes) %>% 
-    mutate(component = group_components()) %>% 
-    filter(component == 1)
 }
