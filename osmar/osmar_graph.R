@@ -233,7 +233,8 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limi
     left_join(osmar_edges, by = c("name" = "id")) %>% 
     filter_to_allowed_paths() %>% 
     add_parent_bridge_relations(raw_osmar) %>% 
-    mark_bridges()
+    mark_bridges() %>% 
+    remove_unreachable_nodes()
   
   # Finally, trim graph down to specified nodes or specified geographic limits
   if (!is.null(in_pgh_nodes)) graph <- filter_to_nodes(graph, in_pgh_nodes)
