@@ -33,7 +33,7 @@ pgh_plan <- drake_plan(
   tiny_rewired_graph = rewire_bridges(tiny_tidy_graph, 
                                       bridges = tiny_needs_rewiring,
                                       termini = tiny_termini),
-  final_tiny_graph = tiny_rewired_graph %>% weight_by_distance(),
+  final_tiny_graph = tiny_rewired_graph %>% weight_by_distance() %>% mark_required_edges(),
   final_tiny_plot = bridge_plot(final_tiny_graph),
   final_tiny_plot_image = ggsave(final_tiny_plot, filename = file_out("osmar/output_data/final_tiny_plot_image.png"), width = 10, height = 10),
   
@@ -54,11 +54,11 @@ pgh_plan <- drake_plan(
   #   trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)),
   
   # Finalize output plot
-  final_pgh_graph = rewired_pgh_graph %>% weight_by_distance() %>% select_main_component(),
+  final_pgh_graph = rewired_pgh_graph %>% weight_by_distance() %>% select_main_component() %>% mark_required_edges(),
   final_pgh_nodes = write_csv(as_tibble(final_pgh_graph, "nodes"), path = file_out("osmar/output_data/rewired_pgh_nodes.csv"), na = ""),
   final_pgh_edges = write_csv(as_tibble(final_pgh_graph, "edges") %>% select(-weight), path = file_out("osmar/output_data/rewired_pgh_edges.csv"), na = ""),
   final_pgh_plot = bridge_plot(final_pgh_graph),
-  final_pgh_plot_image = ggsave(final_pgh_plot, filename = file_out("osmar/output_data/final_pgh_image.png"), width = 40, height = 30)
+  final_pgh_plot_image = ggsave(final_pgh_plot, filename = file_out("osmar/output_data/final_pgh_image.png"), width = 50, height = 40)
 )
 
 # Graph utilities ----
@@ -255,6 +255,7 @@ bridge_plot <- function(graph) {
     activate(edges) %>% 
     mutate(
       edge_flag = case_when(
+        required == TRUE ~ "purple",
         synthetic == TRUE ~ "green",
         straightened == TRUE ~ "red",
         is_bridge == TRUE ~ "blue",
@@ -321,7 +322,8 @@ cluster_points <- function(g, bridge_identifier) {
     as_tibble() %>% 
     mutate(
       name = paste(1:2, bridge_identifier, sep = "-"),
-      label = NA_character_)
+      label = NA_character_,
+      synthetic = TRUE)
   
   new_edges <- kmnodes$cluster %>% 
     # Use the cluster memberships to synthesize new from-to edge list
@@ -363,21 +365,13 @@ rewire_bridge <- function(osm_graph, b, termini) {
     pull(name) %>%
     unique()
   
-  presimplified_graph <- reduce(waylist, function(x, y) {
-    terminals <- termini %>% filter(way_id == y)
-    
-    singleton_rewire_handler(x, way_id = y, 
-                             start_node = terminals[["start_node"]], 
-                             end_node = terminals[["end_node"]])
-  }, .init = osm_graph)
-  
-  cluster_results <- cluster_points(presimplified_graph, b)
+  cluster_results <- cluster_points(osm_graph, b)
   
   # If cluster_results returned null, then exit early
-  if (is.null(cluster_results)) return(presimplified_graph)
+  if (is.null(cluster_results)) return(osm_graph)
   
   # Remove unwanted edges
-  new_graph <- presimplified_graph %>% 
+  new_graph <- osm_graph %>% 
     activate(edges) %>% 
     filter(is.na(bridge_id) | bridge_id != b) %>% 
     # Bind the newly-created nodes
@@ -392,7 +386,11 @@ rewire_bridge <- function(osm_graph, b, termini) {
   
   new_graph %>% 
     # And wire them up to the old nodes
-    bind_edges(indexed_edges)
+    bind_edges(indexed_edges) %>% 
+    activate(nodes) %>% 
+    # Remove nodes of degree 1 to get rid of extra edges that go nowhere
+    mutate(degree = centrality_degree(mode = "all")) %>% 
+    filter(degree > 1)
 }
 
 # Rewire a simple multi-Node Way with an explicit start and end node
@@ -416,4 +414,16 @@ singleton_rewire_handler <- function(graph, way_id, start_node, end_node) {
     filter(is.na(name) | name != way_id) %>% 
     # Add the new edge and return the graph
     bind_edges(new_edge)
+}
+
+mark_required_edges <- function(graph) {
+  graph %>%
+    activate(edges) %>% 
+    mutate(
+      required = case_when(
+        !is.na(bridge_id) & is_bridge ~ TRUE,
+        !is.na(bridge_id) & synthetic ~ TRUE,
+        TRUE ~ FALSE
+      )
+    )
 }
