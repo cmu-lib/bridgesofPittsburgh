@@ -55,6 +55,10 @@ pgh_plan <- drake_plan(
   #   ggsave(rewired_pgh_plot, filename = file_out("osmar/output_data/rewired_pgh_image.png"), width = 40, height = 30),
   #   trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)),
   
+  straightened_pgh = straighten_graph(pgh_tidy_graph),
+  straightened_plot = bridge_plot(straightened_pgh),
+  straightened_plot_image = ggsave(straightened_plot, filename = file_out("osmar/output_data/straightened_pgh_image.png"), width = 40, height = 30),
+  
   # Finalize output plot
   final_pgh_graph = rewired_pgh_graph %>% weight_by_distance() %>% select_main_component(),
   final_pgh_nodes = write_csv(as_tibble(final_pgh_graph, "nodes"), path = file_out("osmar/output_data/rewired_pgh_nodes.csv"), na = ""),
@@ -417,6 +421,36 @@ singleton_rewire_handler <- function(graph, way_id, start_node, end_node) {
     bind_edges(new_edge)
 }
 
+straighten_graph <- function(graph) {
+  node_sequence <- seq_len(igraph::vcount(graph))
+  reduce(node_sequence, straighten_neighborhood, .init = graph)
+}
+
+straighten_neighborhood <- function(graph, node_id) {
+  sel_degree <- igraph::degree(graph, node_id)
+  if (sel_degree != 2) return(graph)
+  
+  res <- graph %>%
+    morph(to_local_neighborhood, node = node_id)
+  
+  old_edges <- res$neighborhood %>% 
+    as_tibble("edges")
+  
+  new_neighbors <- res$neighborhood %>% 
+    as_tibble("nodes") %>% 
+    filter(.tidygraph_node_index != node_id)
+  
+  new_links <- data_frame(from = new_neighbors$.tidygraph_node_index[1], to = new_neighbors$.tidygraph_node_index[2]) %>% 
+    bind_cols(select(old_edges, -from, -to, -weight, -.tidygraph_edge_index)[1,]) %>% 
+    mutate(rewired = TRUE)
+  
+  graph %>% 
+    # Remove old edges
+    activate(edges) %>% 
+    filter(!(row_number() %in% old_edges$.tidygraph_edge_index)) %>% 
+    # Add new synthetic edge
+    bind_edges(new_links)
+}
 
 select_main_component <- function(graph) {
   graph %>% 
