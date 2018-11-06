@@ -78,11 +78,6 @@ weight_by_distance <- function(graph, conversion = 91805.38) {
                            (.N()$lon[from] - .N()$lon[to])^2) * conversion)
 }
 
-tangent_ways <- function(src, osm_nodes) {
-  upsearch <- find_up(src, node(osm_nodes))
-  upsearch[["way_ids"]]
-}
-
 # Identifying bridges ----
 
 osm_node_attributes <- function(src) {
