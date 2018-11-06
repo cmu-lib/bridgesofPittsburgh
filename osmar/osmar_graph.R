@@ -16,7 +16,7 @@ tiny_limits <- list(xlim = c(-80.0106, -79.9872), ylim = c(40.4429, 40.4551))
 pgh_plan <- drake_plan(
   
   # Shapefile for PGH boundaries
-  pgh_boundary_shp = as(readOGR("osmar/input_data/Pittsburgh_Buffered_Boundary/"), "SpatialPolygons"),
+  pgh_boundary_shp = as(readOGR(file_in("osmar/input_data/Pittsburgh_Buffered_Boundary/")), "SpatialPolygons"),
   pgh_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/input_data/pgh_osm.xml"))),
   pgh_points_sp = as_sp(pgh_raw, "points"),
   point_overlap = over(pgh_points_sp, pgh_boundary_shp),
