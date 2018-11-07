@@ -29,16 +29,18 @@ tiny_plan <- drake_plan(
 
 plot_plan <- drake_plan(
   tiny_plot = bridge_plot(tiny_tidy_graph),
-  tiny_plot_image = ggsave(tiny_plot, filename = file_out("osmar/output_data/tiny_image.png"), width = 20, height = 20),
+  tiny_plot_image = ggsave(tiny_plot, filename = file_out("osmar/output_data/tiny_image.svg"), width = 10, height = 10),
   final_tiny_plot = bridge_plot(final_tiny_graph),
   final_tiny_plot_image = ggsave(final_tiny_plot, filename = file_out("osmar/output_data/final_tiny_plot_image.png"), width = 10, height = 10),
   pgh_plot = bridge_plot(pgh_tidy_graph),
-  pgh_plot_image = ggsave(pgh_plot, filename = file_out("osmar/output_data/pgh_image.png"), width = 50, height = 40),
+  pgh_plot_image = ggsave(pgh_plot, filename = file_out("osmar/output_data/pgh_image.svg"), width = 50, height = 40, limitsize = FALSE),
   rewired_pgh_plot = bridge_plot(rewired_pgh_graph),
-  rewired_pgh_plot_image = ggsave(rewired_pgh_plot, filename = file_out("osmar/output_data/rewired_pgh_image.png"), width = 50, height = 40),
+  rewired_pgh_plot_image = ggsave(rewired_pgh_plot, filename = file_out("osmar/output_data/rewired_pgh_image.png"), width = 50, height = 40, limitsize = FALSE),
   final_pgh_plot = bridge_plot(final_pgh_graph),
-  final_pgh_plot_image = ggsave(final_pgh_plot, filename = file_out("osmar/output_data/final_pgh_image.png"), width = 50, height = 40)
+  final_pgh_plot_image = ggsave(final_pgh_plot, filename = file_out("osmar/output_data/final_pgh_image.png"), width = 50, height = 40, limitsize = FALSE)
 )
+
+merged_plot_plan <- gather_plan(plot_plan, target = "plots")
 
 large_plan <- drake_plan(
   download_osm = target(
@@ -68,7 +70,8 @@ large_plan <- drake_plan(
 pgh_plan <- bind_plans(
   tiny_plan,
   plot_plan,
-  large_plan
+  large_plan,
+  merged_plot_plan
 )
 
 # Data utilities ----
