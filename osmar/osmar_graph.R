@@ -13,56 +13,57 @@ library(assertr)
 
 tiny_limits <- list(xlim = c(-80.0106, -79.9872), ylim = c(40.4429, 40.4551))
 
-pgh_plan <- drake_plan(
-  
-  # Shapefile for PGH boundaries
-  pgh_boundary_shp = as(readOGR(file_in("osmar/input_data/Pittsburgh_Buffered_Boundary/")), "SpatialPolygons"),
-  pgh_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/input_data/pgh_osm.xml"))),
-  pgh_points_sp = as_sp(pgh_raw, "points"),
-  point_overlap = over(pgh_points_sp, pgh_boundary_shp),
-  in_bound_points = names(na.omit(point_overlap)),
-  
-  # Sample Graph
+o# Sample Graph
+tiny_plan <- drake_plan(
   tiny_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/input_data/tiny.xml"))),
   tiny_graph = as_igraph(tiny_raw),
   tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, limits = tiny_limits),
-  tiny_plot = bridge_plot(tiny_tidy_graph),
   tiny_termini = way_termini(tiny_raw),
-  tiny_plot_image = ggsave(tiny_plot, filename = file_out("osmar/output_data/tiny_image.png"), width = 20, height = 20),
   tiny_needs_rewiring = bridges_to_rewire(tiny_tidy_graph),
   tiny_rewired_graph = rewire_bridges(tiny_tidy_graph, 
                                       bridges = tiny_needs_rewiring,
                                       termini = tiny_termini),
-  final_tiny_graph = tiny_rewired_graph %>% weight_by_distance() %>% mark_required_edges(),
+  final_tiny_graph = tiny_rewired_graph %>% weight_by_distance() %>% mark_required_edges()
+)
+
+plot_plan <- drake_plan(
+  tiny_plot = bridge_plot(tiny_tidy_graph),
+  tiny_plot_image = ggsave(tiny_plot, filename = file_out("osmar/output_data/tiny_image.png"), width = 20, height = 20),
   final_tiny_plot = bridge_plot(final_tiny_graph),
   final_tiny_plot_image = ggsave(final_tiny_plot, filename = file_out("osmar/output_data/final_tiny_plot_image.png"), width = 10, height = 10),
+  pgh_plot = bridge_plot(pgh_tidy_graph),
+  pgh_plot_image = ggsave(pgh_plot, filename = file_out("osmar/output_data/pgh_image.png"), width = 50, height = 40),
+  rewired_pgh_plot = bridge_plot(rewired_pgh_graph),
+  rewired_pgh_plot_image = ggsave(rewired_pgh_plot, filename = file_out("osmar/output_data/rewired_pgh_image.png"), width = 50, height = 40),
+  final_pgh_plot = bridge_plot(final_pgh_graph),
+  final_pgh_plot_image = ggsave(final_pgh_plot, filename = file_out("osmar/output_data/final_pgh_image.png"), width = 50, height = 40)
+)
+
+large_plan <- drake_plan(
+  # Shapefile for PGH boundaries
+  pgh_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/input_data/pgh_osm.xml"))),
+  pgh_boundary_shp = as(readOGR(file_in("osmar/input_data/Pittsburgh_Buffered_Boundary/")), "SpatialPolygons"),
+  pgh_points_sp = as_sp(pgh_raw, "points"),
+  point_overlap = over(pgh_points_sp, pgh_boundary_shp),
+  in_bound_points = names(na.omit(point_overlap)),
   
   # Full Graph
   pgh_graph = as_igraph(pgh_raw),
   pgh_tidy_graph = enrich_osmar_graph(pgh_raw, pgh_graph, in_pgh_nodes = in_bound_points),
   pgh_termini = way_termini(pgh_raw),
-  pgh_plot = bridge_plot(pgh_tidy_graph),
-  # pgh_plot_image = target(
-  #   ggsave(pgh_plot, filename = file_out("osmar/output_data/pgh_image.png"), width = 40, height = 30),
-  #   trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)),
-  
   pgh_needs_rewiring = bridges_to_rewire(pgh_tidy_graph),
   rewired_pgh_graph = rewire_bridges(pgh_tidy_graph, bridges = pgh_needs_rewiring, termini = pgh_termini),
-  rewired_pgh_plot = bridge_plot(rewired_pgh_graph),
-  # rewired_pgh_plot_image = target(
-  #   ggsave(rewired_pgh_plot, filename = file_out("osmar/output_data/rewired_pgh_image.png"), width = 40, height = 30),
-  #   trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)),
-  
-  straightened_pgh = straighten_graph(pgh_tidy_graph),
-  straightened_plot = bridge_plot(straightened_pgh),
-  straightened_plot_image = ggsave(straightened_plot, filename = file_out("osmar/output_data/straightened_pgh_image.png"), width = 40, height = 30),
   
   # Finalize output plot
   final_pgh_graph = rewired_pgh_graph %>% weight_by_distance() %>% select_main_component() %>% mark_required_edges(),
   final_pgh_nodes = write_csv(as_tibble(final_pgh_graph, "nodes"), path = file_out("osmar/output_data/rewired_pgh_nodes.csv"), na = ""),
-  final_pgh_edges = write_csv(as_tibble(final_pgh_graph, "edges") %>% select(-weight), path = file_out("osmar/output_data/rewired_pgh_edges.csv"), na = ""),
-  final_pgh_plot = bridge_plot(final_pgh_graph),
-  final_pgh_plot_image = ggsave(final_pgh_plot, filename = file_out("osmar/output_data/final_pgh_image.png"), width = 50, height = 40)
+  final_pgh_edges = write_csv(as_tibble(final_pgh_graph, "edges") %>% select(-weight), path = file_out("osmar/output_data/rewired_pgh_edges.csv"), na = "")
+)
+
+pgh_plan <- bind_plans(
+  tiny_plan,
+  plot_plan,
+  large_plan
 )
 
 # Graph utilities ----
