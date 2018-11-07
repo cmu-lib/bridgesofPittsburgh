@@ -10,10 +10,11 @@ library(tidygraph)
 library(ggraph)
 library(rgdal)
 library(assertr)
+library(httr)
 
 tiny_limits <- list(xlim = c(-80.0106, -79.9872), ylim = c(40.4429, 40.4551))
 
-o# Sample Graph
+# Sample Graph
 tiny_plan <- drake_plan(
   tiny_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/input_data/tiny.xml"))),
   tiny_graph = as_igraph(tiny_raw),
@@ -40,8 +41,12 @@ plot_plan <- drake_plan(
 )
 
 large_plan <- drake_plan(
+  download_osm = target(
+    command = get_osm_bbox("-80.1257,40.3405,-79.7978,40.5407"),
+    # Must manually trigger a new data download
+    trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)),
+  pgh_raw = read_osm_response(download_osm),
   # Shapefile for PGH boundaries
-  pgh_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/input_data/pgh_osm.xml"))),
   pgh_boundary_shp = as(readOGR(file_in("osmar/input_data/Pittsburgh_Buffered_Boundary/")), "SpatialPolygons"),
   pgh_points_sp = as_sp(pgh_raw, "points"),
   point_overlap = over(pgh_points_sp, pgh_boundary_shp),
@@ -65,6 +70,18 @@ pgh_plan <- bind_plans(
   plot_plan,
   large_plan
 )
+
+# Data utilities ----
+
+get_osm_bbox <- function(bbox_string) {
+  content(GET(paste0("https://overpass-api.de/api/map?bbox=", bbox_string)), as = "text")
+}
+
+read_osm_response <- function(raw_response) {
+  tfile <- tempfile()
+  write_lines(raw_response, path = tfile)
+  get_osm(complete_file(), source = osmsource_file(tfile))
+}
 
 # Graph utilities ----
 
