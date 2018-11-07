@@ -225,7 +225,8 @@ mark_bridges <- function(graph) {
         TRUE ~ NA_character_
       ),
       straightened = FALSE,
-      synthetic = FALSE
+      synthetic = FALSE,
+      required = FALSE
     )
 }
 
