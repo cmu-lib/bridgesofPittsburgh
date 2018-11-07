@@ -25,8 +25,7 @@ pgh_plan <- drake_plan(
   # Sample Graph
   tiny_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/input_data/tiny.xml"))),
   tiny_graph = as_igraph(tiny_raw),
-  tiny_bridges = find_bridge_waysets(tiny_raw),
-  tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, tiny_bridges, limits = tiny_limits),
+  tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, limits = tiny_limits),
   tiny_plot = bridge_plot(tiny_tidy_graph),
   tiny_termini = way_termini(tiny_raw),
   tiny_plot_image = ggsave(tiny_plot, filename = file_out("osmar/output_data/tiny_image.png"), width = 20, height = 20),
@@ -34,14 +33,13 @@ pgh_plan <- drake_plan(
   tiny_rewired_graph = rewire_bridges(tiny_tidy_graph, 
                                       bridges = tiny_needs_rewiring,
                                       termini = tiny_termini),
-  final_tiny_graph = tiny_rewired_graph %>% weight_by_distance(),
+  final_tiny_graph = tiny_rewired_graph %>% weight_by_distance() %>% mark_required_edges(),
   final_tiny_plot = bridge_plot(final_tiny_graph),
-  final_tiny_plot_image = ggsave(final_tiny_plot, filename = file_out("osmar/output_data/final_tiny_plot_image.png"), width = 40, height = 30),
+  final_tiny_plot_image = ggsave(final_tiny_plot, filename = file_out("osmar/output_data/final_tiny_plot_image.png"), width = 10, height = 10),
   
   # Full Graph
   pgh_graph = as_igraph(pgh_raw),
-  pgh_bridges = find_bridge_waysets(pgh_raw),
-  pgh_tidy_graph = enrich_osmar_graph(pgh_raw, pgh_graph, pgh_bridges, in_pgh_nodes = in_bound_points),
+  pgh_tidy_graph = enrich_osmar_graph(pgh_raw, pgh_graph, in_pgh_nodes = in_bound_points),
   pgh_termini = way_termini(pgh_raw),
   pgh_plot = bridge_plot(pgh_tidy_graph),
   # pgh_plot_image = target(
@@ -60,11 +58,11 @@ pgh_plan <- drake_plan(
   straightened_plot_image = ggsave(straightened_plot, filename = file_out("osmar/output_data/straightened_pgh_image.png"), width = 40, height = 30),
   
   # Finalize output plot
-  final_pgh_graph = rewired_pgh_graph %>% weight_by_distance() %>% select_main_component(),
+  final_pgh_graph = rewired_pgh_graph %>% weight_by_distance() %>% select_main_component() %>% mark_required_edges(),
   final_pgh_nodes = write_csv(as_tibble(final_pgh_graph, "nodes"), path = file_out("osmar/output_data/rewired_pgh_nodes.csv"), na = ""),
   final_pgh_edges = write_csv(as_tibble(final_pgh_graph, "edges") %>% select(-weight), path = file_out("osmar/output_data/rewired_pgh_edges.csv"), na = ""),
   final_pgh_plot = bridge_plot(final_pgh_graph),
-  final_pgh_plot_image = ggsave(final_pgh_plot, filename = file_out("osmar/output_data/final_pgh_image.png"), width = 40, height = 30)
+  final_pgh_plot_image = ggsave(final_pgh_plot, filename = file_out("osmar/output_data/final_pgh_image.png"), width = 50, height = 40)
 )
 
 # Graph utilities ----
@@ -84,9 +82,18 @@ weight_by_distance <- function(graph, conversion = 91805.38) {
                            (.N()$lon[from] - .N()$lon[to])^2) * conversion)
 }
 
-tangent_ways <- function(src, osm_nodes) {
-  upsearch <- find_up(src, node(osm_nodes))
-  upsearch[["way_ids"]]
+# Match UIDs for nodes even after a graph has been modified and the node index
+# in a given graph has changed.
+node_number <- function(graph, name) {
+  match(name, as_tibble(graph, active = "nodes")[["name"]])
+}
+
+# Keep only the biggest connected component of a graph
+select_main_component <- function(graph) {
+  graph %>% 
+    activate(nodes) %>% 
+    mutate(component = group_components()) %>% 
+    filter(component == 1)
 }
 
 # Identifying bridges ----
@@ -111,7 +118,9 @@ osm_node_attributes <- function(src) {
 }
 
 osm_edge_attributes <- function(src) {
-  edge_keys <- c("name", "access", "highway", "bridge", "bridge_name", "bridge:name", "wikipedia")
+  # Pull basic way tags
+  
+  edge_keys <- c("name", "access", "highway", "bridge", "bridge_name")
   
   way_tags <- src$ways$tags %>% 
     filter(k %in% edge_keys) %>% 
@@ -166,7 +175,10 @@ filter_to_nodes <- function(graph, node_ids) {
     remove_unreachable_nodes()
 }
 
-# Filter edges down to the desired paths based on OSM tags (e.g. no sidewalks, no private roads, etc)
+# Filter edges down to the desired paths based on OSM tags (e.g. no sidewalks,
+# no private roads, etc). This is for removing edges entirely from the network,
+# not to be confused with mark_required_edges() which only makrs those that will
+# eventually be required for RPP
 filter_to_allowed_paths <- function(graph) {
   excluded_highways <- c("pedestrian", "footway")
   
@@ -179,67 +191,60 @@ filter_to_allowed_paths <- function(graph) {
 }
 
 # For those edges that have earlier been marked as bridges, designate which are required
-mark_required_edges <- function(graph) {
-  allowed_bridge_attributes <- c("motorway", "primary", "secondary", "tertiary")
+mark_bridges <- function(graph) {
+  allowed_bridge_attributes <- c("motorway", "primary", "secondary", "tertiary", "trunk")
   
   graph %>% 
     activate(edges) %>% 
     mutate(
-      is_bridge = !is.na(bridge_id) & highway %in% allowed_bridge_attributes,
-      # Add some attributes that will be used later on but are mostly NA for now
-      rewired = if_else(is_bridge, FALSE, NA),
-      synthetic = NA)
+      is_bridge = case_when(
+        bridge == "yes" & highway %in% allowed_bridge_attributes ~ TRUE,
+        # When in doubt, it's not a bridge
+        TRUE ~ FALSE),
+      bridge_id = case_when(
+        is_bridge & !is.na(bridge_relation) ~ bridge_relation,
+        is_bridge ~ name,
+        TRUE ~ NA_character_
+      ),
+      straightened = FALSE,
+      synthetic = FALSE
+    )
 }
 
-enrich_osmar_graph <- function(raw_osmar, graph_osmar, bridges, in_pgh_nodes = NULL, limits = NULL) {
+# Find relations that are bridges, and join their IDs to the edges
+add_parent_bridge_relations <- function(graph, raw_osm) {
+  bridge_relations <- raw_osm$relations$tags %>% 
+    filter(k == "type", v == "bridge") %>% 
+    left_join(raw_osm$relations$refs, by = "id") %>% 
+    filter(type == "way") %>% 
+    mutate_at(vars(id, ref), as.character) %>% 
+    select(name = ref, bridge_relation = id)
+  
+  graph %>% 
+    activate(edges) %>% 
+    left_join(bridge_relations, by = "name")
+}
+
+enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limits = NULL) {
   osmar_nodes <- osm_node_attributes(raw_osmar)
   osmar_edges <- osm_edge_attributes(raw_osmar)
   
-  res <- as_tbl_graph(graph_osmar, directed = FALSE) %>% 
+  graph <- as_tbl_graph(graph_osmar, directed = FALSE) %>% 
     activate(nodes) %>% 
     left_join(osmar_nodes, by = c("name" = "id")) %>% 
     activate(edges) %>% 
     mutate_at(vars(name), as.character) %>% 
     left_join(osmar_edges, by = c("name" = "id")) %>% 
-    left_join(bridges, by = c("name" = "way_id")) %>% 
     filter_to_allowed_paths() %>% 
-    mark_required_edges()
+    add_parent_bridge_relations(raw_osmar) %>% 
+    mark_bridges() %>% 
+    remove_unreachable_nodes()
   
-  if (!is.null(in_pgh_nodes)) res <- filter_to_nodes(res, in_pgh_nodes)
+  # Finally, trim graph down to specified nodes or specified geographic limits
+  if (!is.null(in_pgh_nodes)) graph <- filter_to_nodes(graph, in_pgh_nodes)
+  if (!is.null(limits)) graph <- filter_to_limits(graph, limits)
   
-  if (!is.null(limits)) res <- filter_to_limits(res, limits)
-  
-  res
-}
-
-find_bridge_waysets <- function(raw_osm) {
-  # Pull ways that are classed as bridges
-  bridge_ways <- raw_osm$ways$tags %>% 
-    filter(k == "bridge", v == "yes")
-  
-  # Pull relations that are classed as bridges
-  bridge_relations <- raw_osm$relations$tags %>% 
-    filter(k == "type", v == "bridge") %>% 
-    left_join(raw_osm$relations$refs, by = "id") %>% 
-    filter(type == "way") %>% 
-    mutate(
-      id_type = "osm",
-      bridge_id = paste(id_type, id, sep = "-")) %>% 
-    select(bridge_id, way_id = ref, id_type) %>% 
-    # Only keep those ways that are ALSO classed as bridges (to avoid pulling in pylons etc)
-    semi_join(bridge_ways, by = c("way_id" = "id"))
-  
-  # Pull ways that are themselves bridges with no parent relation
-  bridge_singleton_ways <- bridge_ways %>% 
-    # If the way is in an identified relation, don't give it a new ID
-    anti_join(bridge_relations, by = c("id" = "way_id")) %>% 
-    mutate(
-      id_type = "pgh",
-      bridge_id = paste(id_type, row_number(), sep = "-")) %>% 
-    select(bridge_id, way_id = id, id_type)
-  
-  union_bridge_ways <- bind_rows(bridge_singleton_ways, bridge_relations) %>% 
-    mutate_at(vars(way_id), as.character)
+  graph
 }
 
 # Plotting ----
@@ -254,8 +259,9 @@ bridge_plot <- function(graph) {
     activate(edges) %>% 
     mutate(
       edge_flag = case_when(
+        required == TRUE ~ "purple",
         synthetic == TRUE ~ "green",
-        rewired == TRUE ~ "red",
+        straightened == TRUE ~ "red",
         is_bridge == TRUE ~ "blue",
         TRUE ~ "gray"
       )
@@ -273,8 +279,8 @@ bridge_plot <- function(graph) {
 bridges_to_rewire <- function(graph) {
   graph %>%
     as_tibble("edges") %>% 
-    filter(id_type == "osm") %>% 
-    pull(bridge_id) %>% 
+    filter(!is.na(bridge_relation)) %>% 
+    pull(bridge_relation) %>% 
     unique() %>% 
     na.omit()
 }
@@ -320,7 +326,8 @@ cluster_points <- function(g, bridge_identifier) {
     as_tibble() %>% 
     mutate(
       name = paste(1:2, bridge_identifier, sep = "-"),
-      label = NA_character_)
+      label = NA_character_,
+      synthetic = TRUE)
   
   new_edges <- kmnodes$cluster %>% 
     # Use the cluster memberships to synthesize new from-to edge list
@@ -362,21 +369,13 @@ rewire_bridge <- function(osm_graph, b, termini) {
     pull(name) %>%
     unique()
   
-  presimplified_graph <- reduce(waylist, function(x, y) {
-    terminals <- termini %>% filter(way_id == y)
-    
-    singleton_rewire_handler(x, way_id = y, 
-                             start_node = terminals[["start_node"]], 
-                             end_node = terminals[["end_node"]])
-  }, .init = osm_graph)
-  bridge_plot(presimplified_graph)
-  cluster_results <- cluster_points(presimplified_graph, b)
+  cluster_results <- cluster_points(osm_graph, b)
   
   # If cluster_results returned null, then exit early
-  if (is.null(cluster_results)) return(presimplified_graph)
+  if (is.null(cluster_results)) return(osm_graph)
   
   # Remove unwanted edges
-  new_graph <- presimplified_graph %>% 
+  new_graph <- osm_graph %>% 
     activate(edges) %>% 
     filter(is.na(bridge_id) | bridge_id != b) %>% 
     # Bind the newly-created nodes
@@ -391,11 +390,11 @@ rewire_bridge <- function(osm_graph, b, termini) {
   
   new_graph %>% 
     # And wire them up to the old nodes
-    bind_edges(indexed_edges)
-}
-
-node_number <- function(graph, name) {
-  match(name, as_tibble(graph, active = "nodes")[["name"]])
+    bind_edges(indexed_edges) %>% 
+    activate(nodes) %>% 
+    # Remove nodes of degree 1 to get rid of extra edges that go nowhere
+    mutate(degree = centrality_degree(mode = "all")) %>% 
+    filter(degree > 1)
 }
 
 # Rewire a simple multi-Node Way with an explicit start and end node
@@ -406,8 +405,8 @@ singleton_rewire_handler <- function(graph, way_id, start_node, end_node) {
     as_tibble(active = "edges") %>% 
     filter(name == way_id) %>% 
     slice(1) %>% 
-    select(name, bridge_id, label, wikipedia, bridge_id, id_type, is_bridge) %>% 
-    mutate(rewired = TRUE) %>% 
+    select(name, bridge_id, label, bridge_relation, is_bridge) %>% 
+    mutate(straightened = TRUE) %>% 
     mutate(
       from = node_number(graph, start_node),
       to = node_number(graph, end_node)) %>% 
@@ -457,4 +456,16 @@ select_main_component <- function(graph) {
     activate(nodes) %>% 
     mutate(component = group_components()) %>% 
     filter(component == 1)
+}
+
+mark_required_edges <- function(graph) {
+  graph %>%
+    activate(edges) %>% 
+    mutate(
+      required = case_when(
+        !is.na(bridge_id) & is_bridge ~ TRUE,
+        !is.na(bridge_id) & synthetic ~ TRUE,
+        TRUE ~ FALSE
+      )
+    )
 }
