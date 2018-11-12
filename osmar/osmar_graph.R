@@ -12,16 +12,24 @@ library(rgdal)
 library(assertr)
 library(httr)
 
-tiny_limits <- list(xlim = c(-80.0106, -79.9872), ylim = c(40.4429, 40.4551))
+tiny_limits <- list(xlim = c(-80.0072, -79.9868), ylim = c(40.4415, 40.4566))
+
+clean_osm <- function() {
+  clean("download_tiny", "download_osm")
+}
 
 # Sample Graph
 tiny_plan <- drake_plan(
-  tiny_raw = get_osm(complete_file(), source = osmsource_file(file_in("osmar/input_data/tiny.xml"))),
+  download_tiny = target(
+    command = get_osm_bbox("-80.0072,40.4415,-79.9868,40.4566"),
+    # Must manually trigger a new data download
+    trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)),
+  tiny_raw = read_osm_response(download_tiny),
   tiny_graph = as_igraph(tiny_raw),
   tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, limits = tiny_limits),
   tiny_termini = way_termini(tiny_raw),
   tiny_needs_rewiring = bridges_to_rewire(tiny_tidy_graph),
-  tiny_rewired_graph = rewire_bridges(tiny_tidy_graph, 
+  tiny_rewired_graph = rewire_bridges(tiny_tidy_graph,
                                       bridges = tiny_needs_rewiring,
                                       termini = tiny_termini),
   final_tiny_graph = tiny_rewired_graph %>% weight_by_distance() %>% mark_required_edges()
@@ -29,11 +37,11 @@ tiny_plan <- drake_plan(
 
 plot_plan <- drake_plan(
   tiny_plot = bridge_plot(tiny_tidy_graph),
-  tiny_plot_image = ggsave(tiny_plot, filename = file_out("osmar/output_data/tiny_image.svg"), width = 10, height = 10),
+  tiny_plot_image = ggsave(tiny_plot, filename = file_out("osmar/output_data/tiny_image.png"), width = 10, height = 10),
   final_tiny_plot = bridge_plot(final_tiny_graph),
   final_tiny_plot_image = ggsave(final_tiny_plot, filename = file_out("osmar/output_data/final_tiny_plot_image.png"), width = 10, height = 10),
   pgh_plot = bridge_plot(pgh_tidy_graph),
-  pgh_plot_image = ggsave(pgh_plot, filename = file_out("osmar/output_data/pgh_image.svg"), width = 50, height = 40, limitsize = FALSE),
+  pgh_plot_image = ggsave(pgh_plot, filename = file_out("osmar/output_data/pgh_image.png"), width = 50, height = 40, limitsize = FALSE),
   rewired_pgh_plot = bridge_plot(rewired_pgh_graph),
   rewired_pgh_plot_image = ggsave(rewired_pgh_plot, filename = file_out("osmar/output_data/rewired_pgh_image.png"), width = 50, height = 40, limitsize = FALSE),
   final_pgh_plot = bridge_plot(final_pgh_graph),
@@ -77,7 +85,7 @@ pgh_plan <- bind_plans(
 # Data utilities ----
 
 get_osm_bbox <- function(bbox_string) {
-  content(GET(paste0("https://overpass-api.de/api/map?bbox=", bbox_string)), as = "text")
+  content(GET(paste0("https://overpass-api.de/api/map?bbox=", bbox_string)), as = "text", encoding = "UTF-8")
 }
 
 read_osm_response <- function(raw_response) {
