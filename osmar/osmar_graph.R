@@ -7,6 +7,7 @@ library(drake)
 library(osmar)
 library(tidyverse)
 library(tidygraph)
+library(igraph)
 library(ggraph)
 library(rgdal)
 library(assertr)
@@ -64,11 +65,14 @@ large_plan <- drake_plan(
 
   # Full Graph
   pgh_graph = as_igraph(pgh_raw),
-  pgh_tidy_graph = enrich_osmar_graph(pgh_raw, pgh_graph, in_pgh_nodes = in_bound_points),
+  pgh_tidy_graph = enrich_osmar_graph(pgh_raw, pgh_graph, in_pgh_nodes = in_bound_points)
+)
+
+rewiring_plan <- drake_plan(
   pgh_termini = way_termini(pgh_raw),
   pgh_needs_rewiring = bridges_to_rewire(pgh_tidy_graph),
   rewired_pgh_graph = rewire_bridges(pgh_tidy_graph, bridges = pgh_needs_rewiring, termini = pgh_termini),
-
+  
   # Finalize output plot
   final_pgh_graph = rewired_pgh_graph %>% weight_by_distance() %>% select_main_component() %>% mark_required_edges(),
   final_pgh_nodes = write_csv(as_tibble(final_pgh_graph, "nodes"), path = file_out("osmar/output_data/rewired_pgh_nodes.csv"), na = ""),
@@ -79,6 +83,7 @@ pgh_plan <- bind_plans(
   tiny_plan,
   plot_plan,
   large_plan,
+  rewiring_plan,
   merged_plot_plan
 )
 
@@ -255,6 +260,27 @@ add_parent_bridge_relations <- function(graph, raw_osm) {
     left_join(bridge_relations, by = "name")
 }
 
+# After marking bridges, mark all nodes that are interface nodes for bridges, having at least one edge that is a bridge, and at least one edge that is NOT a bridge
+mark_interface_nodes <- function(graph) {
+  interface_results <- map(seq_len(vcount(graph)), is_node_interface, edges = as_tibble(graph, "edges"))
+  V(graph)$is_interface <- map_lgl(interface_results, "is_interface")
+  V(graph)$associated_bridge <- map_chr(interface_results, "associated_bridge")
+  
+  graph
+}
+
+is_node_interface <- function(i, edges) {
+  message(i)
+  tangent_edges <- which(edges[["from"]] == i | edges[["to"]] == i)
+  
+  has_bridge <- any(edges[["is_bridge"]][tangent_edges])
+  has_non_bridge <- any(!(edges[["is_bridge"]][tangent_edges]))
+  is_interface <- has_bridge && has_non_bridge
+  assoc_bridge <- first(na.omit(edges[["bridge_id"]][tangent_edges]))
+  
+  list(is_interface = is_interface, associated_bridge = assoc_bridge)
+}
+
 enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limits = NULL) {
   osmar_nodes <- osm_node_attributes(raw_osmar)
   osmar_edges <- osm_edge_attributes(raw_osmar)
@@ -268,6 +294,7 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limi
     filter_to_allowed_paths() %>%
     add_parent_bridge_relations(raw_osmar) %>%
     mark_bridges() %>%
+    mark_interface_nodes() %>% 
     remove_unreachable_nodes()
 
   # Finally, trim graph down to specified nodes or specified geographic limits
