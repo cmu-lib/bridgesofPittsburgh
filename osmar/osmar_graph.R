@@ -65,7 +65,8 @@ large_plan <- drake_plan(
 
   # Full Graph
   pgh_graph = as_igraph(pgh_raw),
-  pgh_tidy_graph = enrich_osmar_graph(pgh_raw, pgh_graph, in_pgh_nodes = in_bound_points)
+  pgh_tidy_graph = enrich_osmar_graph(pgh_raw, pgh_graph, in_pgh_nodes = in_bound_points) %>% 
+    select_main_component()
 )
 
 rewiring_plan <- drake_plan(
@@ -295,7 +296,8 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limi
     add_parent_bridge_relations(raw_osmar) %>%
     mark_bridges() %>%
     mark_interface_nodes() %>% 
-    remove_unreachable_nodes()
+    remove_unreachable_nodes() %>% 
+    weight_by_distance()
 
   # Finally, trim graph down to specified nodes or specified geographic limits
   if (!is.null(in_pgh_nodes)) graph <- filter_to_nodes(graph, in_pgh_nodes)
@@ -525,4 +527,113 @@ mark_required_edges <- function(graph) {
         TRUE ~ FALSE
       )
     )
+}
+
+# Greedy Search ----
+
+# This strategy doesn't rely on artificially rewiring bridges. Instead, it uses
+# a greedy search along the original graph, starting at a randomly-chosen
+# bridge, crossing it, then taking the shortest path to the next closest bridge.
+# Crossing that 2nd bridge, it then searches for the 3rd, disregarding the nodes
+# already visited. If all points are Inf distances (i.e. unreachable) the
+# function stops and returns the path as edge indices.
+
+# starting_point = 577
+
+library(dequer)
+
+greedy_search <- function(graph, starting_point) {
+  stopifnot(is.integer(starting_point))
+  stopifnot(vertex_attr(graph, "is_interface", index = starting_point))
+  
+  # Create queue to hold edgelist, since we don't know how long it will expand to
+  qe <- queue()
+  qv <- queue()
+  
+  # rev() the q so that R's gc can efficiently dispose of it now that we're done
+  rev(qe)
+  rev(qv)
+}
+
+search_step <- function(graph, starting_point, search_set, qe, qv) {
+  
+}
+
+cross_bridge <- function(graph, starting_point, search_set = NULL, bridge_id, qe, qv) {
+  
+  # If no search set is provided, assume that this is the start of the walk and
+  # find all possible interface points
+  if (is.null(search_set))
+    search_set <- get_interface_points(graph)
+    
+  candidate_points <- setdiff(get_bridge_points(graph, bridge_id), starting_point)
+  
+  candidate_distances <- distances(graph, v = starting_point, to = candidate_points)
+  target_point <- candidate_points[which.min(candidate_distances)]
+  possible_paths <- shortest_paths(graph, from = starting_point, to = target_point, 
+                                   weights = edge_attr(graph, "distance"), output = "both")
+  
+  # If no path can be found, then return out NULL
+  if (is.null(first_path)) return(NULL)
+  
+  epath <- as.integer(possible_paths$epath[[1]])
+  vpath <- as.integer(possible_paths$vpath[[1]])
+  
+  enquque(qe, epath)
+  enquque(qv, vpath)
+  
+  # Return the final node of the vpath - this becomes the starting point for the next step
+  # Return the pruned search set that removes all the nodes from the bridge just considered
+  return(list(
+    new_starting_point = last(vpath),
+    new_search_set = remove_bridge_from_set(graph, search_set, bridge_id)
+  ))
+}
+
+find_next_bridge <- function(graph, starting_point, search_set, qe, qv) {
+  candidate_points <- setdiff(search_set, starting_point)
+  
+  candidate_distances <- distances(graph, v = starting_point, to = candidate_points, 
+                                   weights = edge_attr(graph, "distance"))
+  target_point <- candidate_points[which.min(candidate_distances)]
+  
+  possible_paths <- shortest_paths(graph, from = starting_point, to = target_point, 
+                                   weights = edge_attr(graph, "distance"), output = "both")
+  
+  # If no path can be found, then return out NULL
+  if (is.null(first_path)) return(NULL)
+  
+  epath <- as.integer(possible_paths$epath[[1]])
+  vpath <- as.integer(possible_paths$vpath[[1]])
+  
+  enquque(qe, epath)
+  enquque(qv, vpath)
+  
+  return(list(
+    new_starting_point = last(vpath),
+    new_search_set = search_set
+  ))
+  
+}
+
+enquque <- function(x, v) {
+  walk(v, function(i) pushback(x, data = i))
+}
+
+get_bridge_points <- function(graph, bid) {
+  vertex_points <- graph %>% 
+    subgraph.edges(eids = which(edge_attr(graph, "bridge_id") == bid), delete.vertices = TRUE) %>% 
+    induced_subgraph(which(vertex_attr(., "is_interface"))) %>% 
+    vertex_attr("name")
+  
+  which(vertex_attr(graph, "name") %in% vertex_points)
+}
+
+get_interface_points <- function(graph) {
+  which(V(graph)$is_interface)
+}
+
+remove_bridge_from_set <- function(graph, search_set, bridge_id) {
+  bridge_points <- get_bridge_points(graph, bridge_id)
+  setdiff(search_set, bridge_points)
 }
