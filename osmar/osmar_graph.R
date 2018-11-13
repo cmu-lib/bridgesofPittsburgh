@@ -28,7 +28,8 @@ tiny_plan <- drake_plan(
     trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)),
   tiny_raw = read_osm_response(download_tiny),
   tiny_graph = as_igraph(tiny_raw),
-  tiny_tidy_graph = enrich_osmar_graph(tiny_raw, tiny_graph, limits = tiny_limits),
+  tiny_tidy_graph_unmarked = enrich_osmar_graph(tiny_raw, tiny_graph, limits = tiny_limits),
+  tidy_tiny_graph = mark_interface_nodes(tiny_tidy_graph_unmarked),
   tiny_termini = way_termini(tiny_raw),
   tiny_needs_rewiring = bridges_to_rewire(tiny_tidy_graph),
   tiny_rewired_graph = rewire_bridges(tiny_tidy_graph,
@@ -66,8 +67,8 @@ large_plan <- drake_plan(
 
   # Full Graph
   pgh_graph = as_igraph(pgh_raw),
-  pgh_tidy_graph = enrich_osmar_graph(pgh_raw, pgh_graph, in_pgh_nodes = in_bound_points) %>% 
-    select_main_component()
+  pgh_tidy_graph_unmarked = enrich_osmar_graph(pgh_raw, pgh_graph, in_pgh_nodes = in_bound_points),
+  pgh_tidy_graph = mark_interface_nodes(pgh_tidy_graph_unmarked)
 )
 
 rewiring_plan <- drake_plan(
@@ -278,7 +279,8 @@ is_node_interface <- function(i, edges) {
   
   has_bridge <- any(edges[["is_bridge"]][tangent_edges])
   has_non_bridge <- any(!(edges[["is_bridge"]][tangent_edges]))
-  is_interface <- has_bridge && has_non_bridge
+  has_multi_bridge <- n_distinct(edges[["bridge_id"]][tangent_edges], na.rm = TRUE) >= 2
+  is_interface <- (has_bridge & has_non_bridge) | has_multi_bridge
   assoc_bridge <- first(na.omit(edges[["bridge_id"]][tangent_edges]))
   
   list(is_interface = is_interface, associated_bridge = assoc_bridge)
@@ -297,7 +299,6 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limi
     filter_to_allowed_paths() %>%
     add_parent_bridge_relations(raw_osmar) %>%
     mark_bridges() %>%
-    mark_interface_nodes() %>% 
     remove_unreachable_nodes() %>% 
     weight_by_distance()
     
@@ -307,6 +308,7 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limi
 
   # Give a final persistent ID for edges
   graph %>% 
+    select_main_component() %>% 
     activate(edges) %>% 
     mutate(.id = row_number())
 }
@@ -342,14 +344,14 @@ path_plot <- function(graph, path_ids) {
   graph %>% 
     activate(edges) %>% 
     mutate(
-      edge_flag = case_when(
-        .id %in% path_ids ~ "red",
-        TRUE ~ "gray"
-      )) %>% 
+      edge_order = match(.id, path_ids),
+      flagged_edge = !is.na(edge_order),
+      edge_label = if_else(is.na(edge_order), "", as.character(edge_order))
+    ) %>% 
     lat_lon_layout() %>%
     ggraph(layout = "manual") +
-    geom_edge_link(aes(color = edge_flag)) +
-    scale_edge_color_identity() +
+    geom_edge_link(aes(color = edge_order, alpha = flagged_edge, label = edge_label)) +
+    scale_edge_alpha_discrete(range = c(0.2, 1)) +
     theme_graph() +
     coord_map()
 }
@@ -564,7 +566,6 @@ mark_required_edges <- function(graph) {
 library(dequer)
 
 greedy_search <- function(starting_point, graph) {
-  stopifnot(is.integer(starting_point))
   stopifnot(vertex_attr(graph, "is_interface", index = starting_point))
   
   # Create queue to hold edgelist, since we don't know how long it will expand to
@@ -615,11 +616,18 @@ cross_bridge <- function(graph, starting_point, search_set = NULL, qe, qv) {
   
   candidate_points <- setdiff(get_bridge_points(graph, bridge_id), starting_point)
   
+  # If the candidate point lengths are 0, this means the point may likely be
+  # tangent to another bridge and so it's not inherited both associated bridge
+  # IDs. In this case, allow pathfinding to seek out the next closest bridge.
+  if (length(candidate_points) == 0)
+    candidate_points <- setdiff(search_set, starting_point)
+  
+  
   candidate_distances <- distances(graph, v = starting_point, to = candidate_points,
                                    weights = edge_attr(graph, "distance"))
   
   # If no path can be found, then return out reminiang set
-  if (all(is.infinite(candidate_distances))) return(search_set)
+  if (all(is.infinite(candidate_distances))) return(list(point = starting_point, set = candidate_points, graph = graph, distances = candidate_distances))
 
   target_point <- candidate_points[which.min(candidate_distances)]
   suppressWarnings({
@@ -640,12 +648,14 @@ cross_bridge <- function(graph, starting_point, search_set = NULL, qe, qv) {
   new_search_set = remove_bridge_from_set(graph, search_set, bridge_id)
   
   # If all bridges have been reached, return out empty set
-  if (length(new_search_set) <= 0) return(new_search_set)
+  if (length(new_search_set) <= 0) return(list(point = starting_point, set = search_set, graph = graph, distances = candidate_distances))
   
-  # Remove bridge edges from graph
-  new_graph <- remove_bridge_edges(graph, bridge_id)
+  # Penalized crossed bridges with an extremely high weight so they are only
+  # returned to as a last resort
+  edge_attr(graph, "distance", index = which(edge_attr(graph, "bridge_id") == bridge_id)) <- 20000
+  edge_attr(graph, "distance", index = which(edge_attr(graph, ".id") %in% epath)) <- 20000
   
-  find_next_bridge(graph = new_graph, starting_point = new_starting_point, search_set = new_search_set,
+  find_next_bridge(graph = graph, starting_point = new_starting_point, search_set = new_search_set,
                    qe = qe, qv = qv)
 }
 
@@ -657,7 +667,7 @@ find_next_bridge <- function(graph, starting_point, search_set, qe, qv) {
                                    weights = edge_attr(graph, "distance"))
   
   # If no path can be found, then return out remaining search set
-  if (all(is.infinite(candidate_distances))) return(search_set)
+  if (all(is.infinite(candidate_distances))) return(list(point = starting_point, set = search_set, graph = graph, distances = candidate_distances))
   
   target_point <- candidate_points[which.min(candidate_distances)]
   
@@ -704,8 +714,4 @@ get_interface_points <- function(graph) {
 remove_bridge_from_set <- function(graph, search_set, bridge_id) {
   bridge_points <- get_bridge_points(graph, bridge_id)
   setdiff(search_set, bridge_points)
-}
-
-remove_bridge_edges <- function(graph, bridge_id) {
-  delete_edges(graph, which(edge_attr(graph, "bridge_id") == bridge_id))
 }
