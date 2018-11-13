@@ -12,6 +12,7 @@ library(ggraph)
 library(rgdal)
 library(assertr)
 library(httr)
+library(furrr)
 
 tiny_limits <- list(xlim = c(-80.0072, -79.9868), ylim = c(40.4415, 40.4566))
 
@@ -263,7 +264,8 @@ add_parent_bridge_relations <- function(graph, raw_osm) {
 
 # After marking bridges, mark all nodes that are interface nodes for bridges, having at least one edge that is a bridge, and at least one edge that is NOT a bridge
 mark_interface_nodes <- function(graph) {
-  interface_results <- map(seq_len(vcount(graph)), is_node_interface, edges = as_tibble(graph, "edges"))
+  plan(multiprocess)
+  interface_results <- future_map(seq_len(vcount(graph)), is_node_interface, edges = as_tibble(graph, "edges"))
   V(graph)$is_interface <- map_lgl(interface_results, "is_interface")
   V(graph)$associated_bridge <- map_chr(interface_results, "associated_bridge")
   
