@@ -563,7 +563,7 @@ mark_required_edges <- function(graph) {
 
 library(dequer)
 
-greedy_search <- function(graph, starting_point) {
+greedy_search <- function(starting_point, graph) {
   stopifnot(is.integer(starting_point))
   stopifnot(vertex_attr(graph, "is_interface", index = starting_point))
   
@@ -571,24 +571,35 @@ greedy_search <- function(graph, starting_point) {
   qe <- queue()
   qv <- queue()
   
-  res <- cross_bridge(graph, starting_point, qe = qe, qv = qv)
-  if (length(res) == 0) {
+  missing_points <- cross_bridge(graph, starting_point, qe = qe, qv = qv)
+  if (length(missing_points) == 0) {
     message("all bridges reached!")
   } else {
     warning("Not all bridges reached!")
   }
   
-  result_path <- list(
-    vpath = flatten_int(as.list(qv)),
-    epath = flatten_int(as.list(qe)),
-    missing_points = res
+  vpath = flatten_int(as.list(qv))
+  epath = flatten_int(as.list(qe))
+  path_distance = total_distance(graph, epath)
+  
+  results <- lst(
+    epath,
+    vpath,
+    path_distance,
+    missing_points
   )
   
   # rev() the q so that R's gc can efficiently dispose of it now that we're done
   rev(qe)
   rev(qv)
+  remove(qe)
+  remove(qv)
   
-  return(result_path)
+  return(results)
+}
+
+total_distance <- function(graph, epath) {
+  sum(edge_attr(graph, "distance", index = which(edge_attr(graph, ".id") %in% epath)))
 }
 
 cross_bridge <- function(graph, starting_point, search_set = NULL, qe, qv) {
