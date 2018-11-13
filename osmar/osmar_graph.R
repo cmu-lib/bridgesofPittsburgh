@@ -20,6 +20,8 @@ clean_osm <- function() {
   clean("download_tiny", "download_osm")
 }
 
+plan(multiprocess)
+
 # Sample Graph
 tiny_plan <- drake_plan(
   download_tiny = target(
@@ -71,6 +73,11 @@ large_plan <- drake_plan(
   pgh_tidy_graph = mark_interface_nodes(pgh_tidy_graph_unmarked)
 )
 
+pathway_plan <- drake_plan(
+  pgh_interface_points = get_interface_points(pgh_tidy_graph),
+  path_solutions = future_map(pgh_interface_points, greedy_search, graph = pgh_tidy_graph)
+)
+
 rewiring_plan <- drake_plan(
   pgh_termini = way_termini(pgh_raw),
   pgh_needs_rewiring = bridges_to_rewire(pgh_tidy_graph),
@@ -87,7 +94,8 @@ pgh_plan <- bind_plans(
   plot_plan,
   large_plan,
   rewiring_plan,
-  merged_plot_plan
+  merged_plot_plan,
+  pathway_plan
 )
 
 # Data utilities ----
@@ -655,8 +663,8 @@ cross_bridge <- function(graph, starting_point, search_set = NULL, qe, qv) {
   edge_attr(graph, "distance", index = which(edge_attr(graph, "bridge_id") == bridge_id)) <- 20000
   edge_attr(graph, "distance", index = which(edge_attr(graph, ".id") %in% epath)) <- 20000
   
-  find_next_bridge(graph = graph, starting_point = new_starting_point, search_set = new_search_set,
-                   qe = qe, qv = qv)
+  ignore(find_next_bridge(graph = graph, starting_point = new_starting_point, search_set = new_search_set,
+                   qe = qe, qv = qv))
 }
 
 find_next_bridge <- function(graph, starting_point, search_set, qe, qv) {
@@ -691,7 +699,7 @@ find_next_bridge <- function(graph, starting_point, search_set, qe, qv) {
   # If all bridges have been reached, return out TRUE
   if (length(new_search_set) <= 0) return(TRUE)
   
-  cross_bridge(graph, starting_point = new_starting_point, search_set = new_search_set, qe = qe, qv = qv)
+  ignore(cross_bridge(graph, starting_point = new_starting_point, search_set = new_search_set, qe = qe, qv = qv))
 }
 
 enquque <- function(x, v) {
