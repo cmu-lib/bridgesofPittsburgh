@@ -14,7 +14,7 @@ library(assertr)
 library(httr)
 library(furrr)
 
-tiny_limits <- list(xlim = c(-80.0072, -79.9868), ylim = c(40.4415, 40.4566))
+tiny_limits <- list(xlim = c(-80.0054, -79.9817), ylim = c(40.4424, 40.4602))
 
 clean_osm <- function() {
   clean("download_tiny", "download_osm")
@@ -23,7 +23,7 @@ clean_osm <- function() {
 # Sample Graph
 tiny_plan <- drake_plan(
   download_tiny = target(
-    command = get_osm_bbox("-80.0072,40.4415,-79.9868,40.4566"),
+    command = get_osm_bbox(str_glue("{tiny_limits$xlim[1]},{tiny_limits$ylim[1]},{tiny_limits$xlim[2]},{tiny_limits$ylim[2]}")),
     # Must manually trigger a new data download
     trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)),
   tiny_raw = read_osm_response(download_tiny),
@@ -300,12 +300,15 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limi
     mark_interface_nodes() %>% 
     remove_unreachable_nodes() %>% 
     weight_by_distance()
-
-  # Finally, trim graph down to specified nodes or specified geographic limits
+    
+  # Trim graph down to specified nodes or specified geographic limits
   if (!is.null(in_pgh_nodes)) graph <- filter_to_nodes(graph, in_pgh_nodes)
   if (!is.null(limits)) graph <- filter_to_limits(graph, limits)
 
-  graph
+  # Give a final persistent ID for edges
+  graph %>% 
+    activate(edges) %>% 
+    mutate(.id = row_number())
 }
 
 # Plotting ----
@@ -327,6 +330,22 @@ bridge_plot <- function(graph) {
         TRUE ~ "gray"
       )
     ) %>%
+    lat_lon_layout() %>%
+    ggraph(layout = "manual") +
+    geom_edge_link(aes(color = edge_flag)) +
+    scale_edge_color_identity() +
+    theme_graph() +
+    coord_map()
+}
+
+path_plot <- function(graph, path_ids) {
+  graph %>% 
+    activate(edges) %>% 
+    mutate(
+      edge_flag = case_when(
+        .id %in% path_ids ~ "red",
+        TRUE ~ "gray"
+      )) %>% 
     lat_lon_layout() %>%
     ggraph(layout = "manual") +
     geom_edge_link(aes(color = edge_flag)) +
@@ -552,70 +571,106 @@ greedy_search <- function(graph, starting_point) {
   qe <- queue()
   qv <- queue()
   
+  res <- cross_bridge(graph, starting_point, qe = qe, qv = qv)
+  if (length(res) == 0) {
+    message("all bridges reached!")
+  } else {
+    warning("Not all bridges reached!")
+  }
+  
+  result_path <- list(
+    vpath = flatten_int(as.list(qv)),
+    epath = flatten_int(as.list(qe)),
+    missing_points = res
+  )
+  
   # rev() the q so that R's gc can efficiently dispose of it now that we're done
   rev(qe)
   rev(qv)
-}
-
-search_step <- function(graph, starting_point, search_set, qe, qv) {
   
+  return(result_path)
 }
 
-cross_bridge <- function(graph, starting_point, search_set = NULL, bridge_id, qe, qv) {
+cross_bridge <- function(graph, starting_point, search_set = NULL, qe, qv) {
   
   # If no search set is provided, assume that this is the start of the walk and
   # find all possible interface points
   if (is.null(search_set))
     search_set <- get_interface_points(graph)
+  
+  message("Bridge - ", length(search_set), " points left")
     
+  bridge_id <- vertex_attr(graph, "associated_bridge", starting_point)
+  
   candidate_points <- setdiff(get_bridge_points(graph, bridge_id), starting_point)
   
-  candidate_distances <- distances(graph, v = starting_point, to = candidate_points)
+  candidate_distances <- distances(graph, v = starting_point, to = candidate_points,
+                                   weights = edge_attr(graph, "distance"))
+  
+  # If no path can be found, then return out reminiang set
+  if (all(is.infinite(candidate_distances))) return(search_set)
+
   target_point <- candidate_points[which.min(candidate_distances)]
-  possible_paths <- shortest_paths(graph, from = starting_point, to = target_point, 
-                                   weights = edge_attr(graph, "distance"), output = "both")
+  suppressWarnings({
+    possible_paths <- shortest_paths(graph, from = starting_point, to = target_point, 
+                                     weights = edge_attr(graph, "distance"), output = "both")
+  })
   
-  # If no path can be found, then return out NULL
-  if (is.null(first_path)) return(NULL)
-  
-  epath <- as.integer(possible_paths$epath[[1]])
+  epath <- edge_attr(graph, ".id", index = possible_paths$epath[[1]])
   vpath <- as.integer(possible_paths$vpath[[1]])
   
   enquque(qe, epath)
   enquque(qv, vpath)
   
-  # Return the final node of the vpath - this becomes the starting point for the next step
-  # Return the pruned search set that removes all the nodes from the bridge just considered
-  return(list(
-    new_starting_point = last(vpath),
-    new_search_set = remove_bridge_from_set(graph, search_set, bridge_id)
-  ))
+  # Pass two items to the next search step:
+  # 1) the final node of the vpath - this becomes the starting point for the next step
+  # 2) the pruned search set that removes all the nodes from the bridge just considered
+  new_starting_point = last(vpath)
+  new_search_set = remove_bridge_from_set(graph, search_set, bridge_id)
+  
+  # If all bridges have been reached, return out empty set
+  if (length(new_search_set) <= 0) return(new_search_set)
+  
+  # Remove bridge edges from graph
+  new_graph <- remove_bridge_edges(graph, bridge_id)
+  
+  find_next_bridge(graph = new_graph, starting_point = new_starting_point, search_set = new_search_set,
+                   qe = qe, qv = qv)
 }
 
 find_next_bridge <- function(graph, starting_point, search_set, qe, qv) {
+  message("Road ", length(search_set))
   candidate_points <- setdiff(search_set, starting_point)
   
   candidate_distances <- distances(graph, v = starting_point, to = candidate_points, 
                                    weights = edge_attr(graph, "distance"))
+  
+  # If no path can be found, then return out remaining search set
+  if (all(is.infinite(candidate_distances))) return(search_set)
+  
   target_point <- candidate_points[which.min(candidate_distances)]
   
-  possible_paths <- shortest_paths(graph, from = starting_point, to = target_point, 
-                                   weights = edge_attr(graph, "distance"), output = "both")
+  suppressWarnings({
+    possible_paths <- shortest_paths(graph, from = starting_point, to = target_point, 
+                                     weights = edge_attr(graph, "distance"), output = "both")
+  })
   
-  # If no path can be found, then return out NULL
-  if (is.null(first_path)) return(NULL)
-  
-  epath <- as.integer(possible_paths$epath[[1]])
+  # Save the edge .id trait rather than the index. We need to be able to point
+  # to edges in the original graph even as we progressivley prune them from our
+  # working graph.
+  epath <- edge_attr(graph, ".id", index = possible_paths$epath[[1]])
   vpath <- as.integer(possible_paths$vpath[[1]])
   
   enquque(qe, epath)
   enquque(qv, vpath)
   
-  return(list(
-    new_starting_point = last(vpath),
-    new_search_set = search_set
-  ))
+  new_starting_point = last(vpath)
+  new_search_set = setdiff(candidate_points, target_point)
   
+  # If all bridges have been reached, return out TRUE
+  if (length(new_search_set) <= 0) return(TRUE)
+  
+  cross_bridge(graph, starting_point = new_starting_point, search_set = new_search_set, qe = qe, qv = qv)
 }
 
 enquque <- function(x, v) {
@@ -638,4 +693,8 @@ get_interface_points <- function(graph) {
 remove_bridge_from_set <- function(graph, search_set, bridge_id) {
   bridge_points <- get_bridge_points(graph, bridge_id)
   setdiff(search_set, bridge_points)
+}
+
+remove_bridge_edges <- function(graph, bridge_id) {
+  delete_edges(graph, which(edge_attr(graph, "bridge_id") == bridge_id))
 }
