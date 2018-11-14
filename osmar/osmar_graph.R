@@ -582,8 +582,8 @@ greedy_search <- function(starting_point, graph) {
   # Start by crossing a bridge
   pathfinding_results <- locate_next_path(graph, starting_point, search_set = search_set, qe = qe, qv = qv, is_bridge_crossing = TRUE)
   
-  vpath = flatten_int(as.list(qv))
-  epath = flatten_int(as.list(qe))
+  vpath = as.list(qv)
+  epath = as.list(qe)
   path_distance = total_distance(graph, epath)
   
   results <- lst(
