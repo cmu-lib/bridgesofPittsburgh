@@ -86,12 +86,20 @@ rewiring_plan <- drake_plan(
   final_pgh_edges = write_csv(as_tibble(final_pgh_graph, "edges") %>% select(-weight), path = file_out("osmar/output_data/rewired_pgh_edges.csv"), na = "")
 )
 
+pathway_plan <- drake_plan(
+  sample_pgh_pathway = greedy_search(pgh_interface_points[10], pgh_tidy_graph),
+  sample_path_plot = ggsave(
+    path_plot(pgh_tidy_graph, path_ids = flatten_int(sample_pgh_pathway$epath)),
+              file = file_out("sample_path_plot.png"), width = 20, height = 20)
+)
+
 pgh_plan <- bind_plans(
   tiny_plan,
   plot_plan,
   large_plan,
   rewiring_plan,
-  merged_plot_plan
+  merged_plot_plan,
+  pathway_plan
 )
 
 # Data utilities ----
@@ -346,18 +354,29 @@ bridge_plot <- function(graph) {
     coord_map()
 }
 
-path_plot <- function(graph, path_ids, number_paths = FALSE) {
+path_plot <- function(graph, path_ids) {
   graph %>% 
     activate(edges) %>% 
     mutate(
       edge_order = match(.id, path_ids),
       flagged_edge = !is.na(edge_order),
-      edge_label = if_else(is.na(edge_order), "", as.character(edge_order))
+      edge_label = if_else(is.na(edge_order), "", as.character(edge_order)),
+      edge_category = case_when(
+        is_bridge & flagged_edge ~ "crossed bridge",
+        !is_bridge & flagged_edge ~ "crossed road",
+        is_bridge & !flagged_edge ~ "uncrossed bridge",
+        TRUE ~ "uncrossed road"
+      )
     ) %>% 
     lat_lon_layout() %>%
     ggraph(layout = "manual") +
-    geom_edge_link(aes(color = edge_order, alpha = flagged_edge)) +
-    scale_edge_alpha_discrete(range = c(0.2, 1)) +
+    geom_edge_link(aes(color = edge_category)) +
+    scale_edge_color_manual(values = c(
+      "crossed bridge" = "#1f78b4",
+      "crossed road" = "#a6cee3",
+      "uncrossed bridge" = "#b2df8a",
+      "uncrossed road" = "gray"
+    )) +
     theme_graph() +
     coord_map()
 }
