@@ -314,7 +314,9 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limi
   graph %>% 
     select_main_component() %>% 
     activate(edges) %>% 
-    mutate(.id = row_number())
+    mutate(.id = row_number()) %>% 
+    as.undirected(mode = "each") %>% 
+    as_tbl_graph(directed = FALSE)
 }
 
 # Plotting ----
@@ -344,7 +346,7 @@ bridge_plot <- function(graph) {
     coord_map()
 }
 
-path_plot <- function(graph, path_ids) {
+path_plot <- function(graph, path_ids, number_paths = FALSE) {
   graph %>% 
     activate(edges) %>% 
     mutate(
@@ -354,7 +356,7 @@ path_plot <- function(graph, path_ids) {
     ) %>% 
     lat_lon_layout() %>%
     ggraph(layout = "manual") +
-    geom_edge_link(aes(color = edge_order, alpha = flagged_edge, label = edge_label)) +
+    geom_edge_link(aes(color = edge_order, alpha = flagged_edge)) +
     scale_edge_alpha_discrete(range = c(0.2, 1)) +
     theme_graph() +
     coord_map()
