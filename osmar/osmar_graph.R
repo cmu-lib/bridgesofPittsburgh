@@ -32,6 +32,7 @@ tiny_plan <- drake_plan(
   tiny_graph = as_igraph(tiny_raw),
   tiny_tidy_graph_unmarked = enrich_osmar_graph(tiny_raw, tiny_graph, limits = tiny_limits),
   tidy_tiny_graph = mark_interface_nodes(tiny_tidy_graph_unmarked),
+  tiny_interface_points = get_interface_points(tidy_tiny_graph),
   tiny_termini = way_termini(tiny_raw),
   tiny_needs_rewiring = bridges_to_rewire(tiny_tidy_graph),
   tiny_rewired_graph = rewire_bridges(tiny_tidy_graph,
@@ -70,12 +71,8 @@ large_plan <- drake_plan(
   # Full Graph
   pgh_graph = as_igraph(pgh_raw),
   pgh_tidy_graph_unmarked = enrich_osmar_graph(pgh_raw, pgh_graph, in_pgh_nodes = in_bound_points),
-  pgh_tidy_graph = mark_interface_nodes(pgh_tidy_graph_unmarked)
-)
-
-pathway_plan <- drake_plan(
-  pgh_interface_points = get_interface_points(pgh_tidy_graph),
-  path_solutions = future_map(pgh_interface_points, greedy_search, graph = pgh_tidy_graph)
+  pgh_tidy_graph = mark_interface_nodes(pgh_tidy_graph_unmarked),
+  pgh_interface_points = get_interface_points(pgh_tidy_graph)
 )
 
 rewiring_plan <- drake_plan(
@@ -94,8 +91,7 @@ pgh_plan <- bind_plans(
   plot_plan,
   large_plan,
   rewiring_plan,
-  merged_plot_plan,
-  pathway_plan
+  merged_plot_plan
 )
 
 # Data utilities ----
@@ -574,18 +570,15 @@ mark_required_edges <- function(graph) {
 library(dequer)
 
 greedy_search <- function(starting_point, graph) {
-  stopifnot(vertex_attr(graph, "is_interface", index = starting_point))
+  search_set <- get_interface_points(graph)
+  stopifnot(starting_point %in% search_set)
   
   # Create queue to hold edgelist, since we don't know how long it will expand to
   qe <- queue()
   qv <- queue()
   
-  missing_points <- cross_bridge(graph, starting_point, qe = qe, qv = qv)
-  if (length(missing_points) == 0) {
-    message("all bridges reached!")
-  } else {
-    warning("Not all bridges reached!")
-  }
+  # Start by crossing a bridge
+  pathfinding_results <- locate_next_path(graph, starting_point, search_set = search_set, qe = qe, qv = qv, is_bridge_crossing = TRUE)
   
   vpath = flatten_int(as.list(qv))
   epath = flatten_int(as.list(qe))
@@ -595,10 +588,10 @@ greedy_search <- function(starting_point, graph) {
     epath,
     vpath,
     path_distance,
-    missing_points
+    pathfinding_results
   )
   
-  # rev() the q so that R's gc can efficiently dispose of it now that we're done
+  # rev() the queues holding the edge and node lists so that R can efficiently garbage-collect them
   rev(qe)
   rev(qv)
   remove(qe)
@@ -607,22 +600,15 @@ greedy_search <- function(starting_point, graph) {
   return(results)
 }
 
-total_distance <- function(graph, epath) {
-  sum(edge_attr(graph, "distance", index = which(edge_attr(graph, ".id") %in% epath)))
-}
-
-cross_bridge <- function(graph, starting_point, search_set = NULL, qe, qv) {
+locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridge_crossing) {
   
-  # If no search set is provided, assume that this is the start of the walk and
-  # find all possible interface points
-  if (is.null(search_set))
-    search_set <- get_interface_points(graph)
-  
-  message("Bridge - ", length(search_set), " points left")
-    
-  bridge_id <- vertex_attr(graph, "associated_bridge", starting_point)
-  
-  candidate_points <- setdiff(get_bridge_points(graph, bridge_id), starting_point)
+  if (is_bridge_crossing) {
+    bridge_id <- vertex_attr(graph, "associated_bridge", starting_point)
+    candidate_points <- setdiff(get_bridge_points(graph, bridge_id), starting_point)
+  } else {
+    bridge_id <- NULL
+    candidate_points <- setdiff(search_set, starting_point)
+  }
   
   # If the candidate point lengths are 0, this means the point may likely be
   # tangent to another bridge and so it's not inherited both associated bridge
@@ -630,13 +616,24 @@ cross_bridge <- function(graph, starting_point, search_set = NULL, qe, qv) {
   if (length(candidate_points) == 0)
     candidate_points <- setdiff(search_set, starting_point)
   
+  # Report on status
+  message(step_status_message(starting_point, search_set, is_bridge_crossing, bridge_id))
   
+  # Calculate possible distances
   candidate_distances <- distances(graph, v = starting_point, to = candidate_points,
                                    weights = edge_attr(graph, "distance"))
   
-  # If no path can be found, then return out reminiang set
-  if (all(is.infinite(candidate_distances))) return(list(point = starting_point, set = candidate_points, graph = graph, distances = candidate_distances))
-
+  # If no path can be found, then return out
+  if (all(is.infinite(candidate_distances)))
+    return(list(
+      is_bridge_crossing = is_bridge_crossing,
+      break_reason = "No paths found to point",
+      point = starting_point, 
+      candidates = candidate_points, 
+      search_set = search_set,
+      graph = graph, 
+      distances = candidate_distances))
+  
   target_point <- candidate_points[which.min(candidate_distances)]
   suppressWarnings({
     possible_paths <- shortest_paths(graph, from = starting_point, to = target_point, 
@@ -648,58 +645,57 @@ cross_bridge <- function(graph, starting_point, search_set = NULL, qe, qv) {
   
   enquque(qe, epath)
   enquque(qv, vpath)
+  
+  if (is_bridge_crossing) {
+    # Penalized crossed bridges with an extremely high weight so they are only
+    # returned to as a last resort
+    edge_attr(graph, "distance", index = which(edge_attr(graph, "bridge_id") == bridge_id)) <- 200000
+    edge_attr(graph, "distance", index = which(edge_attr(graph, ".id") %in% epath)) <- 200000
+    
+    # Remove all nodes on this bridge from the search set
+    search_set <- remove_bridge_from_set(graph, search_set, bridge_id)
+  }
   
   # Pass two items to the next search step:
   # 1) the final node of the vpath - this becomes the starting point for the next step
   # 2) the pruned search set that removes all the nodes from the bridge just considered
-  new_starting_point = last(vpath)
-  new_search_set = remove_bridge_from_set(graph, search_set, bridge_id)
+  new_starting_point <- last(vpath)
   
   # If all bridges have been reached, return out empty set
-  if (length(new_search_set) <= 0) return(list(point = starting_point, set = search_set, graph = graph, distances = candidate_distances))
+  if (length(search_set) <= 0) {
+    message("We made it!")
+    return(list(
+      is_bridge_crossing = is_bridge_crossing,
+      break_reason = "All paths done",
+      point = starting_point, 
+      candidates = candidate_points, 
+      search_set = search_set,
+      graph = graph, 
+      distances = candidate_distances))
+  }
   
-  # Penalized crossed bridges with an extremely high weight so they are only
-  # returned to as a last resort
-  edge_attr(graph, "distance", index = which(edge_attr(graph, "bridge_id") == bridge_id)) <- 20000
-  edge_attr(graph, "distance", index = which(edge_attr(graph, ".id") %in% epath)) <- 20000
-  
-  ignore(find_next_bridge(graph = graph, starting_point = new_starting_point, search_set = new_search_set,
-                   qe = qe, qv = qv))
+  ignore( # To keep drake from reading this recursion as a cyclic dependency, we need to explicity ignore() this function call
+    locate_next_path(graph = graph, 
+                     starting_point = new_starting_point, 
+                     search_set = search_set,
+                     qe = qe, qv = qv, 
+                     is_bridge_crossing = !is_bridge_crossing)
+  )
 }
 
-find_next_bridge <- function(graph, starting_point, search_set, qe, qv) {
-  message("Road ", length(search_set))
-  candidate_points <- setdiff(search_set, starting_point)
+total_distance <- function(graph, epath) {
+  sum(edge_attr(graph, "distance", index = which(edge_attr(graph, ".id") %in% epath)))
+}
+
+step_status_message <- function(starting_point, search_set, is_bridge_crossing, bridge_id = NULL) {
+  starting <- str_glue("Starting from {starting_point}.")
+  points_left <- str_glue("{length(search_set)} candidate points left.")
   
-  candidate_distances <- distances(graph, v = starting_point, to = candidate_points, 
-                                   weights = edge_attr(graph, "distance"))
-  
-  # If no path can be found, then return out remaining search set
-  if (all(is.infinite(candidate_distances))) return(list(point = starting_point, set = search_set, graph = graph, distances = candidate_distances))
-  
-  target_point <- candidate_points[which.min(candidate_distances)]
-  
-  suppressWarnings({
-    possible_paths <- shortest_paths(graph, from = starting_point, to = target_point, 
-                                     weights = edge_attr(graph, "distance"), output = "both")
-  })
-  
-  # Save the edge .id trait rather than the index. We need to be able to point
-  # to edges in the original graph even as we progressivley prune them from our
-  # working graph.
-  epath <- edge_attr(graph, ".id", index = possible_paths$epath[[1]])
-  vpath <- as.integer(possible_paths$vpath[[1]])
-  
-  enquque(qe, epath)
-  enquque(qv, vpath)
-  
-  new_starting_point = last(vpath)
-  new_search_set = setdiff(candidate_points, target_point)
-  
-  # If all bridges have been reached, return out TRUE
-  if (length(new_search_set) <= 0) return(TRUE)
-  
-  ignore(cross_bridge(graph, starting_point = new_starting_point, search_set = new_search_set, qe = qe, qv = qv))
+  if (is_bridge_crossing) {
+    str_glue("{starting} Crossing bridge {bridge_id}. {points_left}")
+  } else {
+    str_glue("{starting} Looking for roads. {points_left}")
+  }
 }
 
 enquque <- function(x, v) {
