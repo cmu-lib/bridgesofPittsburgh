@@ -615,8 +615,11 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
   # If the candidate point lengths are 0, this means the point may likely be
   # tangent to another bridge and so it's not inherited both associated bridge
   # IDs. In this case, allow pathfinding to seek out the next closest bridge.
-  if (length(candidate_points) == 0)
+  if (length(candidate_points) == 0) {
+    is_bridge_crossing <- FALSE
+    bridge_id <- NULL
     candidate_points <- setdiff(search_set, starting_point)
+  }
   
   # Report on status
   message(step_status_message(starting_point, search_set, is_bridge_crossing, bridge_id))
@@ -636,25 +639,29 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
       graph = graph, 
       distances = candidate_distances))
   
-  target_point <- candidate_points[which.min(candidate_distances)]
+  if (is_bridge_crossing) {
+    target_point <- candidate_points[which.max(candidate_distances)]
+  } else {
+    target_point <- candidate_points[which.min(candidate_distances)]
+  }
+  
   suppressWarnings({
     possible_paths <- shortest_paths(graph, from = starting_point, to = target_point, 
                                      weights = edge_attr(graph, "distance"), output = "both")
   })
   
-  epath <- edge_attr(graph, ".id", index = possible_paths$epath[[1]])
+  epath <- as.integer(possible_paths$epath[[1]])
   vpath <- as.integer(possible_paths$vpath[[1]])
   
-  enquque(qe, epath)
-  enquque(qv, vpath)
+  pushback(qe, epath)
+  pushback(qv, vpath)
   
   if (is_bridge_crossing) {
-    # Penalized crossed bridges with an extremely high weight so they are only
+    # Penalized crossed edges that are ALSO bridges with an extremely high weight so they are only
     # returned to as a last resort
-    edge_attr(graph, "distance", index = which(edge_attr(graph, "bridge_id") == bridge_id)) <- 200000
-    edge_attr(graph, "distance", index = which(edge_attr(graph, ".id") %in% epath)) <- 200000
+    edge_attr(graph, "distance", index = intersect(epath, which(edge_attr(graph, "is_bridge")))) <- 200000
     
-    # Remove all nodes on this bridge from the search set
+    # Remove all nodes on the crossed bridge from the remaining search set
     search_set <- remove_bridge_from_set(graph, search_set, bridge_id)
   }
   
