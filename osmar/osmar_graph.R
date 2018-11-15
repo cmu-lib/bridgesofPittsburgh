@@ -370,13 +370,14 @@ path_plot <- function(graph, path_ids) {
     ) %>% 
     lat_lon_layout() %>%
     ggraph(layout = "manual") +
-    geom_edge_link(aes(color = edge_category)) +
+    geom_edge_link(aes(color = edge_category, width = flagged_edge)) +
     scale_edge_color_manual(values = c(
-      "crossed bridge" = "#1f78b4",
-      "crossed road" = "#a6cee3",
-      "uncrossed bridge" = "#b2df8a",
+      "crossed bridge" = "#d95f02",
+      "crossed road" = "#1b9e77",
+      "uncrossed bridge" = "#e6ab02",
       "uncrossed road" = "gray"
     )) +
+    scale_edge_width_manual(values = c("TRUE" = 1.5, "FALSE" = 0.5)) +
     theme_graph() +
     coord_map()
 }
