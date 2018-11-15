@@ -86,20 +86,11 @@ rewiring_plan <- drake_plan(
   final_pgh_edges = write_csv(as_tibble(final_pgh_graph, "edges") %>% select(-weight), path = file_out("osmar/output_data/rewired_pgh_edges.csv"), na = "")
 )
 
-pathway_plan <- drake_plan(
-  sample_pgh_pathway = greedy_search(pgh_interface_points[10], pgh_tidy_graph),
-  sample_path_plot = ggsave(
-    path_plot(pgh_tidy_graph, path_ids = flatten_int(sample_pgh_pathway$epath)),
-              file = file_out("sample_path_plot.png"), width = 20, height = 20)
-)
-
 pgh_plan <- bind_plans(
   tiny_plan,
-  plot_plan,
   large_plan,
   rewiring_plan,
-  merged_plot_plan,
-  pathway_plan
+  merged_plot_plan
 )
 
 # Data utilities ----
@@ -355,10 +346,12 @@ bridge_plot <- function(graph) {
 }
 
 path_plot <- function(graph, path_ids) {
+  path_ids <- flatten_int(path_ids)
+  
   graph %>% 
     activate(edges) %>% 
     mutate(
-      edge_order = match(.id, path_ids),
+      edge_order = match(row_number(), path_ids),
       flagged_edge = !is.na(edge_order),
       edge_label = if_else(is.na(edge_order), "", as.character(edge_order)),
       edge_category = case_when(
@@ -591,7 +584,7 @@ mark_required_edges <- function(graph) {
 
 library(dequer)
 
-greedy_search <- function(starting_point, graph) {
+greedy_search <- function(starting_point, graph, quiet = !interactive()) {
   search_set <- get_interface_points(graph)
   stopifnot(starting_point %in% search_set)
   
@@ -600,7 +593,13 @@ greedy_search <- function(starting_point, graph) {
   qv <- queue()
   
   # Start by crossing a bridge
-  pathfinding_results <- locate_next_path(graph, starting_point, search_set = search_set, qe = qe, qv = qv, is_bridge_crossing = TRUE)
+  pathfinding_results <- locate_next_path(
+    graph = graph, 
+    starting_point = starting_point, 
+    search_set = search_set, 
+    qe = qe, qv = qv, 
+    is_bridge_crossing = TRUE, 
+    quiet = quiet)
   
   vpath = as.list(qv)
   epath = as.list(qe)
@@ -622,7 +621,7 @@ greedy_search <- function(starting_point, graph) {
   return(results)
 }
 
-locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridge_crossing) {
+locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridge_crossing, quiet) {
   
   if (is_bridge_crossing) {
     bridge_id <- vertex_attr(graph, "associated_bridge", starting_point)
@@ -642,7 +641,7 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
   }
   
   # Report on status
-  message(step_status_message(starting_point, search_set, is_bridge_crossing, bridge_id))
+  if (!quiet) message(step_status_message(starting_point, search_set, is_bridge_crossing, bridge_id))
   
   # Calculate possible distances
   candidate_distances <- distances(graph, v = starting_point, to = candidate_points,
@@ -656,7 +655,6 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
       point = starting_point, 
       candidates = candidate_points, 
       search_set = search_set,
-      graph = graph, 
       distances = candidate_distances))
   
   if (is_bridge_crossing) {
@@ -699,7 +697,6 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
       point = starting_point, 
       candidates = candidate_points, 
       search_set = search_set,
-      graph = graph, 
       distances = candidate_distances))
   }
   
@@ -708,7 +705,8 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
                      starting_point = new_starting_point, 
                      search_set = search_set,
                      qe = qe, qv = qv, 
-                     is_bridge_crossing = !is_bridge_crossing)
+                     is_bridge_crossing = !is_bridge_crossing,
+                     quiet = quiet)
   )
 }
 
