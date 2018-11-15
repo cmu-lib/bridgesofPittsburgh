@@ -30,8 +30,7 @@ assessment_plan <- drake_plan(
 all_pathways <- bind_plans(
   original_targets,
   tiny_expanded_pathways,
-  pgh_expanded_pathways,
-  assessment_plan
+  pgh_expanded_pathways
 )
 
-make(all_pathways, jobs = 12, cache = path_cache)
+make(all_pathways, jobs = 9, cache = path_cache)
