@@ -3,5 +3,7 @@
 .Rproj.user/
 .Rproj.user
 .drake/
+.graph/
+.path/
 *.png
 *.svg
