@@ -16,21 +16,29 @@ pgh_pathway_plan_generic <- drake_plan(pgh_pathway = greedy_search(starting_poin
 tiny_expanded_pathways <- evaluate_plan(tiny_pathway_plan_generic, rules = list(sp__ = orig_tiny_interface_points))
 pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = orig_pgh_interface_points))
 
+tiny_gathered <- gather_plan(tiny_expanded_pathways, target = "tiny_results", gather = "list")
+pgh_gathered <- gather_plan(pgh_expanded_pathways, target = "pgh_results", gather = "list")
+
 assessment_plan <- drake_plan(
-  tiny_results = map(set_names(tiny_expanded_pathways$target), readd, character_only = TRUE, cache = path_cache),
-  tiny_performances = map_df(tiny_results, function(x) data_frame(point = x$pathfinding_results$point, distance = x$path_distance, missing_points = length(x$pathfinding_results$search_set)), .id = "target") %>% 
-    arrange(missing_points, distance) %>% 
-    mutate(performance_rank = row_number()),
-  pgh_results = map(set_names(pgh_expanded_pathways$target), readd, character_only = TRUE, cache = path_cache),
-  pgh_performances = map_df(pgh_results, function(x) data_frame(point = x$pathfinding_results$point, distance = x$path_distance, missing_points = length(x$pathfinding_results$search_set)), .id = "target") %>% 
-    arrange(missing_points, distance) %>% 
-    mutate(performance_rank = row_number())
+  tiny_performances = assess_pathway(tiny_results),
+  pgh_performances = assess_pathway(pgh_results)
 )
 
 all_pathways <- bind_plans(
   original_targets,
   tiny_expanded_pathways,
-  pgh_expanded_pathways
+  pgh_expanded_pathways,
+  tiny_gathered,
+  pgh_gathered,
+  assessment_plan
 )
 
-make(all_pathways, jobs = 9, cache = path_cache)
+assess_pathway <- function(l) {
+  map_df(l, function(x) {
+    data_frame(point = x$pathfinding_results$point, 
+               distance = x$path_distance, 
+               missing_points = length(x$pathfinding_results$search_set))
+  }, .id = "target") %>% 
+    arrange(missing_points, distance) %>% 
+    mutate(performance_rank = row_number())
+}
