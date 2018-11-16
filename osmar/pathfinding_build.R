@@ -11,7 +11,9 @@ original_targets <- drake_plan(
 )
 
 tiny_pathway_plan_generic <- drake_plan(tiny_pathway = greedy_search(starting_point = sp__, graph = tidy_tiny_graph, quiet = TRUE))
-pgh_pathway_plan_generic <- drake_plan(pgh_pathway = greedy_search(starting_point = sp__, graph = pgh_tidy_graph, quiet = TRUE))
+pgh_pathway_plan_generic <- drake_plan(pgh_pathway = target(
+  greedy_search(starting_point = sp__, graph = pgh_tidy_graph, quiet = TRUE),
+  trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)))
 
 tiny_expanded_pathways <- evaluate_plan(tiny_pathway_plan_generic, rules = list(sp__ = orig_tiny_interface_points))
 pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = orig_pgh_interface_points))
