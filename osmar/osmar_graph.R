@@ -16,11 +16,11 @@ library(furrr)
 
 tiny_limits <- list(xlim = c(-80.0054, -79.9817), ylim = c(40.4424, 40.4602))
 
-clean_osm <- function() {
-  clean("download_tiny", "download_osm")
-}
-
 graph_cache <- new_cache(".graph")
+
+clean_osm <- function() {
+  clean("download_tiny", "download_osm", cache = graph_cache)
+}
 
 plan(multiprocess)
 
@@ -65,7 +65,7 @@ large_plan <- drake_plan(
     trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)),
   pgh_raw = read_osm_response(download_osm),
   # Shapefile for PGH boundaries
-  pgh_boundary_shp = as(readOGR(file_in("osmar/input_data/Pittsburgh_Buffered_Boundary/")), "SpatialPolygons"),
+  pgh_boundary_shp = as(readOGR(file_in("osmar/input_data/Pittsburgh_City_Boundary")), "SpatialPolygons"),
   pgh_points_sp = as_sp(pgh_raw, "points"),
   point_overlap = over(pgh_points_sp, pgh_boundary_shp),
   in_bound_points = names(na.omit(point_overlap)),
@@ -207,6 +207,19 @@ filter_to_nodes <- function(graph, node_ids) {
     remove_unreachable_nodes()
 }
 
+# Keep all edges and nodes, but only mark bridges that are within node boundaries
+filter_bridges_to_nodes <- function(graph, node_ids) {
+  node_indices <- node_number(graph, node_ids) %>% na.omit()
+  
+  graph %>%
+    activate(edges) %>%
+    mutate(
+      within_boundaries = from %in% node_indices | to %in% node_indices,
+      is_bridge = if_else(within_boundaries, is_bridge, FALSE),
+      bridge_id = if_else(within_boundaries, bridge_id, NA_character_)
+    )
+}
+
 # Filter edges down to the desired paths based on OSM tags (e.g. no sidewalks,
 # no private roads, etc). This is for removing edges entirely from the network,
 # not to be confused with mark_required_edges() which only makrs those that will
@@ -278,7 +291,7 @@ is_node_interface <- function(i, edges) {
   list(is_interface = is_interface, associated_bridge = assoc_bridge)
 }
 
-enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limits = NULL) {
+enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limits = NULL, keep_full = TRUE) {
   osmar_nodes <- osm_node_attributes(raw_osmar)
   osmar_edges <- osm_edge_attributes(raw_osmar)
 
@@ -296,7 +309,8 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limi
     weight_by_distance()
     
   # Trim graph down to specified nodes or specified geographic limits
-  if (!is.null(in_pgh_nodes)) graph <- filter_to_nodes(graph, in_pgh_nodes)
+  if (!is.null(in_pgh_nodes) & keep_full) graph <- filter_bridges_to_nodes(graph, in_pgh_nodes)
+  if (!is.null(in_pgh_nodes) & !keep_full) graph <- filter_to_nodes(graph, in_pgh_nodes)
   if (!is.null(limits)) graph <- filter_to_limits(graph, limits)
 
   # Give a final persistent ID for edges
@@ -351,6 +365,8 @@ path_plot <- function(graph, path_ids) {
         TRUE ~ "uncrossed road"
       )
     ) %>% 
+    filter(within_boundaries | flagged_edge) %>% 
+    remove_unreachable_nodes() %>% 
     lat_lon_layout() %>%
     ggraph(layout = "manual") +
     geom_edge_link(aes(color = edge_category, width = flagged_edge)) +
