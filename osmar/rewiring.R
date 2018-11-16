@@ -5,8 +5,6 @@ rewiring_plan <- drake_plan(
   
   # Finalize output plot
   final_pgh_graph = rewired_pgh_graph %>% weight_by_distance() %>% select_main_component() %>% mark_required_edges(),
-  final_pgh_nodes = write_csv(as_tibble(final_pgh_graph, "nodes"), path = file_out("osmar/output_data/rewired_pgh_nodes.csv"), na = ""),
-  final_pgh_edges = write_csv(as_tibble(final_pgh_graph, "edges") %>% select(-weight), path = file_out("osmar/output_data/rewired_pgh_edges.csv"), na = "")
 )
 
 # Rewiring ----
@@ -184,13 +182,6 @@ straighten_neighborhood <- function(graph, node_id) {
     filter(!(row_number() %in% old_edges$.tidygraph_edge_index)) %>%
     # Add new synthetic edge
     bind_edges(new_links)
-}
-
-select_main_component <- function(graph) {
-  graph %>%
-    activate(nodes) %>%
-    mutate(component = group_components()) %>%
-    filter(component == 1)
 }
 
 mark_required_edges <- function(graph) {

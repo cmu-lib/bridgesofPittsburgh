@@ -20,6 +20,8 @@ clean_osm <- function() {
   clean("download_tiny", "download_osm")
 }
 
+graph_cache <- new_cache(".graph")
+
 plan(multiprocess)
 
 # Sample Graph
@@ -72,13 +74,14 @@ large_plan <- drake_plan(
   pgh_graph = as_igraph(pgh_raw),
   pgh_tidy_graph_unmarked = enrich_osmar_graph(pgh_raw, pgh_graph, in_pgh_nodes = in_bound_points),
   pgh_tidy_graph = mark_interface_nodes(pgh_tidy_graph_unmarked),
-  pgh_interface_points = get_interface_points(pgh_tidy_graph)
+  pgh_interface_points = get_interface_points(pgh_tidy_graph),
+  pgh_nodes = write_csv(as_tibble(pgh_tidy_graph, "nodes"), path = file_out("osmar/output_data/pgh_nodes.csv"), na = ""),
+  pgh_edges = write_csv(as_tibble(pgh_tidy_graph, "edges"), path = file_out("osmar/output_data/pgh_edges.csv"), na = "")
 )
 
 pgh_plan <- bind_plans(
   tiny_plan,
   large_plan,
-  rewiring_plan,
   merged_plot_plan
 )
 
@@ -285,6 +288,7 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limi
     activate(edges) %>%
     mutate_at(vars(name), as.character) %>%
     left_join(osmar_edges, by = c("name" = "id")) %>%
+    select(-weight) %>% 
     filter_to_allowed_paths() %>%
     add_parent_bridge_relations(raw_osmar) %>%
     mark_bridges() %>%
