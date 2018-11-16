@@ -128,6 +128,10 @@ select_main_component <- function(graph) {
     filter(component == 1)
 }
 
+get_interface_points <- function(graph) {
+  which(V(graph)$is_interface)
+}
+
 # Identifying bridges ----
 
 osm_node_attributes <- function(src) {

@@ -203,10 +203,6 @@ get_bridge_points <- function(graph, bid) {
   which(vertex_attr(graph, "name") %in% vertex_points)
 }
 
-get_interface_points <- function(graph) {
-  which(V(graph)$is_interface)
-}
-
 remove_bridge_from_set <- function(graph, search_set, bridge_id) {
   bridge_points <- get_bridge_points(graph, bridge_id)
   setdiff(search_set, bridge_points)
