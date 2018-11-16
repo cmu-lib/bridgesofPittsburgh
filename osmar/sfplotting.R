@@ -51,7 +51,7 @@ plot(edges["edge_category"], pal = c(
   "crossed road" = "#1b9e77",
   "uncrossed bridge" = "#e6ab02",
   "uncrossed road" = "gray"
-), lwd = if_else(edges$flagged_edge, 5, 1))
+), lwd = if_else(edges$flagged_edge, 3, 1))
 dev.off()
 
 # 
