@@ -11,8 +11,8 @@ Edge and node lists for a Pittsburgh road graph ready for routefinding are gener
 1. Read the OSM XML into R
 1. Use the `Relation` metadata layer from OSM to identify sets of `Ways` that should be considered bridges
 1. Convert the OSM object into a network, enhancing edges with bridge identity information
-1. Identify which bridges contain multiple `Ways` and will need to be rewired into a single new synthetic edge with two new endpoints.
-  1. First, simplify all bridges into single edges, rather than the chains of edges that are produced by the initial conversion of `Ways` into a graph
-  1. Next, for each set of edges that we know to comprise one physical bridge, compute two new centroids for its sets of endpoints, draw a new edge between these new nodes, and then rewire its original endpoints to feed into these new termini
-1. Filter the graph so that only one large connected component is left
-1. Calculate rough distances for all edges based on the coordinates of their endpoints.
+1. Use a greedy local search algorithm to find shortest paths starting from the terminus point of one bridge.
+  1. Cross bridge
+  1. Every bridge edge set that is crossed should have its weight increased dramatically, so it is possibly for the path to backtrack but only as a last resort.
+  1. Find next closest bridge
+1. Repeat until all bridge edge sets have been visited at least once.
