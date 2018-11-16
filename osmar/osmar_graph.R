@@ -245,10 +245,7 @@ mark_bridges <- function(graph) {
         is_bridge & !is.na(bridge_relation) ~ bridge_relation,
         is_bridge ~ name,
         TRUE ~ NA_character_
-      ),
-      straightened = FALSE,
-      synthetic = FALSE,
-      required = FALSE
+      )
     )
 }
 
