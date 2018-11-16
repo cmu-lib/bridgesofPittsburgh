@@ -141,7 +141,8 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
   if (is_bridge_crossing) {
     # Penalized crossed edges that are ALSO bridges with an extremely high weight so they are only
     # returned to as a last resort
-    edge_attr(graph, "distance", index = intersect(epath, which(edge_attr(graph, "is_bridge")))) <- 200000
+    penalized_bridges <- intersect(epath, which(edge_attr(graph, "is_bridge")))
+    edge_attr(graph, "distance", index = penalized_bridges) <- edge_attr(graph, "distance", index = penalized_bridges) + 200000
     
     # Remove all nodes on the crossed bridge from the remaining search set
     search_set <- remove_bridge_from_set(graph, search_set, bridge_id)
