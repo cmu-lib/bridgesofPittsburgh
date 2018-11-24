@@ -2,6 +2,7 @@ library(sf)
 source("osmar/osmar_graph.R")
 source("osmar/pathfinding_build.R")
 loadd(c("tidy_tiny_graph", "pgh_tidy_graph"), cache = graph_cache)
+library(fs)
 
 #res1027 <- greedy_search(1027, pgh_tidy_graph)
 load("res1027.rda")
@@ -45,27 +46,26 @@ pgh_sf <- st_sfc(st_edges, crs = 4326)
 st_geometry(edges) <- pgh_sf
 
 
-pdf("big.pdf", width = 36, height = 48)
+
+
+
 plot(edges["edge_category"], pal = c(
   "crossed bridge" = "#d95f02",
   "crossed road" = "#1b9e77",
   "uncrossed bridge" = "#e6ab02",
   "uncrossed road" = "gray"
 ), lwd = if_else(edges$flagged_edge, 3, 1))
-dev.off()
 
-# 
-# %>% 
-#   lat_lon_layout() %>%
-#   ggraph(layout = "manual") +
-#   geom_edge_link(aes(color = edge_category, width = flagged_edge)) +
-#   scale_edge_color_manual(values = c(
-#     "crossed bridge" = "#d95f02",
-#     "crossed road" = "#1b9e77",
-#     "uncrossed bridge" = "#e6ab02",
-#     "uncrossed road" = "gray"
-#   )) +
-#   scale_edge_width_manual(values = c("TRUE" = 1.2, "FALSE" = 0.5)) +
-#   theme_graph() +
-#   coord_map()
-# }
+
+oneplot <- function(e, i, edges) {
+  message(i)
+  edges$highlight <- edges$.id %in% e
+  png(path("maps", paste0(str_pad(i, width = 3, pad = "0", side = "left"), "map"), ext = "png"))
+  plot(edges["highlight"], pal = c("gray", "red"), lwd = if_else(edges$highlight, 3, 1))
+  dev.off()
+}
+
+
+iwalk(res1027$epath, oneplot, edges = edges)
+
+plot(edges["geometry"])

@@ -7,3 +7,5 @@
 .path/
 *.png
 *.svg
+*.pdf
+*.rda
