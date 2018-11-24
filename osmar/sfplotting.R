@@ -7,7 +7,7 @@ library(fs)
 #res1027 <- greedy_search(1027, pgh_tidy_graph)
 load("res1027.rda")
 
-path_ids <- res1027$epath %>% 
+path_ids <- res2489$epath %>% 
   flatten_int()
 
 graph <- pgh_tidy_graph %>% 
@@ -48,24 +48,24 @@ st_geometry(edges) <- pgh_sf
 
 
 
-
+pdf("big.pdf", width = 20, height = 20)
 plot(edges["edge_category"], pal = c(
   "crossed bridge" = "#d95f02",
   "crossed road" = "#1b9e77",
   "uncrossed bridge" = "#e6ab02",
   "uncrossed road" = "gray"
-), lwd = if_else(edges$flagged_edge, 3, 1))
-
+), lwd = if_else(edges$flagged_edge, 2, 0.5))
+dev.off()
 
 oneplot <- function(e, i, edges) {
   message(i)
   edges$highlight <- edges$.id %in% e
-  png(path("maps", paste0(str_pad(i, width = 3, pad = "0", side = "left"), "map"), ext = "png"))
+  png(fs::path("maps", paste0(str_pad(i, width = 3, pad = "0", side = "left"), "map"), ext = "png"))
   plot(edges["highlight"], pal = c("gray", "red"), lwd = if_else(edges$highlight, 3, 1))
   dev.off()
 }
 
 
-iwalk(res1027$epath, oneplot, edges = edges)
+iwalk(res2489$epath, oneplot, edges = edges)
 
 plot(edges["geometry"])

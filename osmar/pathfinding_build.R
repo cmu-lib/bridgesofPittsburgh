@@ -87,28 +87,34 @@ greedy_search <- function(starting_point, graph, quiet = !interactive()) {
 
 locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridge_crossing, quiet) {
   
+  search_set <- setdiff(search_set, starting_point)
+  
   if (is_bridge_crossing) {
     bridge_id <- vertex_attr(graph, "associated_bridge", starting_point)
-    candidate_points <- setdiff(get_bridge_points(graph, bridge_id), starting_point)
+    candidate_edges <- which(edge_attr(graph, "bridge_id") == bridge_id)
+    # Collect the "to" nodes of all the bridge edges, since we will always be
+    # starting at the tail/"from" node of a bridge edge
+    candidate_points <- unique(as.integer(tail_of(graph, es = candidate_edges)))
   } else {
     bridge_id <- NULL
-    candidate_points <- setdiff(search_set, starting_point)
+    candidate_points <- search_set
   }
   
   # If the candidate point lengths are 0, this means the point may likely be
   # tangent to another bridge and so it's not inherited both associated bridge
   # IDs. In this case, allow pathfinding to seek out the next closest bridge.
   if (length(candidate_points) == 0) {
+    message("no bridge candidates, looking for a new point")
     is_bridge_crossing <- FALSE
     bridge_id <- NULL
-    candidate_points <- setdiff(search_set, starting_point)
+    candidate_points <- search_set
   }
   
   # Report on status
   if (!quiet) message(step_status_message(starting_point, search_set, is_bridge_crossing, bridge_id))
   
   # Calculate possible distances
-  candidate_distances <- distances(graph, v = starting_point, to = candidate_points,
+  candidate_distances <- distances(graph, v = starting_point, to = candidate_points, mode = "out",
                                    weights = edge_attr(graph, "distance"))
   
   # If no path can be found, then return out
@@ -122,30 +128,45 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
       distances = candidate_distances))
   
   if (is_bridge_crossing) {
-    target_point <- candidate_points[which.max(candidate_distances)]
+    # Find a path within the subgraph comprising only that bridge
+    bridge_graph <- subgraph.edges(graph, eids = candidate_edges, delete.vertices = FALSE)
+    candidate_distances <- distances(bridge_graph, v = starting_point, to = candidate_points, mode = "out", weights = edge_attr(bridge_graph, "distance"))
+    ranking <- min_rank(candidate_distances)
+    ranking[is.infinite(candidate_distances)] <- 0L
+    target_point <- candidate_points[which.max(ranking)]
+    suppressWarnings({
+      possible_paths <- shortest_paths(bridge_graph, from = starting_point, to = target_point, mode = "out", output = "both", weights = edge_attr(bridge_graph, "distance"))
+    })
   } else {
     target_point <- candidate_points[which.min(candidate_distances)]
+    suppressWarnings({
+      possible_paths <- shortest_paths(graph, from = starting_point, to = target_point, 
+                                       weights = edge_attr(graph, "distance"), output = "both", mode = "out")
+    })
   }
   
-  suppressWarnings({
-    possible_paths <- shortest_paths(graph, from = starting_point, to = target_point, 
-                                     weights = edge_attr(graph, "distance"), output = "both")
-  })
-  
-  epath <- as.integer(possible_paths$epath[[1]])
+  epath <- possible_paths$epath[[1]]$.id
   vpath <- as.integer(possible_paths$vpath[[1]])
   
   pushback(qe, epath)
   pushback(qv, vpath)
   
   if (is_bridge_crossing) {
-    # Penalized crossed edges that are ALSO bridges with an extremely high weight so they are only
-    # returned to as a last resort
-    penalized_bridges <- intersect(epath, which(edge_attr(graph, "is_bridge")))
-    edge_attr(graph, "distance", index = penalized_bridges) <- edge_attr(graph, "distance", index = penalized_bridges) + 200000
-    
-    # Remove all nodes on the crossed bridge from the remaining search set
-    search_set <- remove_bridge_from_set(graph, search_set, bridge_id)
+    bridges_crossed <- na.omit(unique(edge_attr(graph, "bridge_id", index = epath)))
+    if (length(bridges_crossed) > 0) {
+      message("Bridges crossed: ", str_c(bridges_crossed, collapse = "; "))
+      
+      bridge_edges <- which(edge_attr(graph, "bridge_id") %in% bridges_crossed)
+      bridge_nodes <- as.integer(head_of(graph, es = bridge_edges))
+      
+      message("increasing weights for ", str_c(bridge_edges, collapse = "; "))
+      edge_attr(graph, "distance", index = bridge_edges) <- edge_attr(graph, "distance", index = bridge_edges) + 20000000
+      
+      # Remove all nodes on the crossed bridge from the remaining search set
+      removed_nodes <- intersect(search_set, bridge_nodes)
+      message("removing nodes ", str_c(removed_nodes, collapse = "; "))
+      search_set <- setdiff(search_set, bridge_nodes)
+    }
   }
   
   # Pass two items to the next search step:

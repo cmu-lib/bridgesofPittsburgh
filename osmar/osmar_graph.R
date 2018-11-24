@@ -156,7 +156,7 @@ osm_node_attributes <- function(src) {
 osm_edge_attributes <- function(src) {
   # Pull basic way tags
 
-  edge_keys <- c("name", "access", "highway", "bridge", "bridge_name")
+  edge_keys <- c("name", "access", "highway", "bridge", "bridge_name", "oneway")
 
   way_tags <- src$ways$tags %>%
     filter(k %in% edge_keys) %>%
@@ -285,12 +285,13 @@ mark_interface_nodes <- function(graph) {
 is_node_interface <- function(i, edges) {
   message(i)
   tangent_edges <- which(edges[["from"]] == i | edges[["to"]] == i)
+  outbound_edges <-  which(edges[["from"]] == i)
   
-  has_bridge <- any(edges[["is_bridge"]][tangent_edges])
+  has_bridge <- any(edges[["is_bridge"]][outbound_edges])
   has_non_bridge <- any(!(edges[["is_bridge"]][tangent_edges]))
-  has_multi_bridge <- n_distinct(edges[["bridge_id"]][tangent_edges], na.rm = TRUE) >= 2
+  has_multi_bridge <- n_distinct(edges[["bridge_id"]][outbound_edges], na.rm = TRUE) >= 2
   is_interface <- (has_bridge & has_non_bridge) | has_multi_bridge
-  assoc_bridge <- first(na.omit(edges[["bridge_id"]][tangent_edges]))
+  assoc_bridge <- first(na.omit(edges[["bridge_id"]][outbound_edges]))
   
   list(is_interface = is_interface, associated_bridge = assoc_bridge)
 }
@@ -299,7 +300,7 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limi
   osmar_nodes <- osm_node_attributes(raw_osmar)
   osmar_edges <- osm_edge_attributes(raw_osmar)
 
-  graph <- as_tbl_graph(graph_osmar, directed = FALSE) %>%
+  graph <- as_tbl_graph(graph_osmar, directed = TRUE) %>%
     activate(nodes) %>%
     left_join(osmar_nodes, by = c("name" = "id")) %>%
     activate(edges) %>%
@@ -316,14 +317,19 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limi
   if (!is.null(in_pgh_nodes) & keep_full) graph <- filter_bridges_to_nodes(graph, in_pgh_nodes)
   if (!is.null(in_pgh_nodes) & !keep_full) graph <- filter_to_nodes(graph, in_pgh_nodes)
   if (!is.null(limits)) graph <- filter_to_limits(graph, limits)
+  
+  # Add reverse edges of non-one-way streets
+  reversed_edges <- graph %>% 
+    as_tibble("edges") %>% 
+    filter(is.na(oneway) | oneway != "yes") %>% 
+    select(from = to, to = from, everything())
+  graph <- bind_edges(graph, reversed_edges)
 
   # Give a final persistent ID for edges
   graph %>% 
     select_main_component() %>% 
     activate(edges) %>% 
-    mutate(.id = row_number()) %>% 
-    as.undirected(mode = "each") %>% 
-    as_tbl_graph(directed = FALSE)
+    mutate(.id = row_number())
 }
 
 # Plotting ----
