@@ -66,13 +66,12 @@ greedy_search <- function(starting_point, graph, quiet = !interactive()) {
   
   vpath = as.list(qv)
   epath = as.list(qe)
-  path_distance = total_distance(graph, epath)
-  
+
   results <- lst(
     epath,
     vpath,
-    path_distance,
-    pathfinding_results
+    pathfinding_results,
+    starting_point
   )
   
   # rev() the queues holding the edge and node lists so that R can efficiently garbage-collect them
@@ -140,7 +139,7 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
   pushback(qe, epath)
   pushback(qv, vpath)
   
-  if (is_bridge_crossing) {
+  # if (is_bridge_crossing) {
     bridges_crossed <- na.omit(unique(edge_attr(graph, "bridge_id", index = epath)))
     if (length(bridges_crossed) > 0) {
       message("Bridges crossed: ", str_c(bridges_crossed, collapse = "; "))
@@ -156,7 +155,7 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
       message("removing nodes ", str_c(removed_nodes, collapse = "; "))
       search_set <- setdiff(search_set, bridge_nodes)
     }
-  }
+  # }
   
   # Pass two items to the next search step:
   # 1) the final node of the vpath - this becomes the starting point for the next step
@@ -183,10 +182,6 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
                      is_bridge_crossing = !is_bridge_crossing,
                      quiet = quiet)
   )
-}
-
-total_distance <- function(graph, epath) {
-  sum(edge_attr(graph, "distance", index = which(edge_attr(graph, ".id") %in% epath)))
 }
 
 step_status_message <- function(starting_point, search_set, is_bridge_crossing, bridge_id = NULL) {
@@ -218,12 +213,24 @@ remove_bridge_from_set <- function(graph, search_set, bridge_id) {
   setdiff(search_set, bridge_points)
 }
 
-assess_pathway <- function(l) {
-  map_df(l, function(x) {
-    data_frame(point = x$pathfinding_results$point, 
-               distance = x$path_distance, 
-               missing_points = length(x$pathfinding_results$search_set))
-  }, .id = "target") %>% 
-    arrange(missing_points, distance) %>% 
-    mutate(performance_rank = row_number())
+assess_all_paths <- function(l, graph) {
+  map_df(l, assess_path, graph = graph, .id = "target")
+}
+
+path_step_distance <- function(eids, graph) {
+  sum(edge_attr(graph, "distance", index = eids))
+}
+
+path_bridge_crossed <- function(eids, graph) {
+  bridges_crossed <- unique(edge_attr(graph, "bridge_id", index = eids))
+}
+
+assess_path <- function(p, graph) {
+  starting_point <- p$starting_point
+  total_distance <- sum(map_dbl(p$epath, path_step_distance, graph = graph))
+  times_bridges_crossed <- p$epath %>% 
+    map(path_bridge_crossed, graph = graph) %>% 
+    flatten_chr() %>% 
+    na.omit() %>% 
+    fct_count()
 }
