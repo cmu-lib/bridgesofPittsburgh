@@ -1,5 +1,4 @@
 source("osmar/osmar_graph.R")
-graph_cache <- new_cache(".graph")
 make(pgh_plan, c("tiny_interface_points", "pgh_interface_points"), cache = graph_cache)
 orig_tiny_interface_points = readd("tiny_interface_points", cache = graph_cache)
 orig_pgh_interface_points = readd("pgh_interface_points", cache = graph_cache)
