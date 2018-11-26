@@ -100,16 +100,6 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
     candidate_points <- search_set
   }
   
-  # If the candidate point lengths are 0, this means the point may likely be
-  # tangent to another bridge and so it's not inherited both associated bridge
-  # IDs. In this case, allow pathfinding to seek out the next closest bridge.
-  if (length(candidate_points) == 0) {
-    message("no bridge candidates, looking for a new point")
-    is_bridge_crossing <- FALSE
-    bridge_id <- NULL
-    candidate_points <- search_set
-  }
-  
   # Report on status
   if (!quiet) message(step_status_message(starting_point, search_set, is_bridge_crossing, bridge_id))
   
