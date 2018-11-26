@@ -13,6 +13,7 @@ library(rgdal)
 library(assertr)
 library(httr)
 library(furrr)
+library(geosphere)
 
 tiny_limits <- list(xlim = c(-80.0054, -79.9817), ylim = c(40.4424, 40.4602))
 
@@ -107,11 +108,12 @@ remove_unreachable_nodes <- function(graph) {
 
 # Weights by carteisan distance of from and to nodes
 # the "conversion" factor is
-weight_by_distance <- function(graph, conversion = 91805.38) {
+weight_by_distance <- function(graph) {
   graph %>%
     activate(edges) %>%
-    mutate(distance = sqrt((.N()$lat[from] - .N()$lat[to])^2 +
-                           (.N()$lon[from] - .N()$lon[to])^2) * conversion)
+    mutate(distance = geosphere::distGeo(
+      p1 = cbind(.N()$lon[from], .N()$lat[from]),
+      p2 = cbind(.N()$lon[to], .N()$lat[to])))
 }
 
 # Match UIDs for nodes even after a graph has been modified and the node index
