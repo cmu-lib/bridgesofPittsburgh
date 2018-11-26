@@ -29,7 +29,7 @@ mark_graph <- function(graph, pathway) {
     simplify(remove.multiple = TRUE, edge.attr.comb = list(edge_cateogry = "max", flagged_edge = "max", "first")) %>% 
     as_tbl_graph() %>% 
     activate(edges) %>% 
-    mutate_at(vars(flagged_edge), as.factor(as.logical(.)))
+    mutate(flagged_edge = as.factor(as.logical(flagged_edge)))
   
   marked_graph
 }
@@ -66,7 +66,7 @@ bridges_only_plot <- function(edges, filepath) {
   plot(edges["is_bridge"], pal = c(
     "TRUE" = "gray",
     "FALSE" = "red"
-  ), lwd = if_else(edges$is_bridge, 2, 0.5))
+  ), lwd = if_else(edges$is_bridge == "TRUE", 2, 0.5))
   dev.off()
 }
 
@@ -77,20 +77,22 @@ pathway_plot <- function(edges, filepath) {
     "crossed road" = "#1b9e77",
     "uncrossed bridge" = "#e6ab02",
     "uncrossed road" = "gray"
-  ), lwd = if_else(edges$flagged_edge, 2, 0.5))
+  ), lwd = if_else(edges$flagged_edge == "TRUE", 2, 0.5))
   dev.off()
 }
 
 animation_frame <- function(e, i, edges, dirpath) {
-  edges$highlight <- edges$.id %in% e
+  if (length(e) == 0) {
+    edges$highlight <- FALSE
+  } else {
+    edges$highlight <- edges$.id %in% e
+  }
   png(fs::path(dirpath, paste0(str_pad(i, width = 3, pad = "0", side = "left"), "map"), ext = "png"), height = 768, width = 1024)
   plot(edges["highlight"], pal = c("gray", "red"), lwd = if_else(edges$highlight, 3, 1))
   dev.off()
 }
 
 animation_plot <- function(pathway, edges, dirpath) {
-  # Keep only those pathway steps where at least one edge is crossed
-  non_empty_path <- discard(pathway$epath, ~ length(.) == 0)
   fs::dir_create(dirpath)
-  iwalk(non_empty_path, animation_frame, edges = edges, dirpath = dirpath)
+  iwalk(pathway$epath, animation_frame, edges = edges, dirpath = dirpath)
 }
