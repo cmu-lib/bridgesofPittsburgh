@@ -1,13 +1,25 @@
 library(sf)
 library(fs)
+library(mapview)
 source("osmar/pathfinding_build.R")
 
 plot_plan <- drake_plan(
   filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_4757),
-  simplified_graph = simplify_two_way_streets(filtered_graph),
-  pathway_sf = graph_as_sf(simplified_graph),
+  pathway_sf = graph_as_sf(filtered_graph),
+  only_pathway_sf = filter(pathway_sf, edge_category != "uncrossed road"),
   bridge_map = bridges_only_plot(pathway_sf, file_out("osmar/output_data/bridges_map.pdf")),
-  pathway_map = pathway_plot(pathway_sf, file_out("osmar/output_data/pathway_map.pdf"))
+  pathway_map = pathway_plot(pathway_sf, file_out("osmar/output_data/pathway_map.pdf")),
+  labeled_map = labeled_plot(pathway_sf, file_out("osmar/output_data/labeled_map.pdf")),
+  leaflet_map = mapview(only_pathway_sf["edge_category"], 
+                        label = only_pathway_sf[["edge_labels"]],
+                        color = c(
+                          "crossed bridge" = "#d95f02",
+                          "crossed road" = "#1b9e77",
+                          "uncrossed bridge" = "#e6ab02",
+                          "uncrossed road" = "gray"
+                        ),
+                        lwd = if_else(only_pathway_sf$flagged_edge == "TRUE", 2, 0.5)),
+  output_leaflet = mapshot(leaflet_map, url = file_out(fs::path(getwd(), "pgh_leaflet.html")))
 )
 
 all_plots <- bind_plans(
@@ -35,18 +47,9 @@ filter_graph_to_pathway <- function(graph, pathway) {
       ordered = TRUE)
     ) %>% 
     filter(within_boundaries | flagged_edge) %>% 
-    select_main_component()
-}
-
-simplify_two_way_streets <- function(graph) {
-  # Simplify multiple edges on all two-way roads so that we only plot one line
-  # per road. The edge category is a ranked factor, so it will plot as a
-  # crossed bridge before being plotted as anything else, etc.
-  graph %>% 
-    igraph::simplify(remove.multiple = TRUE, edge.attr.comb = list(edge_cateogry = "max", flagged_edge = "max", "first")) %>% 
-    as_tbl_graph() %>% 
+    select_main_component() %>% 
     activate(edges) %>% 
-    mutate(flagged_edge = as.factor(as.logical(flagged_edge)))
+    mutate_at(vars(flagged_edge), funs(as.factor(as.logical(.))))
 }
 
 graph_as_sf <- function(marked_graph) {
@@ -91,6 +94,14 @@ pathway_plot <- function(edges, filepath) {
   dev.off()
 }
 
+labeled_plot <- function(edges, filepath) {
+  p <- ggplot(edges) +
+    geom_sf(aes(fill = edge_category)) +
+    geom_sf_text(aes(label = edge_label), check_overlap = TRUE)
+  
+  ggsave(filename = filepath, plot = p, width = 20, height = 20)
+}
+
 # Animation ----
 
 animation_frame <- function(e, i, edges, dirpath) {
@@ -100,7 +111,7 @@ animation_frame <- function(e, i, edges, dirpath) {
     edges$highlight <- edges$.id %in% e
   }
   png(fs::path(dirpath, paste0(str_pad(i, width = 3, pad = "0", side = "left"), "map"), ext = "png"), height = 768, width = 1024)
-  plot(edges["highlight"], pal = c("gray", "red"), lwd = if_else(edges$highlight, 3, 1))
+  plot(edges["highlight"], pal = c("gray", "red"), lwd = if_else(edges$highlight, 3, 1), key.pos = NULL)
   dev.off()
 }
 
