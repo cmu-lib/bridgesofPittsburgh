@@ -207,7 +207,7 @@ filter_bridges_to_nodes <- function(graph, node_ids) {
 # not to be confused with mark_required_edges() which only makrs those that will
 # eventually be required for RPP
 filter_to_allowed_paths <- function(graph) {
-  excluded_highways <- c("pedestrian", "footway")
+  excluded_highways <- c("pedestrian", "footway", "cycleway", "steps", "track", "elevator", "bus_stop", "construction", "no", "escape", "proposed", "raceway", "services")
 
   graph %>%
     activate(edges) %>%
