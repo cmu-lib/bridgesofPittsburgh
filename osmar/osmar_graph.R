@@ -33,13 +33,7 @@ tiny_plan <- drake_plan(
   tiny_graph = as_igraph(tiny_raw),
   tiny_tidy_graph_unmarked = enrich_osmar_graph(tiny_raw, tiny_graph, limits = tiny_limits),
   tidy_tiny_graph = mark_interface_nodes(tiny_tidy_graph_unmarked),
-  tiny_interface_points = get_interface_points(tidy_tiny_graph),
-  tiny_termini = way_termini(tiny_raw),
-  tiny_needs_rewiring = bridges_to_rewire(tiny_tidy_graph),
-  tiny_rewired_graph = rewire_bridges(tiny_tidy_graph,
-                                      bridges = tiny_needs_rewiring,
-                                      termini = tiny_termini),
-  final_tiny_graph = tiny_rewired_graph %>% weight_by_distance() %>% mark_required_edges()
+  tiny_interface_points = get_interface_points(tidy_tiny_graph)
 )
 
 large_plan <- drake_plan(
@@ -65,8 +59,7 @@ large_plan <- drake_plan(
 
 pgh_plan <- bind_plans(
   tiny_plan,
-  large_plan,
-  merged_plot_plan
+  large_plan
 )
 
 # Data utilities ----
