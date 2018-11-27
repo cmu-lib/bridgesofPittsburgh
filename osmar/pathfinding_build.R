@@ -174,7 +174,7 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
   }
   
   # Force garbage collection before moving on
-  gc()
+  gc(full = TRUE)
   
   ignore( # To keep drake from reading this recursion as a cyclic dependency, we need to explicity ignore() this function call
     locate_next_path(graph = graph, 
