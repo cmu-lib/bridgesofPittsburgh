@@ -17,10 +17,8 @@ library(geosphere)
 
 tiny_limits <- list(xlim = c(-80.0054, -79.9817), ylim = c(40.4424, 40.4602))
 
-graph_cache <- new_cache(".graph")
-
 clean_osm <- function() {
-  clean("download_tiny", "download_osm", cache = graph_cache)
+  clean("download_tiny", "download_osm")
 }
 
 plan(multiprocess)

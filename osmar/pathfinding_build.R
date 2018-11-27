@@ -1,37 +1,29 @@
 source("osmar/osmar_graph.R")
-make(pgh_plan, c("tiny_interface_points", "pgh_interface_points"), cache = graph_cache)
-orig_tiny_interface_points = readd("tiny_interface_points", cache = graph_cache)
-orig_pgh_interface_points = readd("pgh_interface_points", cache = graph_cache)
-
-path_cache <- new_cache(".path")
-original_targets <- drake_plan(
-  tidy_tiny_graph = readd("tidy_tiny_graph", cache = graph_cache),
-  pgh_tidy_graph = readd("pgh_tidy_graph", cache = graph_cache)
-)
+make(pgh_plan, c("tiny_interface_points", "pgh_interface_points"))
 
 tiny_pathway_plan_generic <- drake_plan(tiny_pathway = greedy_search(starting_point = sp__, graph = tidy_tiny_graph, quiet = TRUE))
 pgh_pathway_plan_generic <- drake_plan(pgh_pathway = target(
   greedy_search(starting_point = sp__, graph = pgh_tidy_graph, quiet = TRUE),
   trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)))
 
-tiny_expanded_pathways <- evaluate_plan(tiny_pathway_plan_generic, rules = list(sp__ = orig_tiny_interface_points))
-pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = orig_pgh_interface_points))
+tiny_expanded_pathways <- evaluate_plan(tiny_pathway_plan_generic, rules = list(sp__ = readd("tiny_interface_points")))
+pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = readd("pgh_interface_points")))
 
 tiny_gathered <- gather_plan(tiny_expanded_pathways, target = "tiny_results", gather = "list")
 pgh_gathered <- gather_plan(pgh_expanded_pathways, target = "pgh_results", gather = "list")
 
-assessment_plan <- drake_plan(
-  tiny_performances = assess_pathway(tiny_results),
-  pgh_performances = assess_pathway(pgh_results)
-)
+assessment_plan_generic <- drake_plan(path_performance = assess_path(p = p__, graph = pgh_tidy_graph))
+assessment_plan <- evaluate_plan(assessment_plan_generic, rules = list(p__ = pgh_expanded_pathways$target))
+pgh_performances <- gather_plan(assessment_plan, target = "pgh_performances", gather = "rbind")
 
 all_pathways <- bind_plans(
-  original_targets,
+  pgh_plan,
   tiny_expanded_pathways,
   pgh_expanded_pathways,
   tiny_gathered,
   pgh_gathered,
-  assessment_plan
+  assessment_plan,
+  pgh_performances
 )
 
 # Greedy Search ----
@@ -42,8 +34,6 @@ all_pathways <- bind_plans(
 # Crossing that 2nd bridge, it then searches for the 3rd, disregarding the nodes
 # already visited. If all points are Inf distances (i.e. unreachable) the
 # function stops and returns the path as edge indices.
-
-# starting_point = 577
 
 library(dequer)
 
@@ -222,15 +212,32 @@ path_step_distance <- function(eids, graph) {
 }
 
 path_bridge_crossed <- function(eids, graph) {
-  bridges_crossed <- unique(edge_attr(graph, "bridge_id", index = eids))
+  unique(edge_attr(graph, "bridge_id", index = eids))
 }
 
 assess_path <- function(p, graph) {
   starting_point <- p$starting_point
+  ending_point <- p$pathfinding_results$point
+  n_steps <- length(p$epath)
+  
   total_distance <- sum(map_dbl(p$epath, path_step_distance, graph = graph))
   times_bridges_crossed <- p$epath %>% 
     map(path_bridge_crossed, graph = graph) %>% 
     flatten_chr() %>% 
     na.omit() %>% 
-    fct_count()
+    fct_count(sort = TRUE)
+  
+  max_times_crossed <- first(times_bridges_crossed$n)
+  bridge_most_crossed <- first(times_bridges_crossed$f)
+  mean_times_crossed <- mean(times_bridges_crossed$n)
+  
+  tibble(
+    n_steps,
+    starting_point,
+    ending_point,
+    total_distance,
+    mean_times_crossed,
+    max_times_crossed,
+    bridge_most_crossed
+  )
 }
