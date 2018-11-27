@@ -3,8 +3,7 @@ make(pgh_plan, c("tiny_interface_points", "pgh_interface_points"))
 
 tiny_pathway_plan_generic <- drake_plan(tiny_pathway = greedy_search(starting_point = sp__, graph = tidy_tiny_graph, quiet = TRUE))
 pgh_pathway_plan_generic <- drake_plan(pgh_pathway = target(
-  greedy_search(starting_point = sp__, graph = pgh_tidy_graph, quiet = TRUE),
-  trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)))
+  greedy_search(starting_point = sp__, graph = pgh_tidy_graph, quiet = TRUE)))
 
 tiny_expanded_pathways <- evaluate_plan(tiny_pathway_plan_generic, rules = list(sp__ = readd("tiny_interface_points")))
 pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = readd("pgh_interface_points")))
