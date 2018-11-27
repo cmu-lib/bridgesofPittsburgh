@@ -1,13 +1,26 @@
 library(sf)
 library(fs)
 source("osmar/pathfinding_build.R")
-loadd(c("tidy_tiny_graph", "pgh_tidy_graph"), cache = path_cache)
-loadd("pgh_pathway_2489", cache = path_cache)
 
-mark_graph <- function(graph, pathway) {
+plot_plan <- drake_plan(
+  filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_4757),
+  simplified_graph = simplify_two_way_streets(filtered_graph),
+  pathway_sf = graph_as_sf(simplified_graph),
+  bridge_map = bridges_only_plot(pathway_sf, file_out("osmar/output_data/bridges_map.pdf")),
+  pathway_map = pathway_plot(pathway_sf, file_out("osmar/output_data/pathway_map.pdf"))
+)
+
+all_plots <- bind_plans(
+  all_pathways,
+  plot_plan
+)
+
+# SF transforms ----
+
+filter_graph_to_pathway <- function(graph, pathway) {
   path_ids <- unique(flatten_int(pathway$epath))
   
-  marked_graph <- graph %>% 
+  graph %>% 
     activate(edges) %>% 
     mutate(
       edge_order = match(row_number(), path_ids),
@@ -22,19 +35,21 @@ mark_graph <- function(graph, pathway) {
       ordered = TRUE)
     ) %>% 
     filter(within_boundaries | flagged_edge) %>% 
-    select_main_component() %>% 
-    # Simplify multiple edges on all two-way roads so that we only plot one line
-    # per road. The edge category is a ranked factor, so it will plot as a
-    # crossed bridge before being plotted as anything else, etc.
+    select_main_component()
+}
+
+simplify_two_way_streets <- function(graph) {
+  # Simplify multiple edges on all two-way roads so that we only plot one line
+  # per road. The edge category is a ranked factor, so it will plot as a
+  # crossed bridge before being plotted as anything else, etc.
+  graph %>% 
     igraph::simplify(remove.multiple = TRUE, edge.attr.comb = list(edge_cateogry = "max", flagged_edge = "max", "first")) %>% 
     as_tbl_graph() %>% 
     activate(edges) %>% 
     mutate(flagged_edge = as.factor(as.logical(flagged_edge)))
-  
-  marked_graph
 }
 
-flagged_graph_as_sf <- function(marked_graph) {
+graph_as_sf <- function(marked_graph) {
   edges <- as_tibble(marked_graph, "edges") %>% arrange(.id)
   nodes <- as_tibble(marked_graph, "nodes") %>% mutate(index = row_number())
   
@@ -52,11 +67,6 @@ flagged_graph_as_sf <- function(marked_graph) {
   sf_col <- st_sfc(st_edges, crs = 4326)
   st_geometry(edges) <- sf_col
   edges
-}
-
-graph_to_sf <- function(graph, pathway) {
-  flagged_graph <- mark_graph(graph, pathway)
-  flagged_graph_as_sf(flagged_graph)
 }
 
 # Plotting ----
@@ -80,6 +90,8 @@ pathway_plot <- function(edges, filepath) {
   ), lwd = if_else(edges$flagged_edge == "TRUE", 2, 0.5))
   dev.off()
 }
+
+# Animation ----
 
 animation_frame <- function(e, i, edges, dirpath) {
   if (length(e) == 0) {
