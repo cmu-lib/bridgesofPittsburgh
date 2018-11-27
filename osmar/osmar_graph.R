@@ -42,21 +42,6 @@ tiny_plan <- drake_plan(
   final_tiny_graph = tiny_rewired_graph %>% weight_by_distance() %>% mark_required_edges()
 )
 
-plot_plan <- drake_plan(
-  tiny_plot = bridge_plot(tiny_tidy_graph),
-  tiny_plot_image = ggsave(tiny_plot, filename = file_out("osmar/output_data/tiny_image.png"), width = 10, height = 10),
-  final_tiny_plot = bridge_plot(final_tiny_graph),
-  final_tiny_plot_image = ggsave(final_tiny_plot, filename = file_out("osmar/output_data/final_tiny_plot_image.png"), width = 10, height = 10),
-  pgh_plot = bridge_plot(pgh_tidy_graph),
-  pgh_plot_image = ggsave(pgh_plot, filename = file_out("osmar/output_data/pgh_image.png"), width = 50, height = 40, limitsize = FALSE),
-  rewired_pgh_plot = bridge_plot(rewired_pgh_graph),
-  rewired_pgh_plot_image = ggsave(rewired_pgh_plot, filename = file_out("osmar/output_data/rewired_pgh_image.png"), width = 50, height = 40, limitsize = FALSE),
-  final_pgh_plot = bridge_plot(final_pgh_graph),
-  final_pgh_plot_image = ggsave(final_pgh_plot, filename = file_out("osmar/output_data/final_pgh_image.png"), width = 50, height = 40, limitsize = FALSE)
-)
-
-merged_plot_plan <- gather_plan(plot_plan, target = "plots")
-
 large_plan <- drake_plan(
   download_osm = target(
     command = get_osm_bbox("-80.1257,40.3405,-79.7978,40.5407"),
