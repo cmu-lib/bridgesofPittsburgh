@@ -4,7 +4,7 @@ library(mapview)
 source("osmar/pathfinding_build.R")
 
 plot_plan <- drake_plan(
-  filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_4757),
+  filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_2469),
   pathway_sf = graph_as_sf(filtered_graph),
   only_pathway_sf = filter(pathway_sf, edge_category != "uncrossed road"),
   bridge_map = bridges_only_plot(pathway_sf, file_out("osmar/output_data/bridges_map.pdf")),
@@ -19,7 +19,7 @@ plot_plan <- drake_plan(
                           "uncrossed road" = "gray"
                         ),
                         lwd = if_else(only_pathway_sf$flagged_edge == "TRUE", 2, 0.5)),
-  output_leaflet = mapshot(leaflet_map, url = file_out(fs::path(getwd(), "pgh_leaflet.html")))
+  output_leaflet = mapshot(leaflet_map, url = file_out(fs::path(getwd(), "osmar/output_data/pgh_leaflet.html")))
 )
 
 all_plots <- bind_plans(
