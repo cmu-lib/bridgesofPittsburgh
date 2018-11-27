@@ -79,9 +79,9 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
   if (is_bridge_crossing) {
     bridge_id <- vertex_attr(graph, "associated_bridge", starting_point)
     candidate_edges <- which(edge_attr(graph, "bridge_id") == bridge_id)
-    # Collect the "to" nodes of all the bridge edges, since we will always be
-    # starting at the tail/"from" node of a bridge edge
-    candidate_points <- setdiff(unique(as.integer(tail_of(graph, es = candidate_edges))), starting_point)
+    # Collect the head/"to" nodes of all the bridge edges, since we will always
+    # be starting at the tail/"from" node of a bridge edge
+    candidate_points <- setdiff(unique(as.integer(head_of(graph, es = candidate_edges))), starting_point)
   } else {
     bridge_id <- NULL
     candidate_points <- search_set
