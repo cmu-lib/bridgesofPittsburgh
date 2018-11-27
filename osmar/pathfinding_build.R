@@ -43,13 +43,14 @@ greedy_search <- function(starting_point, graph, quiet = !interactive()) {
   # Create queue to hold edgelist, since we don't know how long it will expand to
   qe <- queue()
   qv <- queue()
+  qb <- queue()
   
   # Start by crossing a bridge
   pathfinding_results <- locate_next_path(
     graph = graph, 
     starting_point = starting_point, 
     search_set = search_set, 
-    qe = qe, qv = qv, 
+    qe = qe, qv = qv, qb = qb,
     is_bridge_crossing = TRUE, 
     quiet = quiet)
   
@@ -66,18 +67,22 @@ greedy_search <- function(starting_point, graph, quiet = !interactive()) {
   # rev() the queues holding the edge and node lists so that R can efficiently garbage-collect them
   rev(qe)
   rev(qv)
+  rev(qb)
   remove(qe)
   remove(qv)
+  remove(qb)
   
   return(results)
 }
 
-locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridge_crossing, quiet) {
+locate_next_path <- function(graph, starting_point, search_set, qe, qv, qb, is_bridge_crossing, quiet) {
   
+  crossed_bridges <- flatten_chr(as.list(qb))
   search_set <- setdiff(search_set, starting_point)
   
   if (is_bridge_crossing) {
-    bridge_id <- vertex_attr(graph, "associated_bridge", starting_point)
+    # Get first uncrossed bridge that goes from this node
+    bridge_id <- first(setdiff(na.omit(edge_attr(graph, "bridge_id", E(graph)[.from(starting_point)])), crossed_bridges))
     candidate_edges <- which(edge_attr(graph, "bridge_id") == bridge_id)
     # Collect the head/"to" nodes of all the bridge edges, since we will always
     # be starting at the tail/"from" node of a bridge edge
@@ -138,23 +143,23 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
   pushback(qe, epath)
   pushback(qv, vpath)
   
-  # if (is_bridge_crossing) {
-    bridges_crossed <- na.omit(unique(edge_attr(graph, "bridge_id", index = epath)))
-    if (length(bridges_crossed) > 0) {
-      message("Bridges crossed: ", str_c(bridges_crossed, collapse = "; "))
-      
-      bridge_edges <- which(edge_attr(graph, "bridge_id") %in% bridges_crossed)
-      bridge_nodes <- as.integer(head_of(graph, es = bridge_edges))
-      
-      message("increasing weights for ", str_c(bridge_edges, collapse = "; "))
-      edge_attr(graph, "distance", index = bridge_edges) <- edge_attr(graph, "distance", index = bridge_edges) + 20000000
-      
-      # Remove all nodes on the crossed bridge from the remaining search set
-      removed_nodes <- intersect(search_set, bridge_nodes)
-      message("removing nodes ", str_c(removed_nodes, collapse = "; "))
-      search_set <- setdiff(search_set, bridge_nodes)
-    }
-  # }
+  bridges_crossed <- na.omit(unique(edge_attr(graph, "bridge_id", index = epath)))
+  if (length(bridges_crossed) > 0) {
+    # Any bridges crossed get added to the queue
+    pushback(qb, bridges_crossed)
+    message("Bridges crossed: ", str_c(bridges_crossed, collapse = "; "))
+    
+    bridge_edges <- which(edge_attr(graph, "bridge_id") %in% bridges_crossed)
+    bridge_nodes <- as.integer(head_of(graph, es = bridge_edges))
+    
+    message("increasing weights for ", str_c(bridge_edges, collapse = "; "))
+    edge_attr(graph, "distance", index = bridge_edges) <- edge_attr(graph, "distance", index = bridge_edges) + 20000000
+    
+    # Remove all nodes on the crossed bridge from the remaining search set
+    removed_nodes <- intersect(search_set, bridge_nodes)
+    message("removing nodes ", str_c(removed_nodes, collapse = "; "))
+    search_set <- setdiff(search_set, bridge_nodes)
+  }
   
   # Pass two items to the next search step:
   # 1) the final node of the vpath - this becomes the starting point for the next step
@@ -180,7 +185,7 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, is_bridg
     locate_next_path(graph = graph, 
                      starting_point = new_starting_point, 
                      search_set = search_set,
-                     qe = qe, qv = qv, 
+                     qe = qe, qv = qv, qb = qb,
                      is_bridge_crossing = !is_bridge_crossing,
                      quiet = quiet)
   )

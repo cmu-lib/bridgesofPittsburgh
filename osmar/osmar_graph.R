@@ -255,7 +255,6 @@ mark_interface_nodes <- function(graph) {
   plan(multiprocess)
   interface_results <- future_map(seq_len(vcount(graph)), is_node_interface, edges = as_tibble(graph, "edges"))
   V(graph)$is_interface <- map_lgl(interface_results, "is_interface")
-  V(graph)$associated_bridge <- map_chr(interface_results, "associated_bridge")
   
   graph
 }
@@ -269,9 +268,8 @@ is_node_interface <- function(i, edges) {
   has_non_bridge <- any(!(edges[["is_bridge"]][tangent_edges]))
   has_multi_bridge <- n_distinct(edges[["bridge_id"]][outbound_edges], na.rm = TRUE) >= 2
   is_interface <- (has_bridge & has_non_bridge) | has_multi_bridge
-  assoc_bridge <- first(na.omit(edges[["bridge_id"]][outbound_edges]))
   
-  list(is_interface = is_interface, associated_bridge = assoc_bridge)
+  list(is_interface = is_interface)
 }
 
 enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limits = NULL, keep_full = TRUE) {
