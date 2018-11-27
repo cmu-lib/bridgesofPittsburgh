@@ -26,7 +26,7 @@ mark_graph <- function(graph, pathway) {
     # Simplify multiple edges on all two-way roads so that we only plot one line
     # per road. The edge category is a ranked factor, so it will plot as a
     # crossed bridge before being plotted as anything else, etc.
-    simplify(remove.multiple = TRUE, edge.attr.comb = list(edge_cateogry = "max", flagged_edge = "max", "first")) %>% 
+    igraph::simplify(remove.multiple = TRUE, edge.attr.comb = list(edge_cateogry = "max", flagged_edge = "max", "first")) %>% 
     as_tbl_graph() %>% 
     activate(edges) %>% 
     mutate(flagged_edge = as.factor(as.logical(flagged_edge)))
