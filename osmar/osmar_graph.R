@@ -16,6 +16,7 @@ library(furrr)
 library(geosphere)
 
 tiny_limits <- list(xlim = c(-80.0054, -79.9817), ylim = c(40.4424, 40.4602))
+big_limits <- list(xlim = c(-80.1257, -79.7978), ylim = c(40.3405, 40.5407))
 
 clean_osm <- function() {
   clean("download_tiny", "download_osm")
@@ -38,7 +39,7 @@ tiny_plan <- drake_plan(
 
 large_plan <- drake_plan(
   download_osm = target(
-    command = get_osm_bbox("-80.1257,40.3405,-79.7978,40.5407"),
+    command = get_osm_bbox("{big_limits$xlim[1]},{big_limits$ylim[1]},{big_limits$xlim[2]},{big_limits$ylim[2]}"),
     # Must manually trigger a new data download
     trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)),
   pgh_raw = read_osm_response(download_osm),
