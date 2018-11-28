@@ -9,6 +9,8 @@ plot_plan <- drake_plan(
   modular_graph = add_modularity(filtered_graph, group_walktrap, steps = 10),
   
   # Layers
+  pathway_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_2469, linefun = produce_step_linestring),
+  pathway_multiline_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_2469, linefun = produce_step_multiline),
   bridges_layer = filter(pathway_sf, edge_category == "crossed bridge"),
   crossed_roads_layer = filter(pathway_sf, edge_category == "crossed road"),
   uncrossed_roads_layer = filter(pathway_sf, edge_category == "uncrossed road"),
@@ -24,6 +26,8 @@ plot_plan <- drake_plan(
 )
 
 shp_plan <- drake_plan(
+  pathway_shp = write_sf(pathway_layer, file_out("osmar/output_data/shapefiles/pathway_linestring"), driver = "ESRI Shapefile"),
+  pathway_multiline_shp = write_sf(pathway_multiline_layer, file_out("osmar/output_data/shapefiles/pathway_multilinestring"), driver = "ESRI Shapefile"),
   bridge_shp = write_sf(bridges_layer, file_out("osmar/output_data/shapefiles/bridges_shp"), driver = "ESRI Shapefile"),
   crossed_roads_shp = write_sf(crossed_roads_layer, file_out("osmar/output_data/shapefiles/pathway_shp"), driver = "ESRI Shapefile")
 )
@@ -66,6 +70,55 @@ add_modularity <- function(graph, modfun, ...) {
 }
 
 # SF transforms ----
+
+produce_pathway_sf <- function(graph, pathway, linefun) {
+  edges <- as_tibble(graph, "edges") %>% arrange(.id)
+  nodes <- as_tibble(graph, "nodes") %>% mutate(index = row_number())
+  
+  res <- imap(pathway$epath, linefun, edges = edges, nodes = nodes)
+  do.call(rbind, args = res)
+}
+
+produce_step_multiline <- function(eids, i, edges, nodes) {
+  select_edges <- edges[eids,]
+  
+  poly_attr <- data.frame(step = i)
+  
+  st_edges <- select_edges %>% 
+    select(.id, from, to) %>% 
+    gather(key = "dim", value = "index", from, to) %>%
+    arrange(.id, dim) %>% 
+    left_join(select(nodes, lat, lon, index), by = "index") %>% 
+    split(as.factor(.$.id)) %>% 
+    map(function(x) {
+      cbind(x$lon, x$lat)
+    }) %>% 
+    st_multilinestring()
+  
+  sf_col <- st_sfc(st_edges, crs = 4326)
+  st_geometry(poly_attr) <- sf_col
+  poly_attr
+}
+
+produce_step_linestring <- function(eids, i, edges, nodes) {
+  select_edges <- edges[eids,]
+  
+  st_edges <- select_edges %>% 
+    select(.id, from, to) %>% 
+    gather(key = "dim", value = "index", from, to) %>%
+    arrange(.id, dim) %>% 
+    left_join(select(nodes, lat, lon, index), by = "index") %>% 
+    split(as.factor(.$.id)) %>% 
+    map(function(x) {
+      cbind(x$lon, x$lat)
+    }) %>% 
+    map(st_linestring)
+  
+  sf_col <- st_sfc(st_edges, crs = 4326)
+  st_geometry(select_edges) <- sf_col
+  select_edges$step <- i
+  select_edges
+}
 
 graph_as_sf <- function(marked_graph) {
   edges <- as_tibble(marked_graph, "edges") %>% arrange(.id)
