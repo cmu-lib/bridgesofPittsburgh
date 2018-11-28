@@ -145,7 +145,7 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, qb, is_b
     bridge_nodes <- as.integer(head_of(graph, es = bridge_edges))
     
     message("increasing weights for ", str_c(bridge_edges, collapse = "; "))
-    edge_attr(graph, "distance", index = bridge_edges) <- edge_attr(graph, "distance", index = bridge_edges) + 20000000
+    edge_attr(graph, "distance", index = bridge_edges) <- penalize(edge_attr(graph, "distance", index = bridge_edges))
     
     # Remove all nodes on the crossed bridge from the remaining search set
     removed_nodes <- intersect(search_set, bridge_nodes)
@@ -181,6 +181,11 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, qb, is_b
                      is_bridge_crossing = !is_bridge_crossing,
                      quiet = quiet)
   )
+}
+
+# Bridge weight penalty function
+penalize <- function(x) {
+  (x + 1000)^2
 }
 
 step_status_message <- function(starting_point, search_set, is_bridge_crossing, bridge_id = NULL) {
