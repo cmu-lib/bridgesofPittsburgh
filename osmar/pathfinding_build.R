@@ -242,7 +242,7 @@ assess_path <- function(p, graph) {
     fct_count(sort = TRUE)
   
   max_times_crossed <- first(times_bridges_crossed$n)
-  bridge_most_crossed <- first(times_bridges_crossed$f)
+  bridge_most_crossed <- as.character(first(times_bridges_crossed$f))
   mean_times_crossed <- mean(times_bridges_crossed$n)
   
   tibble(
