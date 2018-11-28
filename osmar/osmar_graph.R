@@ -14,6 +14,7 @@ library(assertr)
 library(httr)
 library(furrr)
 library(geosphere)
+library(sf)
 
 tiny_limits <- list(xlim = c(-80.0054, -79.9817), ylim = c(40.4424, 40.4602))
 big_limits <- list(xlim = c(-80.1257, -79.7978), ylim = c(40.3405, 40.5407))
@@ -45,6 +46,7 @@ large_plan <- drake_plan(
   pgh_raw = read_osm_response(download_osm),
   # Shapefile for PGH boundaries
   pgh_boundary_shp = as(readOGR(file_in("osmar/input_data/Pittsburgh_City_Boundary")), "SpatialPolygons"),
+  pgh_boundary_layer = read_sf(file_in("osmar/input_data/Pittsburgh_City_Boundary")),
   pgh_points_sp = as_sp(pgh_raw, "points"),
   point_overlap = over(pgh_points_sp, pgh_boundary_shp),
   in_bound_points = names(na.omit(point_overlap)),

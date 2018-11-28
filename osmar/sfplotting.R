@@ -6,28 +6,35 @@ source("osmar/pathfinding_build.R")
 plot_plan <- drake_plan(
   filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_2469),
   pathway_sf = graph_as_sf(filtered_graph),
-  only_pathway_sf = filter(pathway_sf, edge_category != "uncrossed road"),
+  modular_graph = add_modularity(filtered_graph, group_walktrap, steps = 10),
+  
+  # Layers
+  bridges_layer = filter(pathway_sf, edge_category == "crossed bridge"),
+  crossed_roads_layer = filter(pathway_sf, edge_category == "crossed road"),
+  uncrossed_roads_layer = filter(pathway_sf, edge_category == "uncrossed road"),
+  
   bridge_map = bridges_only_plot(pathway_sf, file_out("osmar/output_data/bridges_map.pdf")),
   pathway_map = pathway_plot(pathway_sf, file_out("osmar/output_data/pathway_map.pdf")),
   labeled_map = labeled_plot(pathway_sf, file_out("osmar/output_data/labeled_map.pdf")),
-  leaflet_map = mapview(only_pathway_sf["edge_category"], 
-                        label = only_pathway_sf[["edge_labels"]],
-                        color = c(
-                          "crossed bridge" = "#d95f02",
-                          "crossed road" = "#1b9e77",
-                          "uncrossed bridge" = "#e6ab02",
-                          "uncrossed road" = "gray"
-                        ),
-                        lwd = if_else(only_pathway_sf$flagged_edge == "TRUE", 2, 0.5)),
+  leaflet_map = mapview_plot(list(
+    "Bridges" = bridges_layer, 
+    "Crossed roads" = crossed_roads_layer, 
+    "Pittsburgh boudary" = pgh_boundary_layer)),
   output_leaflet = mapshot(leaflet_map, url = file_out(fs::path(getwd(), "osmar/output_data/pgh_leaflet.html")))
+)
+
+shp_plan <- drake_plan(
+  bridge_shp = write_sf(bridges_layer, file_out("osmar/output_data/shapefiles/bridges_shp"), driver = "ESRI Shapefile"),
+  crossed_roads_shp = write_sf(crossed_roads_layer, file_out("osmar/output_data/shapefiles/pathway_shp"), driver = "ESRI Shapefile")
 )
 
 all_plots <- bind_plans(
   all_pathways,
+  shp_plan,
   plot_plan
 )
 
-# SF transforms ----
+# Graph transforms ----
 
 filter_graph_to_pathway <- function(graph, pathway) {
   path_ids <- unique(flatten_int(pathway$epath))
@@ -51,6 +58,14 @@ filter_graph_to_pathway <- function(graph, pathway) {
     activate(edges) %>% 
     mutate_at(vars(flagged_edge), funs(as.factor(as.logical(.))))
 }
+
+add_modularity <- function(graph, modfun, ...) {
+  graph %>% 
+    activate(nodes) %>% 
+    mutate(modularity = modfun(weights = distance, ...))
+}
+
+# SF transforms ----
 
 graph_as_sf <- function(marked_graph) {
   edges <- as_tibble(marked_graph, "edges") %>% arrange(.id)
@@ -100,6 +115,10 @@ labeled_plot <- function(edges, filepath) {
     geom_sf_text(aes(label = edge_label), check_overlap = TRUE)
   
   ggsave(filename = filepath, plot = p, width = 20, height = 20)
+}
+
+mapview_plot <- function(l) {
+  mapview(l)
 }
 
 # Animation ----
