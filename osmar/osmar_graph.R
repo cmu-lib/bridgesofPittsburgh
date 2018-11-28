@@ -54,6 +54,7 @@ large_plan <- drake_plan(
   pgh_tidy_graph_unmarked = enrich_osmar_graph(pgh_raw, pgh_graph, in_pgh_nodes = in_bound_points),
   pgh_tidy_graph = mark_interface_nodes(pgh_tidy_graph_unmarked),
   pgh_interface_points = get_interface_points(pgh_tidy_graph),
+  pgh_starting_points = get_starting_points(pgh_tidy_graph, pgh_interface_points),
   pgh_nodes = write_csv(as_tibble(pgh_tidy_graph, "nodes"), path = file_out("osmar/output_data/pgh_nodes.csv"), na = ""),
   pgh_edges = write_csv(as_tibble(pgh_tidy_graph, "edges"), path = file_out("osmar/output_data/pgh_edges.csv"), na = "")
 )
@@ -109,6 +110,24 @@ select_main_component <- function(graph) {
 
 get_interface_points <- function(graph) {
   which(V(graph)$is_interface)
+}
+
+get_starting_points <- function(graph, interface_points) {
+  # Pick one interface point per unique bridge
+  point_bridges <- map_df(set_names(interface_points), function(p) {
+    ei <- E(graph)[.from(p)]
+    unique_bridges <- unique(edge_attr(graph, "bridge_id", ei))
+    data_frame(
+      bridge_id = unique_bridges
+    )
+  }, .id = "point")
+  
+  # Take the first point for each bridge
+  point_bridges %>% 
+    filter(!is.na(bridge_id)) %>% 
+    distinct(bridge_id, .keep_all = TRUE) %>% 
+    pull(point) %>% 
+    as.integer()
 }
 
 # Identifying bridges ----

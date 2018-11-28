@@ -1,15 +1,10 @@
 source("osmar/osmar_graph.R")
-make(pgh_plan, c("tiny_interface_points", "pgh_interface_points"))
+make(pgh_plan, "pgh_starting_points")
 
-tiny_pathway_plan_generic <- drake_plan(tiny_pathway = greedy_search(starting_point = sp__, graph = tidy_tiny_graph, quiet = TRUE))
 pgh_pathway_plan_generic <- drake_plan(pgh_pathway = target(
   greedy_search(starting_point = sp__, graph = pgh_tidy_graph, quiet = TRUE)))
 
-tiny_expanded_pathways <- evaluate_plan(tiny_pathway_plan_generic, rules = list(sp__ = readd("tiny_interface_points")))
-pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = readd("pgh_interface_points")))
-
-tiny_gathered <- gather_plan(tiny_expanded_pathways, target = "tiny_results", gather = "list")
-pgh_gathered <- gather_plan(pgh_expanded_pathways, target = "pgh_results", gather = "list")
+pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = readd("pgh_starting_points")))
 
 assessment_plan_generic <- drake_plan(path_performance = assess_path(p = p__, graph = pgh_tidy_graph))
 assessment_plan <- evaluate_plan(assessment_plan_generic, rules = list(p__ = pgh_expanded_pathways$target))
@@ -17,10 +12,7 @@ pgh_performances <- gather_plan(assessment_plan, target = "pgh_performances", ga
 
 all_pathways <- bind_plans(
   pgh_plan,
-  tiny_expanded_pathways,
   pgh_expanded_pathways,
-  tiny_gathered,
-  pgh_gathered,
   assessment_plan,
   pgh_performances
 )
