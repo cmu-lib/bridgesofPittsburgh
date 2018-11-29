@@ -6,7 +6,7 @@ source("osmar/pathfinding_build.R")
 plot_plan <- drake_plan(
   filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_2469),
   pathway_sf = graph_as_sf(filtered_graph),
-  modular_graph = add_modularity(filtered_graph, group_walktrap, steps = 10),
+  modular_graph = add_modularity(filtered_graph, group_walktrap, steps = 1000),
   
   # Layers
   pathway_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_2469, linefun = produce_step_linestring),
@@ -55,7 +55,8 @@ filter_graph_to_pathway <- function(graph, pathway) {
         is_bridge & !flagged_edge ~ "uncrossed bridge",
         TRUE ~ "uncrossed road"
       ), levels = c("crossed bridge", "crossed road", "uncrossed bridge", "uncrossed road"),
-      ordered = TRUE)
+      ordered = TRUE),
+      osm_url = str_glue("https://openstreetmap.org/way/{name}")
     ) %>% 
     filter(within_boundaries | flagged_edge) %>% 
     select_main_component() %>% 
@@ -72,7 +73,9 @@ add_modularity <- function(graph, modfun, ...) {
 # SF transforms ----
 
 produce_pathway_sf <- function(graph, pathway, linefun) {
-  edges <- as_tibble(graph, "edges") %>% arrange(.id)
+  edges <- as_tibble(graph, "edges") %>% 
+    mutate(osm_url = str_glue("https://openstreetmap.org/way/{name}")) %>% 
+    arrange(.id)
   nodes <- as_tibble(graph, "nodes") %>% mutate(index = row_number())
   
   res <- imap(pathway$epath, linefun, edges = edges, nodes = nodes)
