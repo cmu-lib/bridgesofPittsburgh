@@ -1,22 +1,5 @@
 source("osmar/osmar_graph.R")
-make(pgh_plan, "pgh_starting_points")
 
-pgh_pathway_plan_generic <- drake_plan(pgh_pathway = target(
-  greedy_search(starting_point = sp__, graph = pgh_tidy_graph, quiet = TRUE),
-  trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)))
-
-pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = readd("pgh_starting_points")))
-
-assessment_plan_generic <- drake_plan(path_performance = assess_path(p = p__, graph = pgh_tidy_graph))
-assessment_plan <- evaluate_plan(assessment_plan_generic, rules = list(p__ = pgh_expanded_pathways$target))
-pgh_performances <- gather_plan(assessment_plan, target = "pgh_performances", gather = "rbind")
-
-all_pathways <- bind_plans(
-  pgh_plan,
-  pgh_expanded_pathways,
-  assessment_plan,
-  pgh_performances
-)
 
 # Greedy Search ----
 
