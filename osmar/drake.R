@@ -17,35 +17,14 @@ library(geosphere)
 library(sf)
 library(fs)
 library(mapview)
+library(dequer)
 
 # Load all functions
 dir_walk("osmar/R", source)
 
 # Build graph ----
 
-tiny_limits <- list(xlim = c(-80.0054, -79.9817), ylim = c(40.4424, 40.4602))
-big_limits <- list(xlim = c(-80.1257, -79.7978), ylim = c(40.3405, 40.5407))
-
-plan(multiprocess)
-
-# Sample Graph
-tiny_plan <- drake_plan(
-  download_tiny = target(
-    command = get_osm_bbox(str_glue("{tiny_limits$xlim[1]},{tiny_limits$ylim[1]},{tiny_limits$xlim[2]},{tiny_limits$ylim[2]}")),
-    # Must manually trigger a new data download
-    trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)),
-  tiny_raw = read_osm_response(download_tiny),
-  tiny_graph = as_igraph(tiny_raw),
-  tiny_tidy_graph_unmarked = enrich_osmar_graph(tiny_raw, tiny_graph, limits = tiny_limits),
-  tidy_tiny_graph = mark_interface_nodes(tiny_tidy_graph_unmarked),
-  tiny_interface_points = get_interface_points(tidy_tiny_graph)
-)
-
-large_plan <- drake_plan(
-  download_osm = target(
-    command = get_osm_bbox("{big_limits$xlim[1]},{big_limits$ylim[1]},{big_limits$xlim[2]},{big_limits$ylim[2]}"),
-    # Must manually trigger a new data download
-    trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)),
+pgh_plan <- drake_plan(
   pgh_raw = read_osm_response(download_osm),
   # Shapefile for PGH boundaries
   pgh_boundary_shp = as(readOGR(file_in("osmar/input_data/Pittsburgh_City_Boundary")), "SpatialPolygons"),
@@ -64,13 +43,9 @@ large_plan <- drake_plan(
   pgh_edges = write_csv(as_tibble(pgh_tidy_graph, "edges"), path = file_out("osmar/output_data/pgh_edges.csv"), na = "")
 )
 
-pgh_plan <- bind_plans(
-  tiny_plan,
-  large_plan
-)
-
 # Locate pathways ----
 
+# In order to determine which 
 make(pgh_plan)
 
 pgh_pathway_plan_generic <- drake_plan(pgh_pathway = target(

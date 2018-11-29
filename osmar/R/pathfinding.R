@@ -1,6 +1,3 @@
-source("osmar/osmar_graph.R")
-
-
 # Greedy Search ----
 
 # This strategy doesn't rely on artificially rewiring bridges. Instead, it uses
@@ -9,8 +6,6 @@ source("osmar/osmar_graph.R")
 # Crossing that 2nd bridge, it then searches for the 3rd, disregarding the nodes
 # already visited. If all points are Inf distances (i.e. unreachable) the
 # function stops and returns the path as edge indices.
-
-library(dequer)
 
 greedy_search <- function(starting_point, graph, quiet = !interactive()) {
   search_set <- get_interface_points(graph)
@@ -167,6 +162,8 @@ locate_next_path <- function(graph, starting_point, search_set, qe, qv, qb, is_b
   )
 }
 
+# Pathfinding helpers ----
+
 # Bridge weight penalty function
 penalize <- function(x) {
   (x + 1000)^2
@@ -200,6 +197,8 @@ remove_bridge_from_set <- function(graph, search_set, bridge_id) {
   bridge_points <- get_bridge_points(graph, bridge_id)
   setdiff(search_set, bridge_points)
 }
+
+# Path assessment ----
 
 assess_all_paths <- function(l, graph) {
   map_df(l, assess_path, graph = graph, .id = "target")
