@@ -10,6 +10,24 @@ read_osm_response <- function(raw_response) {
   get_osm(complete_file(), source = osmsource_file(tfile))
 }
 
+osm_nodes_to_sf <- function(osm) {
+  nodes_sf <- cbind(osm$nodes$attrs$lon, osm$nodes$attrs$lat) %>% 
+    st_multipoint() %>% 
+    st_sfc(crs = 4326) %>%
+    st_cast("POINT")
+  
+  res <- select(osm$nodes$attrs, id)
+  st_geometry(res) <- nodes_sf
+  res
+}
+
+nodes_within_boundaries <- function(nodes, boundaries) {
+  res <- st_intersects(nodes, boundaries, sparse = FALSE) %>% 
+    apply(1, any)
+  
+  nodes$id[which(res)]
+}
+
 # Graph utilities ----
 
 remove_unreachable_nodes <- function(graph) {
