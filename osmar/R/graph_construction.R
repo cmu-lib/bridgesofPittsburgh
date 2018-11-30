@@ -215,7 +215,8 @@ add_parent_bridge_relations <- function(graph, raw_osm) {
     left_join(raw_osm$relations$refs, by = "id") %>%
     filter(type == "way") %>%
     mutate_at(vars(id, ref), as.character) %>%
-    select(name = ref, bridge_relation = id)
+    select(name = ref, bridge_relation = id) %>% 
+    distinct()
 
   graph %>%
     activate(edges) %>%
