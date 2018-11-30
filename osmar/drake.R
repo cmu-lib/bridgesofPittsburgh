@@ -65,16 +65,18 @@ pgh_plan <- bind_plans(
   pgh_performances
 )
 
+# At this point, it is necessary to run the pathways to evaluate which one we want to use for visualization purposes.
+
 # Visualize Pathways ----
 
 plot_plan <- drake_plan(
-  filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_2469),
+  filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_100279),
   pathway_sf = graph_as_sf(filtered_graph),
   modular_graph = add_modularity(filtered_graph, group_walktrap, steps = 10000),
   
   # Layers
-  pathway_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_2469, linefun = produce_step_linestring),
-  pathway_multiline_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_2469, linefun = produce_step_multiline),
+  pathway_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_100279, linefun = produce_step_linestring),
+  pathway_multiline_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_100279, linefun = produce_step_multiline),
   bridges_layer = filter(pathway_sf, edge_category == "crossed bridge"),
   crossed_roads_layer = filter(pathway_sf, edge_category == "crossed road"),
   uncrossed_roads_layer = filter(pathway_sf, edge_category == "uncrossed road"),
