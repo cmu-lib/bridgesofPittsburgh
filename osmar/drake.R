@@ -32,7 +32,7 @@ pgh_plan <- drake_plan(
   # Shapefile for PGH boundaries
   pgh_boundary_layer = read_sf(file_in("osmar/input_data/Pittsburgh_City_Boundary")),
   in_bound_points = nodes_within_boundaries(pgh_nodes_sf, pgh_boundary_layer),
-  
+
   # Full Graph
   pgh_graph = as_igraph(pgh_raw),
   pgh_tidy_graph_unmarked = enrich_osmar_graph(pgh_raw, pgh_graph, in_pgh_nodes = in_bound_points),
@@ -58,8 +58,10 @@ pgh_pathway_plan_generic <- drake_plan(pgh_pathway = target(
 
 pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = readd("pgh_starting_points")))
 
+# After building each pathway, run the assessment functions...
 assessment_plan_generic <- drake_plan(path_performance = assess_path(p = p__, graph = pgh_tidy_graph))
 assessment_plan <- evaluate_plan(assessment_plan_generic, rules = list(p__ = pgh_expanded_pathways$target))
+# ... and bind them into a dataframe
 pgh_performances <- gather_plan(assessment_plan, target = "pgh_performances", gather = "rbind")
 
 pgh_plan <- bind_plans(
@@ -74,27 +76,33 @@ pgh_plan <- bind_plans(
 # Visualize Pathways ----
 
 plot_plan <- drake_plan(
-  filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_100279),
+
+  # For visualization purposes only keep the graph within city limits + any
+  # additional edges traversed by the pathway
+  filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_15555),
   pathway_sf = graph_as_sf(filtered_graph),
-  modular_graph = add_modularity(filtered_graph, group_walktrap, steps = 10000),
-  
-  # Layers
-  pathway_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_100279, linefun = produce_step_linestring),
-  pathway_multiline_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_100279, linefun = produce_step_multiline),
+
+  # Produce different collections of simple features to be rendered on maps or
+  # as shapefiles
+  pathway_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_15555, linefun = produce_step_linestring),
+  pathway_multiline_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_15555, linefun = produce_step_multiline),
   bridges_layer = filter(pathway_sf, edge_category == "crossed bridge"),
   crossed_roads_layer = filter(pathway_sf, edge_category == "crossed road"),
   uncrossed_roads_layer = filter(pathway_sf, edge_category == "uncrossed road"),
-  
+
+  # Generate a variety fo static PDF maps
   bridge_map = bridges_only_plot(pathway_sf, file_out("osmar/output_data/bridges_map.pdf")),
   pathway_map = pathway_plot(pathway_sf, file_out("osmar/output_data/pathway_map.pdf")),
-  labeled_map = labeled_plot(pathway_sf, file_out("osmar/output_data/labeled_map.pdf")),
+
+  # Generate a standalone leaflet map
   leaflet_map = mapview_plot(list(
-    "Bridges" = bridges_layer, 
-    "Crossed roads" = crossed_roads_layer, 
+    "Bridges" = bridges_layer,
+    "Crossed roads" = crossed_roads_layer,
     "Pittsburgh boudary" = pgh_boundary_layer)),
   output_leaflet = mapshot(leaflet_map, url = file_out(fs::path(getwd(), "osmar/output_data/pgh_leaflet.html")))
 )
 
+# Produce several shapefiles
 shp_plan <- drake_plan(
   pathway_shp = write_sf(pathway_layer, file_out("osmar/output_data/shapefiles/pathway_linestring"), driver = "ESRI Shapefile"),
   pathway_multiline_shp = write_sf(pathway_multiline_layer, file_out("osmar/output_data/shapefiles/pathway_multilinestring"), driver = "ESRI Shapefile"),

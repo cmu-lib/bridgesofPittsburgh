@@ -1,22 +1,23 @@
 # Greedy Search ----
 
-# This strategy doesn't rely on artificially rewiring bridges. Instead, it uses
-# a greedy search along the original graph, starting at a randomly-chosen
-# bridge, crossing it, then taking the shortest path to the next closest bridge.
-# Crossing that 2nd bridge, it then searches for the 3rd, disregarding the nodes
-# already visited. If all points are Inf distances (i.e. unreachable) the
-# function stops and returns the path as edge indices.
+# This strategy uses a greedy search along the original graph, starting at a
+# randomly-chosen bridge, crossing it, then taking the shortest path to the next
+# closest bridge. Crossing that 2nd bridge, it then searches for the 3rd,
+# disregarding the nodes already visited. If all points are Inf distances (i.e.
+# unreachable) the function stops and returns the path as edge indices.
 
 greedy_search <- function(starting_point, graph, quiet = !interactive()) {
   search_set <- get_interface_points(graph)
   stopifnot(starting_point %in% search_set)
   
-  # Create queue to hold edgelist, since we don't know how long it will expand to
+  # Create queue to hold edgelist, nodelist, and bridgelist, since we don't know
+  # how long they need to be ahead of time.
   qe <- queue()
   qv <- queue()
   qb <- queue()
   
-  # Start by crossing a bridge
+  # Start by crossing a bridge. This function will recurse until it runs out of
+  # pathways or runs out of bridge termini to hit.
   pathfinding_results <- locate_next_path(
     graph = graph, 
     starting_point = starting_point, 
@@ -46,6 +47,27 @@ greedy_search <- function(starting_point, graph, quiet = !interactive()) {
   return(results)
 }
 
+# Primary recursive function that steps through the graph. This function has two
+# modes depending on the value of is_bridge_crossing:
+#
+# - If TRUE, the function tries to cross the the farthest node THAT BELONGS TO
+# THE SAME BRIDGE, almost always ensuring that it successfully crosses the
+# bridge.
+#
+# - If FALSE, the function looks for the next nearest point that is the entry
+# point for a bridge, and takes that path.
+#
+# Regardless of which mode the function is using, it saves both the node & edge
+# paths to the queues, and then checks which bridges have been crossed by the
+# path it just took. For those bridges, it 1) increases ALL the bridge edge
+# weights (not just the weights of the bridges crossed) by squaring them, making
+# them exponentially less-attractive for future crossings; and 2) removes any of
+# the associated nodes for that bridge from the remaining set of nodes to be
+# visited.
+#
+# After this, it passes the newly reweighted graph and the new starting point to
+# itself, and flips its mode. It will recurse until search_set is empty, or
+# until it can find no further paths to take.
 locate_next_path <- function(graph, starting_point, search_set, qe, qv, qb, is_bridge_crossing, quiet) {
   
   crossed_bridges <- flatten_chr(as.list(qb))
@@ -186,14 +208,17 @@ assess_all_paths <- function(l, graph) {
   map_df(l, assess_path, graph = graph, .id = "target")
 }
 
+# What is the distance in meters for the set of edges?
 path_step_distance <- function(eids, graph) {
   sum(edge_attr(graph, "distance", index = eids))
 }
 
+# Which bridges were crossed by this path?
 path_bridge_crossed <- function(eids, graph) {
   unique(edge_attr(graph, "bridge_id", index = eids))
 }
 
+# Return a one-row data frame with metrics on the pathway p
 assess_path <- function(p, graph) {
   starting_point <- p$starting_point
   ending_point <- p$pathfinding_results$point

@@ -10,6 +10,8 @@ read_osm_response <- function(raw_response) {
   get_osm(complete_file(), source = osmsource_file(tfile))
 }
 
+# Convert OSM nodes to sf so that we can determine which ones are withi the PGH
+# administrative boundary
 osm_nodes_to_sf <- function(osm) {
   nodes_sf <- cbind(osm$nodes$attrs$lon, osm$nodes$attrs$lat) %>% 
     st_multipoint() %>% 
@@ -64,6 +66,7 @@ get_interface_points <- function(graph) {
   which(V(graph)$is_interface)
 }
 
+# Staring points are points that have outgoing edges that are bridges
 get_starting_points <- function(graph, interface_points) {
   # Pick one interface point per unique bridge
   point_bridges <- map_df(set_names(interface_points), function(p) {
