@@ -26,7 +26,7 @@ dir_walk("osmar/R", source)
 
 pgh_plan <- drake_plan(
   big_limits = list(xlim = c(-80.1257, -79.7978), ylim = c(40.3405, 40.5407)),
-  download_osm = get_osm_bbox(str_glue("{big_limits$xlim[1]},{big_limits$ylim[1]},{big_limits$xlim[2]},{big_limits$ylim[2]}")),
+  download_osm = get_osm_bbox(big_limits$xlim, big_limits$ylim),
   pgh_raw = read_osm_response(download_osm),
   pgh_nodes_sf = osm_nodes_to_sf(pgh_raw),
   # Shapefile for PGH boundaries

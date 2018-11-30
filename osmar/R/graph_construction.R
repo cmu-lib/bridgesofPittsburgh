@@ -1,7 +1,7 @@
 # Data utilities ----
 
-get_osm_bbox <- function(bbox_string) {
-  content(GET(paste0("https://overpass-api.de/api/map?bbox=", bbox_string)), as = "text", encoding = "UTF-8")
+get_osm_bbox <- function(xlim, ylim) {
+  content(GET(str_glue("https://overpass-api.de/api/map?bbox={xlim[1]},{ylim[1]},{xlim[2]},{ylim[2]}")), as = "text", encoding = "UTF-8")
 }
 
 read_osm_response <- function(raw_response) {
