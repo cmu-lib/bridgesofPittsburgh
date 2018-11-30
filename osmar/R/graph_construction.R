@@ -120,28 +120,6 @@ osm_edge_attributes <- function(src) {
     mutate_at(vars(id), as.character)
 }
 
-way_termini <- function(src) {
-  long_termini <- src$ways$refs %>%
-    group_by(id) %>%
-    mutate(
-      index = row_number(),
-      first = row_number(index) == 1,
-      last = row_number(desc(index)) == 1) %>%
-    filter(first | last) %>%
-    ungroup()
-
-  firsts <- long_termini %>%
-    filter(first) %>%
-    select(way_id = id, start_node = ref)
-
-  lasts <- long_termini %>%
-    filter(last) %>%
-    select(way_id = id, end_node = ref)
-
-  left_join(firsts, lasts, by = "way_id") %>%
-    mutate_all(as.character)
-}
-
 # Only keep those nodes in the graph that are within a specified bounding box
 filter_to_limits <- function(graph, limits) {
   graph %>%

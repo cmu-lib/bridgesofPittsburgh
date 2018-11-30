@@ -180,24 +180,6 @@ step_status_message <- function(starting_point, search_set, is_bridge_crossing, 
   }
 }
 
-enquque <- function(x, v) {
-  walk(v, function(i) pushback(x, data = i))
-}
-
-get_bridge_points <- function(graph, bid) {
-  vertex_points <- graph %>% 
-    subgraph.edges(eids = which(edge_attr(graph, "bridge_id") == bid), delete.vertices = TRUE) %>% 
-    induced_subgraph(which(vertex_attr(., "is_interface"))) %>% 
-    vertex_attr("name")
-  
-  which(vertex_attr(graph, "name") %in% vertex_points)
-}
-
-remove_bridge_from_set <- function(graph, search_set, bridge_id) {
-  bridge_points <- get_bridge_points(graph, bridge_id)
-  setdiff(search_set, bridge_points)
-}
-
 # Path assessment ----
 
 assess_all_paths <- function(l, graph) {
