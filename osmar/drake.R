@@ -45,7 +45,11 @@ pgh_plan <- drake_plan(
 
 # Locate pathways ----
 
-# In order to determine which 
+# In order to determine which starting points need to be used, we need to build
+# all pgh_plan targets UP TO THIS POINT in order to derive the correct
+# pgh_starting_points values. From these values, we'll generate a new set of
+# targets within pgh_expanded_pathways.
+
 make(pgh_plan)
 
 pgh_pathway_plan_generic <- drake_plan(pgh_pathway = target(
