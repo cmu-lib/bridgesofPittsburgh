@@ -35,7 +35,12 @@ pgh_plan <- drake_plan(
 
   # Full Graph
   pgh_graph = as_igraph(pgh_raw),
-  pgh_tidy_graph_unmarked = enrich_osmar_graph(pgh_raw, pgh_graph, in_pgh_nodes = in_bound_points),
+  pgh_tidy_graph_unmarked = enrich_osmar_graph(pgh_raw, pgh_graph, 
+                                               in_pgh_nodes = in_bound_points, 
+                                               excluded_highways = c("pedestrian", "footway", "cycleway", "steps", "track", 
+                                                                     "elevator", "bus_stop", "construction", "no", "escape", 
+                                                                     "proposed", "raceway", "services"), 
+                                               allowed_bridge_attributes =  c("motorway", "primary", "secondary", "tertiary", "trunk")),
   pgh_tidy_graph = mark_interface_nodes(pgh_tidy_graph_unmarked),
   pgh_interface_points = get_interface_points(pgh_tidy_graph),
   pgh_starting_points = get_starting_points(pgh_tidy_graph, pgh_interface_points),

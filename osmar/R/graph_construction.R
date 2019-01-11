@@ -155,12 +155,12 @@ filter_bridges_to_nodes <- function(graph, node_ids) {
     )
 }
 
+
 # Filter edges down to the desired paths based on OSM tags (e.g. no sidewalks,
 # no private roads, etc). This is for removing edges entirely from the network,
 # not to be confused with mark_required_edges() which only makrs those that will
-# eventually be required for RPP
-filter_to_allowed_paths <- function(graph) {
-  excluded_highways <- c("pedestrian", "footway", "cycleway", "steps", "track", "elevator", "bus_stop", "construction", "no", "escape", "proposed", "raceway", "services")
+# eventually be required to be crossed during pathfinding.
+filter_to_allowed_paths <- function(graph, excluded_highways) {
 
   graph %>%
     activate(edges) %>%
@@ -171,8 +171,7 @@ filter_to_allowed_paths <- function(graph) {
 }
 
 # For those edges that have earlier been marked as bridges, designate which are required
-mark_bridges <- function(graph) {
-  allowed_bridge_attributes <- c("motorway", "primary", "secondary", "tertiary", "trunk")
+mark_bridges <- function(graph, allowed_bridge_attributes) {
 
   graph %>%
     activate(edges) %>%
@@ -226,7 +225,7 @@ is_node_interface <- function(i, edges) {
   list(is_interface = is_interface)
 }
 
-enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limits = NULL, keep_full = TRUE) {
+enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limits = NULL, keep_full = TRUE, excluded_highways, allowed_bridge_attributes) {
   osmar_nodes <- osm_node_attributes(raw_osmar)
   osmar_edges <- osm_edge_attributes(raw_osmar)
 
@@ -237,9 +236,9 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limi
     mutate_at(vars(name), as.character) %>%
     left_join(osmar_edges, by = c("name" = "id")) %>%
     select(-weight) %>% 
-    filter_to_allowed_paths() %>%
+    filter_to_allowed_paths(excluded_highways) %>%
     add_parent_bridge_relations(raw_osmar) %>%
-    mark_bridges() %>%
+    mark_bridges(allowed_bridge_attributes) %>%
     remove_unreachable_nodes() %>% 
     weight_by_distance()
     
