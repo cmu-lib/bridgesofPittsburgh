@@ -196,7 +196,7 @@ add_parent_bridge_relations <- function(graph, raw_osmar) {
     filter(type == "way") %>%
     mutate_at(vars(id, ref), as.character) %>%
     select(name = ref, bridge_relation = id) %>% 
-    distinct()
+    distinct(name, .keep_all = TRUE)
 
   graph %>%
     activate(edges) %>%
