@@ -72,7 +72,7 @@ get_starting_points <- function(graph, interface_points) {
   point_bridges <- map_df(set_names(interface_points), function(p) {
     ei <- E(graph)[.from(p)]
     unique_bridges <- unique(edge_attr(graph, "bridge_id", ei))
-    data_frame(
+    tibble(
       bridge_id = unique_bridges
     )
   }, .id = "point")
