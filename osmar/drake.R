@@ -85,13 +85,13 @@ plot_plan <- drake_plan(
 
   # For visualization purposes only keep the graph within city limits + any
   # additional edges traversed by the pathway
-  filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_107098),
+  filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_2480),
   pathway_sf = graph_as_sf(filtered_graph),
 
   # Produce different collections of simple features to be rendered on maps or
   # as shapefiles
-  pathway_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_107098, linefun = produce_step_linestring),
-  pathway_multiline_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_107098, linefun = produce_step_multiline),
+  pathway_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_2480, linefun = produce_step_linestring),
+  pathway_multiline_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_2480, linefun = produce_step_multiline),
   bridges_layer = filter(pathway_sf, edge_category == "crossed bridge"),
   crossed_roads_layer = filter(pathway_sf, edge_category == "crossed road"),
   uncrossed_roads_layer = filter(pathway_sf, edge_category == "uncrossed road"),
