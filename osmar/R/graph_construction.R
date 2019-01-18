@@ -189,10 +189,10 @@ mark_bridges <- function(graph, allowed_bridge_attributes) {
 }
 
 # Find relations that are bridges, and join their IDs to the edges
-add_parent_bridge_relations <- function(graph, raw_osm) {
-  bridge_relations <- raw_osm$relations$tags %>%
+add_parent_bridge_relations <- function(graph, raw_osmar) {
+  bridge_relations <- raw_osmar$relations$tags %>%
     filter(k == "type", v == "bridge") %>%
-    left_join(raw_osm$relations$refs, by = "id") %>%
+    left_join(raw_osmar$relations$refs, by = "id") %>%
     filter(type == "way") %>%
     mutate_at(vars(id, ref), as.character) %>%
     select(name = ref, bridge_relation = id) %>% 
