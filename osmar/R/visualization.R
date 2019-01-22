@@ -36,9 +36,24 @@ filter_graph_to_pathway <- function(graph, pathway) {
 # Functions to take a graph and render it as sf object, including as linestrings and multilinestrings
 
 produce_pathway_sf <- function(graph, pathway, linefun) {
-  edges <- as_tibble(graph, "edges") %>%
-    mutate(osm_url = str_glue("https://openstreetmap.org/way/{name}")) %>%
-    arrange(.id)
+  path_ids <- unique(flatten_int(pathway$epath))
+  
+  # Get a table with one row per edge 
+  edges <- as_tibble(graph, "edges")[path_ids,] %>% 
+    mutate(
+      path_order = row_number(),
+      osm_url = str_glue("https://openstreetmap.org/way/{name}"),
+      # True for any step that crosses onto a bridge from either a non-bridge or a different bridge
+      bridge_switch = !is.na(bridge_id) & (is.na(lag(bridge_id)) | (lag(bridge_id) != bridge_id))) %>% 
+    group_by(.id) %>%
+    mutate(times_edge_crossed = row_number()) %>% 
+    group_by(bridge_id) %>% 
+    mutate(
+      times_bridge_crossed_so_far = cumsum(bridge_switch),
+      total_times_bridge_crossed = sum(bridge_switch)) %>% 
+    ungroup() %>% 
+    arrange(path_order)
+  
   nodes <- as_tibble(graph, "nodes") %>% mutate(index = row_number())
 
   # Create one sf per step of the pathway, dividing into multiline or
@@ -71,9 +86,7 @@ produce_step_multiline <- function(eids, i, edges, nodes) {
 
 # Render each step as a set of liestrings (one for each edge in the graph)
 produce_step_linestring <- function(eids, i, edges, nodes) {
-  select_edges <- edges[eids,]
-
-  st_edges <- select_edges %>%
+  st_edges <- edges %>%
     select(.id, from, to) %>%
     gather(key = "dim", value = "index", from, to) %>%
     arrange(.id, dim) %>%
@@ -85,7 +98,7 @@ produce_step_linestring <- function(eids, i, edges, nodes) {
     map(st_linestring)
 
   sf_col <- st_sfc(st_edges, crs = 4326)
-  st_geometry(select_edges) <- sf_col
+  st_geometry(edges) <- sf_col
   select_edges$step <- i
   select_edges
 }

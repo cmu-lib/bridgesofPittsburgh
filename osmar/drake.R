@@ -101,11 +101,10 @@ plot_plan <- drake_plan(
   pathway_map = pathway_plot(pathway_sf, file_out("osmar/output_data/pathway_map.pdf")),
 
   # Generate a standalone leaflet map
-  leaflet_map = mapview_plot(list(
-    "Bridges" = bridges_layer,
-    "Crossed roads" = crossed_roads_layer,
-    "Pittsburgh boudary" = pgh_boundary_layer),
-    color = list("#FD9E3F", "#7F5CFF", NA_character_)),
+  leaflet_map = mapview(x = pathway_sf,
+    zcol = "edge_category"
+    # color = list("#FD9E3F", "#7F5CFF", NA_character_)
+    ),
   output_leaflet = mapshot(leaflet_map, url = file_out(fs::path(getwd(), "osmar/output_data/pgh_leaflet.html")))
 )
 
