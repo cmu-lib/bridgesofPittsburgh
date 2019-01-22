@@ -133,8 +133,8 @@ pathway_plot <- function(edges, filepath) {
   dev.off()
 }
 
-mapview_plot <- function(l) {
-  mapview(l)
+mapview_plot <- function(l, ...) {
+  mapview(l, ...)
 }
 
 # Animation ----

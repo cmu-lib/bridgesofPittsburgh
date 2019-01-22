@@ -104,7 +104,8 @@ plot_plan <- drake_plan(
   leaflet_map = mapview_plot(list(
     "Bridges" = bridges_layer,
     "Crossed roads" = crossed_roads_layer,
-    "Pittsburgh boudary" = pgh_boundary_layer)),
+    "Pittsburgh boudary" = pgh_boundary_layer),
+    color = list("#FD9E3F", "#7F5CFF", NA_character_)),
   output_leaflet = mapshot(leaflet_map, url = file_out(fs::path(getwd(), "osmar/output_data/pgh_leaflet.html")))
 )
 
