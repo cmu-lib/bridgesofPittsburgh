@@ -36,7 +36,7 @@ filter_graph_to_pathway <- function(graph, pathway) {
 # Functions to take a graph and render it as sf object, including as linestrings and multilinestrings
 
 produce_pathway_sf <- function(graph, pathway, linefun) {
-  path_ids <- unique(flatten_int(pathway$epath))
+  path_ids <- flatten_int(pathway$epath)
   
   # Get a table with one row per edge 
   edges <- as_tibble(graph, "edges")[path_ids,] %>% 
@@ -52,7 +52,8 @@ produce_pathway_sf <- function(graph, pathway, linefun) {
       times_bridge_crossed_so_far = cumsum(bridge_switch),
       total_times_bridge_crossed = sum(bridge_switch)) %>% 
     ungroup() %>% 
-    arrange(path_order)
+    arrange(path_order) %>% 
+    mutate_at(vars(contains("times")), funs(na_if(., 1)))
   
   nodes <- as_tibble(graph, "nodes") %>% mutate(index = row_number())
 
@@ -87,11 +88,11 @@ produce_step_multiline <- function(eids, i, edges, nodes) {
 # Render each step as a set of liestrings (one for each edge in the graph)
 produce_step_linestring <- function(eids, i, edges, nodes) {
   st_edges <- edges %>%
-    select(.id, from, to) %>%
+    select(path_order, .id, from, to) %>%
     gather(key = "dim", value = "index", from, to) %>%
-    arrange(.id, dim) %>%
+    arrange(path_order, dim) %>%
     left_join(select(nodes, lat, lon, index), by = "index") %>%
-    split(as.factor(.$.id)) %>%
+    split(as.factor(.$path_order)) %>%
     map(function(x) {
       cbind(x$lon, x$lat)
     }) %>%
@@ -99,8 +100,7 @@ produce_step_linestring <- function(eids, i, edges, nodes) {
 
   sf_col <- st_sfc(st_edges, crs = 4326)
   st_geometry(edges) <- sf_col
-  select_edges$step <- i
-  select_edges
+  edges
 }
 
 # Create an sf for the entire graph, including ucrossed roads
