@@ -56,33 +56,36 @@ pgh_plan <- drake_plan(
 # pgh_starting_points values. From these values, we'll generate a new set of
 # targets within pgh_expanded_pathways.
 
-make(pgh_plan)
+# make(pgh_plan)
+# 
+# pgh_pathway_plan_generic <- drake_plan(pgh_pathway = target(
+#   greedy_search(starting_point = sp__, graph = pgh_tidy_graph, quiet = TRUE),
+#   trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)))
+# 
+# pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = readd("pgh_starting_points")))
+# 
+# # After building each pathway, run the assessment functions...
+# assessment_plan_generic <- drake_plan(path_performance = assess_path(p = p__, graph = pgh_tidy_graph))
+# assessment_plan <- evaluate_plan(assessment_plan_generic, rules = list(p__ = pgh_expanded_pathways$target))
+# # ... and bind them into a dataframe
+# pgh_performances <- gather_plan(assessment_plan, target = "pgh_performances", gather = "rbind")
+# 
+# pgh_plan <- bind_plans(
+#   pgh_plan,
+#   pgh_expanded_pathways,
+#   assessment_plan,
+#   pgh_performances
+# )
 
-pgh_pathway_plan_generic <- drake_plan(pgh_pathway = target(
-  greedy_search(starting_point = sp__, graph = pgh_tidy_graph, quiet = TRUE),
-  trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)))
 
-pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = readd("pgh_starting_points")))
-
-# After building each pathway, run the assessment functions...
-assessment_plan_generic <- drake_plan(path_performance = assess_path(p = p__, graph = pgh_tidy_graph))
-assessment_plan <- evaluate_plan(assessment_plan_generic, rules = list(p__ = pgh_expanded_pathways$target))
-# ... and bind them into a dataframe
-pgh_performances <- gather_plan(assessment_plan, target = "pgh_performances", gather = "rbind")
-
-pgh_plan <- bind_plans(
-  pgh_plan,
-  pgh_expanded_pathways,
-  assessment_plan,
-  pgh_performances
-)
 
 # At this point, it is necessary to run the pathways to evaluate which one we want to use for visualization purposes.
 
 # Visualize Pathways ----
 
 plot_plan <- drake_plan(
-
+  pgh_pathway_2480 = greedy_search(starting_point = 2480, graph = pgh_tidy_graph),
+  
   # For visualization purposes only keep the graph within city limits + any
   # additional edges traversed by the pathway
   filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_2480),
@@ -91,7 +94,6 @@ plot_plan <- drake_plan(
   # Produce different collections of simple features to be rendered on maps or
   # as shapefiles
   pathway_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_2480, linefun = produce_step_linestring),
-  pathway_multiline_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_2480, linefun = produce_step_multiline),
   bridges_layer = filter(pathway_sf, edge_category == "crossed bridge"),
   crossed_roads_layer = filter(pathway_sf, edge_category == "crossed road"),
   uncrossed_roads_layer = filter(pathway_sf, edge_category == "uncrossed road"),
@@ -101,8 +103,8 @@ plot_plan <- drake_plan(
   pathway_map = pathway_plot(pathway_sf, file_out("osmar/output_data/pathway_map.pdf")),
 
   # Generate a standalone leaflet map
-  leaflet_map = mapview(x = pathway_sf,
-    zcol = "edge_category"
+  leaflet_map = mapview(x = pathway_layer,
+    zcol = "times_bridge_crossed_so_far"
     # color = list("#FD9E3F", "#7F5CFF", NA_character_)
     ),
   output_leaflet = mapshot(leaflet_map, url = file_out(fs::path(getwd(), "osmar/output_data/pgh_leaflet.html")))
