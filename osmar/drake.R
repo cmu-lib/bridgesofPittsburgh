@@ -30,7 +30,7 @@ pgh_plan <- drake_plan(
   pgh_raw = read_osm_response(download_osm),
   pgh_nodes_sf = osm_nodes_to_sf(pgh_raw),
   # Shapefile for PGH boundaries
-  pgh_boundary_layer = read_sf(file_in("osmar/input_data/Pittsburgh_City_Boundary")),
+  pgh_boundary_layer = read_sf(file_in("osmar/input_data/Pittsburgh_River_Boundary")),
   in_bound_points = nodes_within_boundaries(pgh_nodes_sf, pgh_boundary_layer),
 
   # Full Graph
