@@ -49,8 +49,8 @@ produce_pathway_sf <- function(graph, pathway, linefun) {
     mutate(times_edge_crossed = row_number()) %>% 
     group_by(bridge_id) %>% 
     mutate(
-      times_bridge_crossed_so_far = cumsum(bridge_switch),
-      total_times_bridge_crossed = sum(bridge_switch)) %>% 
+      times_bridge_crossed_so_far = cumsum(bridge_switch) + 1,
+      total_times_bridge_crossed = sum(bridge_switch) + 1) %>% 
     ungroup() %>% 
     arrange(path_order) %>% 
     mutate_at(vars(contains("times")), funs(na_if(., 1)))
@@ -59,8 +59,7 @@ produce_pathway_sf <- function(graph, pathway, linefun) {
 
   # Create one sf per step of the pathway, dividing into multiline or
   # linestring based on the function passed to linefun
-  res <- imap(pathway$epath, linefun, edges = edges, nodes = nodes)
-  do.call(rbind, args = res)
+  produce_step_linestring(edges = edges, nodes = nodes)
 }
 
 # Render each step as 1 multilinestring
@@ -86,7 +85,7 @@ produce_step_multiline <- function(eids, i, edges, nodes) {
 }
 
 # Render each step as a set of liestrings (one for each edge in the graph)
-produce_step_linestring <- function(eids, i, edges, nodes) {
+produce_step_linestring <- function(edges, nodes) {
   st_edges <- edges %>%
     select(path_order, .id, from, to) %>%
     gather(key = "dim", value = "index", from, to) %>%
