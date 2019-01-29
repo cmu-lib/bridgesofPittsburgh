@@ -40,7 +40,7 @@ pgh_plan <- drake_plan(
                                                in_pgh_nodes = in_bound_points, 
                                                excluded_highways = c("pedestrian", "footway", "cycleway", "steps", "track", 
                                                                      "elevator", "bus_stop", "construction", "no", "escape", 
-                                                                     "proposed", "raceway", "services"), 
+                                                                     "proposed", "raceway", "services", "path"), 
                                                allowed_bridge_attributes =  c("motorway", "primary", "secondary", "tertiary", "trunk")),
   pgh_tidy_graph = mark_interface_nodes(pgh_tidy_graph_unmarked),
   pgh_interface_points = get_interface_points(pgh_tidy_graph),
