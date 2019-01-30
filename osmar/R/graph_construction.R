@@ -62,29 +62,6 @@ select_main_component <- function(graph) {
     filter(component == 1)
 }
 
-get_interface_points <- function(graph) {
-  which(V(graph)$is_interface)
-}
-
-# Staring points are points that have outgoing edges that are bridges
-get_starting_points <- function(graph, interface_points) {
-  # Pick one interface point per unique bridge
-  point_bridges <- map_df(set_names(interface_points), function(p) {
-    ei <- E(graph)[.from(p)]
-    unique_bridges <- unique(edge_attr(graph, "bridge_id", ei))
-    tibble(
-      bridge_id = unique_bridges
-    )
-  }, .id = "point")
-  
-  # Take the first point for each bridge
-  point_bridges %>% 
-    filter(!is.na(bridge_id)) %>% 
-    distinct(bridge_id, .keep_all = TRUE) %>% 
-    pull(point) %>% 
-    as.integer()
-}
-
 # Identifying bridges ----
 
 osm_node_attributes <- function(src) {
@@ -170,6 +147,16 @@ filter_to_allowed_paths <- function(graph, excluded_highways) {
     )
 }
 
+collect_edge_bundles <- function(graph) {
+  all_bridge_ids <- graph %>% 
+    as_tibble("edges") %>% 
+    pull(bridge_id)
+  
+  unique_relation_ids <- unique(na.omit(all_bridge_ids))
+  
+  map(unique_relation_ids, ~ which(.x == all_bridge_ids))
+}
+
 # For those edges that have earlier been marked as bridges, designate which are required
 mark_bridges <- function(graph, allowed_bridge_attributes) {
 
@@ -201,28 +188,6 @@ add_parent_bridge_relations <- function(graph, raw_osmar) {
   graph %>%
     activate(edges) %>%
     left_join(bridge_relations, by = "name")
-}
-
-# After marking bridges, mark all nodes that are interface nodes for bridges, having at least one edge that is a bridge, and at least one edge that is NOT a bridge
-mark_interface_nodes <- function(graph) {
-  plan(multiprocess)
-  interface_results <- future_map(seq_len(vcount(graph)), is_node_interface, edges = as_tibble(graph, "edges"))
-  V(graph)$is_interface <- map_lgl(interface_results, "is_interface")
-  
-  graph
-}
-
-is_node_interface <- function(i, edges) {
-  message(i)
-  tangent_edges <- which(edges[["from"]] == i | edges[["to"]] == i)
-  outbound_edges <-  which(edges[["from"]] == i)
-  
-  has_bridge <- any(edges[["is_bridge"]][outbound_edges])
-  has_non_bridge <- any(!(edges[["is_bridge"]][tangent_edges]))
-  has_multi_bridge <- n_distinct(edges[["bridge_id"]][outbound_edges], na.rm = TRUE) >= 2
-  is_interface <- (has_bridge & has_non_bridge) | has_multi_bridge
-  
-  list(is_interface = is_interface)
 }
 
 enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limits = NULL, keep_full = TRUE, excluded_highways, allowed_bridge_attributes) {

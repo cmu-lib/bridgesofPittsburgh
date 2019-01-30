@@ -18,6 +18,7 @@ library(sf)
 library(fs)
 library(mapview)
 library(dequer)
+library(pathfinder)
 
 # Load all functions
 dir_walk("osmar/R", source)
@@ -35,16 +36,15 @@ pgh_plan <- drake_plan(
 
   # Full Graph
   pgh_graph = as_igraph(pgh_raw),
-  pgh_tidy_graph_unmarked = enrich_osmar_graph(raw_osmar = pgh_raw, 
+  pgh_tidy_graph = enrich_osmar_graph(raw_osmar = pgh_raw, 
                                                graph_osmar = pgh_graph, 
                                                in_pgh_nodes = in_bound_points, 
                                                excluded_highways = c("pedestrian", "footway", "cycleway", "steps", "track", 
                                                                      "elevator", "bus_stop", "construction", "no", "escape", 
                                                                      "proposed", "raceway", "services", "path"), 
                                                allowed_bridge_attributes =  c("motorway", "primary", "secondary", "tertiary", "trunk")),
-  pgh_tidy_graph = mark_interface_nodes(pgh_tidy_graph_unmarked),
-  pgh_interface_points = get_interface_points(pgh_tidy_graph),
-  pgh_starting_points = get_starting_points(pgh_tidy_graph, pgh_interface_points),
+  pgh_edge_bundles = collect_edge_bundles(pgh_tidy_graph),
+  pgh_starting_points = get_interface_points(pgh_tidy_graph, get_bundled_edges(pgh_edge_bundles)),
   pgh_nodes = write_csv(as_tibble(pgh_tidy_graph, "nodes"), path = file_out("osmar/output_data/pgh_nodes.csv"), na = ""),
   pgh_edges = write_csv(as_tibble(pgh_tidy_graph, "edges"), path = file_out("osmar/output_data/pgh_edges.csv"), na = "")
 )
@@ -56,26 +56,26 @@ pgh_plan <- drake_plan(
 # pgh_starting_points values. From these values, we'll generate a new set of
 # targets within pgh_expanded_pathways.
 
-# make(pgh_plan)
-# 
-# pgh_pathway_plan_generic <- drake_plan(pgh_pathway = target(
-#   greedy_search(starting_point = sp__, graph = pgh_tidy_graph, quiet = TRUE),
-#   trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)))
-# 
-# pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = readd("pgh_starting_points")))
-# 
-# # After building each pathway, run the assessment functions...
-# assessment_plan_generic <- drake_plan(path_performance = assess_path(p = p__, graph = pgh_tidy_graph))
-# assessment_plan <- evaluate_plan(assessment_plan_generic, rules = list(p__ = pgh_expanded_pathways$target))
-# # ... and bind them into a dataframe
-# pgh_performances <- gather_plan(assessment_plan, target = "pgh_performances", gather = "rbind")
-# 
-# pgh_plan <- bind_plans(
-#   pgh_plan,
-#   pgh_expanded_pathways,
-#   assessment_plan,
-#   pgh_performances
-# )
+make(pgh_plan)
+
+pgh_pathway_plan_generic <- drake_plan(pgh_pathway = target(
+  greedy_search(starting_point = sp__, graph = pgh_tidy_graph, edge_bundles = pgh_edge_bundles, distances = E(pgh_tidy_graph)$distance, quiet = TRUE),
+  trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)))
+
+pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = readd("pgh_starting_points")))
+
+# After building each pathway, run the assessment functions...
+assessment_plan_generic <- drake_plan(path_performance = assess_path(p = p__, graph = pgh_tidy_graph))
+assessment_plan <- evaluate_plan(assessment_plan_generic, rules = list(p__ = pgh_expanded_pathways$target))
+# ... and bind them into a dataframe
+pgh_performances <- gather_plan(assessment_plan, target = "pgh_performances", gather = "rbind")
+
+pgh_plan <- bind_plans(
+  pgh_plan,
+  pgh_expanded_pathways,
+  assessment_plan,
+  pgh_performances
+)
 
 
 
@@ -84,16 +84,14 @@ pgh_plan <- drake_plan(
 # Visualize Pathways ----
 
 plot_plan <- drake_plan(
-  pgh_pathway_2480 = greedy_search(starting_point = 2480, graph = pgh_tidy_graph),
-  
   # For visualization purposes only keep the graph within city limits + any
   # additional edges traversed by the pathway
-  filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_2480),
+  filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_9131),
   pathway_sf = graph_as_sf(filtered_graph),
 
   # Produce different collections of simple features to be rendered on maps or
   # as shapefiles
-  pathway_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_2480, linefun = produce_step_linestring),
+  pathway_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_9131, linefun = produce_step_linestring),
   bridges_layer = filter(pathway_sf, edge_category == "crossed bridge"),
   crossed_roads_layer = filter(pathway_sf, edge_category == "crossed road"),
   uncrossed_roads_layer = filter(pathway_sf, edge_category == "uncrossed road"),
@@ -113,7 +111,7 @@ plot_plan <- drake_plan(
 # Produce several shapefiles
 shp_plan <- drake_plan(
   pathway_shp = write_sf(pathway_layer, file_out("osmar/output_data/shapefiles/pathway_linestring"), driver = "ESRI Shapefile"),
-  pathway_multiline_shp = write_sf(pathway_multiline_layer, file_out("osmar/output_data/shapefiles/pathway_multilinestring"), driver = "ESRI Shapefile"),
+  # pathway_multiline_shp = write_sf(pathway_multiline_layer, file_out("osmar/output_data/shapefiles/pathway_multilinestring"), driver = "ESRI Shapefile"),
   bridge_shp = write_sf(bridges_layer, file_out("osmar/output_data/shapefiles/bridges_shp"), driver = "ESRI Shapefile"),
   crossed_roads_shp = write_sf(crossed_roads_layer, file_out("osmar/output_data/shapefiles/pathway_shp"), driver = "ESRI Shapefile")
 )
