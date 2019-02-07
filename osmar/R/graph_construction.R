@@ -223,6 +223,6 @@ enrich_osmar_graph <- function(raw_osmar, graph_osmar, in_pgh_nodes = NULL, limi
   graph %>% 
     select_main_component() %>% 
     activate(edges) %>% 
-    distinct(from, to) %>% 
+    distinct(from, to, .keep_all = TRUE) %>% 
     mutate(.id = row_number())
 }
