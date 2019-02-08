@@ -72,28 +72,26 @@ pgh_plan <- drake_plan(
 # pgh_starting_points values. From these values, we'll generate a new set of
 # targets within pgh_expanded_pathways.
 
-make(pgh_plan)
-
-pgh_pathway_plan_generic <- drake_plan(pgh_pathway = target(
-  greedy_search(starting_point = sp__, graph = pgh_tidy_graph, edge_bundles = pgh_edge_bundles, distances = E(pgh_tidy_graph)$distance, quiet = TRUE),
-  trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)))
-
-pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = readd("pgh_starting_points")))
-
-# After building each pathway, run the assessment functions...
-assessment_plan_generic <- drake_plan(path_performance = glance(pathway = p__))
-assessment_plan <- evaluate_plan(assessment_plan_generic, rules = list(p__ = pgh_expanded_pathways$target))
-# ... and bind them into a dataframe
-pgh_performances <- gather_plan(assessment_plan, target = "pgh_performances", gather = "rbind")
-
-pgh_plan <- bind_plans(
-  pgh_plan,
-  pgh_expanded_pathways,
-  assessment_plan,
-  pgh_performances
-)
-
-
+# pgh_pathway_plan_generic <- drake_plan(pgh_pathway = target(
+#   greedy_search(starting_point = sp__, graph = pgh_tidy_graph, edge_bundles = pgh_edge_bundles, distances = E(pgh_tidy_graph)$distance, quiet = TRUE),
+#   trigger = trigger(command = FALSE, depend = FALSE, file = FALSE)))
+# 
+# pgh_expanded_pathways <- evaluate_plan(pgh_pathway_plan_generic, rules = list(sp__ = readd("pgh_starting_points")))
+# 
+# # After building each pathway, run the assessment functions...
+# assessment_plan_generic <- drake_plan(path_performance = glance(pathway = p__))
+# assessment_plan <- evaluate_plan(assessment_plan_generic, rules = list(p__ = pgh_expanded_pathways$target))
+# # ... and bind them into a dataframe
+# pgh_performances <- gather_plan(assessment_plan, target = "pgh_performances", gather = "rbind")
+# 
+# pgh_plan <- bind_plans(
+#   pgh_plan,
+#   pgh_expanded_pathways,
+#   assessment_plan,
+#   pgh_performances
+# )
+# 
+# 
 
 # At this point, it is necessary to run the pathways to evaluate which one we want to use for visualization purposes.
 
@@ -101,15 +99,18 @@ pgh_plan <- bind_plans(
 
 plot_plan <- drake_plan(
   test_run = greedy_search(pgh_tidy_graph, edge_bundles = pgh_edge_bundles, distances = E(pgh_tidy_graph)$distance, starting_point = 1),
+  path_result = write_lines(toJSON(test_run$epath, pretty = TRUE), path = file_out("osmar/output_data/paths/edge_steps.json")),
+  path_summary = write_csv(glance(test_run), na = "", path = file_out("osmar/output_data/paths/path_summary.csv")),
+  path_details = write_csv(glance(test_run), na = "", path = file_out("osmar/output_data/paths/path_details.csv")),
   
   # For visualization purposes only keep the graph within city limits + any
   # additional edges traversed by the pathway
-  filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = pgh_pathway_94516),
+  filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = test_run),
   pathway_sf = graph_as_sf(filtered_graph),
 
   # Produce different collections of simple features to be rendered on maps or
   # as shapefiles
-  pathway_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = pgh_pathway_94516, linefun = produce_step_linestring),
+  pathway_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = test_run, linefun = produce_step_linestring),
   bridges_layer = filter(pathway_sf, edge_category == "crossed bridge"),
   crossed_roads_layer = filter(pathway_sf, edge_category == "crossed road"),
   uncrossed_roads_layer = filter(pathway_sf, edge_category == "uncrossed road"),
