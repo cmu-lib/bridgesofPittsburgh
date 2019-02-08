@@ -101,7 +101,7 @@ plot_plan <- drake_plan(
   test_run = greedy_search(pgh_tidy_graph, edge_bundles = pgh_edge_bundles, distances = E(pgh_tidy_graph)$distance, starting_point = 1),
   path_result = write_lines(toJSON(test_run$epath, pretty = TRUE), path = file_out("osmar/output_data/paths/edge_steps.json")),
   path_summary = write_csv(glance(test_run), na = "", path = file_out("osmar/output_data/paths/path_summary.csv")),
-  path_details = write_csv(glance(test_run), na = "", path = file_out("osmar/output_data/paths/path_details.csv")),
+  path_details = write_csv(augment(test_run), na = "", path = file_out("osmar/output_data/paths/path_details.csv")),
   
   # For visualization purposes only keep the graph within city limits + any
   # additional edges traversed by the pathway
