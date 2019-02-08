@@ -1,0 +1,2 @@
+n_steps,starting_point,ending_point,total_distance,mean_times_crossed,max_times_crossed,bundle_most_crossed,p_multiple_crossed
+307,1,98913,535469.2823023564,1.1375,3,30,0.11875
