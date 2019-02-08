@@ -52,8 +52,7 @@ produce_pathway_sf <- function(graph, pathway, linefun) {
       times_bridge_crossed_so_far = cumsum(bridge_switch),
       total_times_bridge_crossed = sum(bridge_switch)) %>% 
     ungroup() %>% 
-    arrange(path_order) %>% 
-    mutate_at(vars(contains("times")), funs(na_if(., 1)))
+    arrange(path_order)
   
   nodes <- as_tibble(graph, "nodes") %>% mutate(index = row_number())
 
