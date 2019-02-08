@@ -49,8 +49,8 @@ produce_pathway_sf <- function(graph, pathway, linefun) {
     mutate(times_edge_crossed = row_number()) %>% 
     group_by(bridge_id) %>% 
     mutate(
-      times_bridge_crossed_so_far = cumsum(bridge_switch) + 1,
-      total_times_bridge_crossed = sum(bridge_switch) + 1) %>% 
+      times_bridge_crossed_so_far = cumsum(bridge_switch),
+      total_times_bridge_crossed = sum(bridge_switch)) %>% 
     ungroup() %>% 
     arrange(path_order) %>% 
     mutate_at(vars(contains("times")), funs(na_if(., 1)))
