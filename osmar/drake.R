@@ -18,6 +18,7 @@ library(sf)
 library(fs)
 library(mapview)
 library(dequer)
+library(konigsbergr)
 library(pathfinder)
 library(jsonlite)
 
@@ -27,40 +28,30 @@ dir_walk("osmar/R", source)
 # Build graph ----
 
 pgh_plan <- drake_plan(
-  big_limits = list(xlim = c(-80.1257, -79.7978), ylim = c(40.3405, 40.5407)),
-  download_osm = get_osm_bbox(big_limits$xlim, big_limits$ylim),
-  pgh_raw = read_osm_response(download_osm),
-  pgh_nodes_sf = osm_nodes_to_sf(pgh_raw),
+  download_osm = get_osm_bbox(-80.1257, -79.7978, 40.3405, 40.5407),
+  pgh_nodes_sf = osm_nodes_to_sf(download_osm),
   # Shapefile for PGH boundaries
   pgh_boundary_layer = read_sf(file_in("osmar/input_data/Pittsburgh_River_Boundary")),
   in_bound_points = nodes_within_boundaries(pgh_nodes_sf, pgh_boundary_layer),
-
-  # Full Graph
-  pgh_graph = as_igraph(pgh_raw),
-  pgh_tidy_graph = enrich_osmar_graph(raw_osmar = pgh_raw, 
-                                               graph_osmar = pgh_graph, 
-                                               in_pgh_nodes = in_bound_points, 
-                                               excluded_highways = c("pedestrian", "footway", "cycleway", "steps", "track", 
-                                                                     "elevator", "bus_stop", "construction", "no", "escape", 
-                                                                     "proposed", "raceway", "services", "path"), 
-                                               allowed_bridge_attributes =  c("motorway", "primary", "secondary", "tertiary", "trunk")),
+  pgh_unlimited_graph = konigsberg_graph(src = download_osm, path_filter = automobile_highways, bridge_filter = main_bridges),
+  pgh_tidy_graph = filter_bridges_to_nodes(pgh_unlimited_graph, node_ids = in_bound_points),
   pgh_edge_bundles = collect_edge_bundles(pgh_tidy_graph),
-  pgh_starting_points = get_interface_points(pgh_tidy_graph, pgh_edge_bundles),
   pgh_nodes = write_csv(
     as_tibble(pgh_tidy_graph, "nodes") %>% 
-      mutate(id = row_number()) %>% 
-      select(id, osm_node_id = name, lat, lon, osm_label = label),
+      mutate(node_id = row_number()) %>% 
+      select(id = node_id, osm_node_id = id, lat, lon, osm_label = label),
     path = file_out("osmar/output_data/pgh_nodes.csv"), na = ""),
   pgh_edges = write_csv(
     as_tibble(pgh_tidy_graph, "edges") %>% 
-    select(from, to, id = .id, 
-           osm_way_id = name, 
-           osm_bridge_relation_id = bridge_relation, 
-           osm_bridge = bridge, 
-           osm_highway = highway, 
-           osm_label = label, 
-           bridge_id, distance, 
-           within_boundaries), 
+      mutate(edge_id = row_number()) %>% 
+      select(from, to, id = edge_id, 
+             osm_way_id = id, 
+             osm_bridge_relation_id = bridge_relation, 
+             osm_bridge = bridge, 
+             osm_highway = highway, 
+             osm_label = label, 
+             bridge_id, distance, 
+             within_boundaries), 
     path = file_out("osmar/output_data/pgh_edges.csv"), na = ""),
   pgh_bundles = write_lines(toJSON(pgh_edge_bundles, pretty = TRUE), path = "osmar/output_data/pgh_bundles.json")
 )
