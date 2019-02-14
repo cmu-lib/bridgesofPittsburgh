@@ -22,7 +22,7 @@ filter_graph_to_pathway <- function(graph, pathway) {
         TRUE ~ "uncrossed road"
       ), levels = c("crossed bridge", "crossed road", "uncrossed bridge", "uncrossed road"),
       ordered = TRUE),
-      osm_url = str_glue("https://openstreetmap.org/way/{name}")
+      osm_url = str_glue("https://openstreetmap.org/way/{id}")
     ) %>%
     filter(within_boundaries | flagged_edge) %>%
     # Remove any orphaned nodes
@@ -39,10 +39,12 @@ produce_pathway_sf <- function(graph, pathway, linefun) {
   path_ids <- flatten_int(pathway$epath)
   
   # Get a table with one row per edge 
-  edges <- as_tibble(graph, "edges")[path_ids,] %>% 
+  edges <- as_tibble(graph, "edges") %>% 
+    mutate(.id = row_number()) %>% 
+    .[path_ids,] %>% 
     mutate(
       path_order = row_number(),
-      osm_url = str_glue("https://openstreetmap.org/way/{name}"),
+      osm_url = str_glue("https://openstreetmap.org/way/{id}"),
       # True for any step that crosses onto a bridge from either a non-bridge or a different bridge
       bridge_switch = !is.na(bridge_id) & (is.na(lag(bridge_id)) | (lag(bridge_id) != bridge_id))) %>% 
     group_by(.id) %>%

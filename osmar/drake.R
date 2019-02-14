@@ -112,8 +112,9 @@ plot_plan <- drake_plan(
 
   # Generate a standalone leaflet map
   leaflet_map = mapview(x = pathway_layer,
-                        zcol = "total_times_bridge_crossed"
-    # color = list("#FD9E3F", "#7F5CFF", NA_character_)
+                        zcol = "total_times_bridge_crossed",
+    color = c("gray50", "#2B83BA", "#ABDDA4", "#FDAE61"),
+    lwd = 4
     ),
   output_leaflet = mapshot(leaflet_map, url = file_out(fs::path(getwd(), "osmar/output_data/pgh_leaflet.html")))
 )
