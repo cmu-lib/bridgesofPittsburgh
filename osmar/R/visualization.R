@@ -35,93 +35,16 @@ filter_graph_to_pathway <- function(graph, pathway) {
 
 # Functions to take a graph and render it as sf object, including as linestrings and multilinestrings
 
-produce_pathway_sf <- function(graph, pathway, linefun) {
-  path_ids <- flatten_int(pathway$epath)
+produce_pathway_sf <- function(graph, pathway) {
+  edges_sf <- edges_to_sf(graph, V(graph)$lat, V(graph)$lon) %>% 
+    mutate(osm_url = str_glue("https://openstreetmap.org/way/{id}"))
   
-  # Get a table with one row per edge 
-  edges <- as_tibble(graph, "edges") %>% 
-    mutate(.id = row_number()) %>% 
-    .[path_ids,] %>% 
-    mutate(
-      path_order = row_number(),
-      osm_url = str_glue("https://openstreetmap.org/way/{id}"),
-      # True for any step that crosses onto a bridge from either a non-bridge or a different bridge
-      bridge_switch = !is.na(bridge_id) & (is.na(lag(bridge_id)) | (lag(bridge_id) != bridge_id))) %>% 
-    group_by(.id) %>%
-    mutate(times_edge_crossed = row_number()) %>% 
-    group_by(bridge_id) %>% 
-    mutate(
-      times_bridge_crossed_so_far = cumsum(bridge_switch),
-      total_times_bridge_crossed = sum(bridge_switch)) %>% 
-    ungroup() %>% 
-    arrange(path_order)
+  augmented_pathway <- augment(pathway) %>% 
+    group_by(bundle_id) %>% 
+    mutate(total_times_bridge_crossed = max(times_bundle_crossed)) %>% 
+    ungroup()
   
-  nodes <- as_tibble(graph, "nodes") %>% mutate(index = row_number())
-
-  # Create one sf per step of the pathway, dividing into multiline or
-  # linestring based on the function passed to linefun
-  produce_step_linestring(edges = edges, nodes = nodes)
-}
-
-# Render each step as 1 multilinestring
-produce_step_multiline <- function(eids, i, edges, nodes) {
-  select_edges <- edges[eids,]
-
-  poly_attr <- data.frame(step = i)
-
-  st_edges <- select_edges %>%
-    select(.id, from, to) %>%
-    gather(key = "dim", value = "index", from, to) %>%
-    arrange(.id, dim) %>%
-    left_join(select(nodes, lat, lon, index), by = "index") %>%
-    split(as.factor(.$.id)) %>%
-    map(function(x) {
-      cbind(x$lon, x$lat)
-    }) %>%
-    st_multilinestring()
-
-  sf_col <- st_sfc(st_edges, crs = 4326)
-  st_geometry(poly_attr) <- sf_col
-  poly_attr
-}
-
-# Render each step as a set of liestrings (one for each edge in the graph)
-produce_step_linestring <- function(edges, nodes) {
-  st_edges <- edges %>%
-    select(path_order, .id, from, to) %>%
-    gather(key = "dim", value = "index", from, to) %>%
-    arrange(path_order, dim) %>%
-    left_join(select(nodes, lat, lon, index), by = "index") %>%
-    split(as.factor(.$path_order)) %>%
-    map(function(x) {
-      cbind(x$lon, x$lat)
-    }) %>%
-    map(st_linestring)
-
-  sf_col <- st_sfc(st_edges, crs = 4326)
-  st_geometry(edges) <- sf_col
-  edges
-}
-
-# Create an sf for the entire graph, including ucrossed roads
-graph_as_sf <- function(marked_graph) {
-  edges <- as_tibble(marked_graph, "edges") %>% arrange(.id)
-  nodes <- as_tibble(marked_graph, "nodes") %>% mutate(index = row_number())
-
-  st_edges <- edges %>%
-    select(.id, from, to) %>%
-    gather(key = "dim", value = "index", from, to) %>%
-    arrange(.id, dim) %>%
-    left_join(select(nodes, lat, lon, index), by = "index") %>%
-    split(as.factor(.$.id)) %>%
-    map(function(x) {
-      cbind(x$lon, x$lat)
-    }) %>%
-    map(st_linestring)
-
-  sf_col <- st_sfc(st_edges, crs = 4326)
-  st_geometry(edges) <- sf_col
-  edges
+  bind_cols(edges_sf[augmented_pathway$edge_id,], augmented_pathway)
 }
 
 # Plotting ----

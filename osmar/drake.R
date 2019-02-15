@@ -60,31 +60,20 @@ pgh_plan <- drake_plan(
     path = file_out("osmar/output_data/pgh_edges.csv"), na = ""),
   pgh_bundles = write_lines(toJSON(pgh_edge_bundles, pretty = TRUE), path = "osmar/output_data/pgh_bundles.json"),
 
-  test_run = greedy_search(pgh_tidy_graph, edge_bundles = pgh_edge_bundles, distances = E(pgh_tidy_graph)$distance, starting_point = 1),
+  test_run = greedy_search(pgh_tidy_graph, edge_bundles = pgh_edge_bundles, 
+                           distances = E(pgh_tidy_graph)$distance, starting_point = 1),
   path_result = write_lines(toJSON(test_run$epath, pretty = TRUE), path = file_out("osmar/output_data/paths/edge_steps.json")),
   path_summary = write_csv(glance(test_run), na = "", path = file_out("osmar/output_data/paths/path_summary.csv")),
   path_details = write_csv(augment(test_run), na = "", path = file_out("osmar/output_data/paths/path_details.csv")),
   
   # For visualization purposes only keep the graph within city limits + any
   # additional edges traversed by the pathway
-  filtered_graph = filter_graph_to_pathway(graph = pgh_tidy_graph, pathway = test_run),
-  pathway_sf = graph_as_sf(filtered_graph),
-
-  # Produce different collections of simple features to be rendered on maps or
-  # as shapefiles
-  pathway_layer = produce_pathway_sf(graph = pgh_tidy_graph, pathway = test_run, linefun = produce_step_linestring),
-  bridges_layer = filter(pathway_sf, edge_category == "crossed bridge"),
-  crossed_roads_layer = filter(pathway_sf, edge_category == "crossed road"),
-  uncrossed_roads_layer = filter(pathway_sf, edge_category == "uncrossed road"),
-
-  # Generate a variety fo static PDF maps
-  bridge_map = bridges_only_plot(pathway_sf, file_out("osmar/output_data/bridges_map.pdf")),
-  pathway_map = pathway_plot(pathway_sf, file_out("osmar/output_data/pathway_map.pdf")),
+  pathway_sf = produce_pathway_sf(graph = pgh_tidy_graph, pathway = test_run),
 
   # Generate a standalone leaflet map
-  leaflet_map = mapview(x = pathway_layer,
+  leaflet_map = mapview(x = pathway_sf,
                         zcol = "total_times_bridge_crossed",
-    color = c("gray50", "#2B83BA", "#ABDDA4", "#FDAE61"),
+    color = c("#2B83BA", "#ABDDA4", "#FDAE61"),
     lwd = 4
     ),
   output_leaflet = mapshot(leaflet_map, url = file_out(fs::path(getwd(), "osmar/output_data/pgh_leaflet.html")))
