@@ -7,6 +7,7 @@
 | `lat`               | Latitude                                                              |
 | `lon`               | Longitude                                                             |
 | `osm_label`         | OSM label for this node if it exists                                  |
+| `neighborhood`      | Colloquial name of Pittsburgh neighborhood (possibly NULL)            |
 
 # Edge attributes
 
