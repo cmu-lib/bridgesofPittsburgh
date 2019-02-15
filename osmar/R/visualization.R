@@ -47,6 +47,22 @@ produce_pathway_sf <- function(graph, pathway) {
   bind_cols(edges_sf[augmented_pathway$edge_id,], augmented_pathway)
 }
 
+bridge_text_table <- function(graph, pathway) {
+  road_labels <- as_tibble(graph, "edges")[unlist(pathway$epath), ] %>% 
+    mutate(
+      label = coalesce(label, "<unnamed road>"),
+      label_dupe = duplicated(label),
+      label_number = cumsum(!label_dupe)) %>% 
+    group_by(label_number, label) %>% 
+    summarize(dist = sum(distance), 
+              osm_url = first(str_glue("https://openstreetmap.org/way/{id}")), 
+              is_bridge = any(!is.na(bridge_id)))
+}
+
+bridge_text_html <- function(text_table) {
+  tags$ol(pmap(text_table, function(label, dist, osm_url, ...) tags$li(a(str_glue("{label} - {format(dist, digits = 0)} meters"), href = osm_url))))
+}
+
 # Plotting ----
 
 bridges_only_plot <- function(edges, filepath) {

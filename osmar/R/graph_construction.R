@@ -91,6 +91,13 @@ get_prunable_nodes <- function(graph) {
 }
 
 write_edgelist <- function(graph) {
+  
+  if (all(!(edge_attr_names(graph) %in% c("bridge_relation", "bridge", "highway")))) {
+    E(graph)$bridge_relation <- NA_real_
+    E(graph)$bridge <- NA_character_
+    E(graph)$highway <- NA_character_
+  }
+  
   as_tibble(graph, "edges") %>% 
     mutate(edge_id = row_number()) %>% 
     select(from, to, id = edge_id, 

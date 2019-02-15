@@ -21,6 +21,7 @@ library(dequer)
 library(konigsbergr)
 library(pathfinder)
 library(jsonlite)
+library(htmltools)
 
 # Load all functions
 dir_walk("osmar/R", source)
@@ -55,6 +56,10 @@ pgh_plan <- drake_plan(
   path_result = write_lines(toJSON(test_run$epath, pretty = TRUE), path = file_out("osmar/output_data/paths/edge_steps.json")),
   path_summary = write_csv(glance(test_run), na = "", path = file_out("osmar/output_data/paths/path_summary.csv")),
   path_details = write_csv(augment(test_run), na = "", path = file_out("osmar/output_data/paths/path_details.csv")),
+  path_as_text = bridge_text_table(pgh_tidy_graph, test_run),
+  bridges_only_path_text = filter(path_as_text, is_bridge == TRUE),
+  write_lines(bridge_text_html(path_as_text), path = file_out("osmar/output_data/paths/path_ordered_list.html")),
+  write_lines(bridge_text_html(bridges_only_path_text), path = file_out("osmar/output_data/paths/path_ordered_list_bridges_only.html")),
   
   # For visualization purposes only keep the graph within city limits + any
   # additional edges traversed by the pathway
