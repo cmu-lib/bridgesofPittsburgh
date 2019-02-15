@@ -41,24 +41,14 @@ pgh_plan <- drake_plan(
     activate(nodes) %>% 
     left_join(select(st_set_geometry(node_communities, NULL), id, neighborhood = hood) %>% distinct(id, .keep_all = TRUE), by = "id"),
   pgh_edge_bundles = collect_edge_bundles(pgh_tidy_graph),
-  pgh_nodes = write_csv(
-    as_tibble(pgh_tidy_graph, "nodes") %>% 
-      mutate(node_id = row_number()) %>% 
-      select(id = node_id, osm_node_id = id, lat, lon, osm_label = label, neighborhood),
-    path = file_out("osmar/output_data/pgh_nodes.csv"), na = ""),
-  pgh_edges = write_csv(
-    as_tibble(pgh_tidy_graph, "edges") %>% 
-      mutate(edge_id = row_number()) %>% 
-      select(from, to, id = edge_id, 
-             osm_way_id = id, 
-             osm_bridge_relation_id = bridge_relation, 
-             osm_bridge = bridge, 
-             osm_highway = highway, 
-             osm_label = label, 
-             bridge_id, distance, 
-             within_boundaries), 
-    path = file_out("osmar/output_data/pgh_edges.csv"), na = ""),
-  pgh_bundles = write_lines(toJSON(pgh_edge_bundles, pretty = TRUE), path = "osmar/output_data/pgh_bundles.json"),
+  pgh_nodes = write_csv(write_nodelist(pgh_tidy_graph), path = file_out("osmar/output_data/pgh_nodes.csv"), na = ""),
+  pgh_edges = write_csv(write_edgelist(pgh_tidy_graph), path = file_out("osmar/output_data/pgh_edges.csv"), na = ""),
+  
+  simplified_graph = simplify_topology(pgh_tidy_graph, pgh_edge_bundles),
+  simplified_pgh_nodes = write_csv(write_nodelist(simplified_graph), path = file_out("osmar/output_data/simplified_pgh_nodes.csv"), na = ""),
+  simplified_pgh_edges = write_csv(write_edgelist(simplified_graph), path = file_out("osmar/output_data/simplified_pgh_edges.csv"), na = ""),
+  
+  write_lines(toJSON(pgh_edge_bundles, pretty = TRUE), path = "osmar/output_data/pgh_bundles.json"),
 
   test_run = greedy_search(pgh_tidy_graph, edge_bundles = pgh_edge_bundles, 
                            distances = E(pgh_tidy_graph)$distance, starting_point = 1),
