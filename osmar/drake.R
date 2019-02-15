@@ -77,5 +77,5 @@ pgh_plan <- drake_plan(
     color = c("#2B83BA", "#ABDDA4", "#FDAE61"),
     lwd = 4
     ),
-  output_leaflet = mapshot(leaflet_map, url = file_out(fs::path(getwd(), "osmar/output_data/pgh_leaflet.html")))
+  mapshot(leaflet_map, url = file_out(fs::path(getwd(), "osmar/output_data/pgh_leaflet.html")))
 )
