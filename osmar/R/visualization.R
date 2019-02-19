@@ -89,6 +89,50 @@ mapview_plot <- function(l, ...) {
   mapview(l, ...)
 }
 
+# Creat POINT sf with centroids for all bridges and attributes for a leaflet map popup
+bridge_centroids <- function(graph, pathway) {
+  # Get point sf from graph
+  graph_pt <- nodes_to_sf(pathway$graph_state)
+  
+  # Get the unique vertex indices for each bridge
+  bridge_points <- map(pathway$edge_bundles, function(es) {
+    point_indices <- unique(as.integer(ends(graph, es = es, names = FALSE)))
+    st_union(graph_pt[point_indices,])
+  })
+  
+  # Use sf to find the centroid for each node and then bind into one sf
+  # collection (have to use do.call() because apparently c.sfc doesn't work in
+  # bulk, as sf doesn't want to check they all have the same CRS...)
+  bridge_centroids <- map(bridge_points, st_centroid) %>% 
+    do.call(c, .)
+  
+  bridge_attributes <- pathway$graph_state %>% 
+    as_tibble("edges") %>% 
+    filter(!is.na(pathfinder.bundle_id)) %>% 
+    group_by(pathfinder.bundle_id) %>% 
+    summarize_all(funs(last)) %>% 
+    mutate(
+      bridge_label = case_when(
+        # Yank the text "relation" from a few poorly-named bridge labels
+        !is.na(relation_label) ~ str_replace(as.character(relation_label), " ?relation", ""),
+        !is.na(label) ~ label,
+        TRUE ~ "unnamed bridge"
+      ),
+      osm_url = case_when(
+        is.na(bridge_relation) ~ str_glue("https://openstreetmap.org/way/{bridge_id}"),
+        !is.na(bridge_relation) ~ str_glue("https://openstreetmap.org/relation/{bridge_id}")
+      )
+    ) %>% 
+    select(
+      bridge_label,
+      road_type = highway,
+      osm_url
+    )
+  
+  st_geometry(bridge_attributes) <- bridge_centroids
+  bridge_attributes
+}
+
 # Animation ----
 
 animation_frame <- function(e, i, edges, dirpath) {

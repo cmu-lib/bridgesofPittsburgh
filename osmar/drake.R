@@ -64,7 +64,9 @@ pgh_plan <- drake_plan(
   # For visualization purposes only keep the graph within city limits + any
   # additional edges traversed by the pathway
   pathway_sf = produce_pathway_sf(graph = pgh_tidy_graph, pathway = test_run),
-  save(pathway_sf, file = file_out("osmar/output_data/paths/pathway_sf.rda")),
+  bridge_centroid_sf = bridge_centroids(graph = pgh_tidy_graph, pathway = test_run),
+  pathway_sf_rda = save(pathway_sf, file = file_out("osmar/output_data/paths/pathway_sf.rda")),
+  bridge_centroid_sf_rda = save(bridge_centroid_sf, file = file_out("osmar/output_data/bridge_centroid_sf.rda")),
   
   # Generate a standalone leaflet map
   leaflet_map = mapview(x = pathway_sf,
