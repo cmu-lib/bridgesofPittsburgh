@@ -56,7 +56,8 @@ simplify_topology <- function(graph, edge_bundles) {
                                         is_bridge = "first", 
                                         distance = "first", 
                                         within_boundaries = "first",
-                                        bridge_id = "first", "ignore"))
+                                        bridge_id = "first", "ignore")) %>% 
+    as_tbl_graph()
   
   two_degree <- get_prunable_nodes(undirected_network)
   
@@ -114,4 +115,60 @@ write_nodelist <- function(graph) {
   as_tibble(graph, "nodes") %>% 
     mutate(node_id = row_number()) %>% 
     select(id = node_id, osm_node_id = id, lat, lon, osm_label = label, neighborhood)
+}
+
+interface_distance_matrix <- function(graph, edge_bundles) {
+  decorated_graph <- decorate_graph(graph, edge_bundles, E(graph)$distance)
+  
+  bridgeless_graph <- decorated_graph %>% 
+    activate(edges) %>% 
+    filter(is.na(pathfinder.bundle_id))
+  
+  interface_points <- which(V(bridgeless_graph)$pathfinder.interface)
+  
+  plan(multiprocess)
+  res <- future_map(interface_points, one_shortest_path, 
+                    pruned_graph = bridgeless_graph, original_graph = decorated_graph, 
+                    interface_points = interface_points, 
+                    .progress = TRUE)
+  
+  
+  bridge_distances <- map(res, function(x) {
+    container <- rep(NA_real_, length(interface_points))
+    container[match(x$search_points, interface_points)] <- x$distances
+    container
+  })
+  
+  long_dist <- data_frame(
+    from = rep(seq_along(interface_points), length(interface_points)),
+    to = rep(seq_along(interface_points), each = length(interface_points)),
+    distance = unlist(bridge_distances)
+  )
+  
+  bridge_distance_matrix <- bridge_distances %>% do.call(rbind, .)
+  
+  ggplot(long_dist, aes(x = from, y = to)) +
+    geom_tile(aes(color = distance))
+    
+  bdg <- graph_from_adjacency_matrix(bridge_distance_matrix, mode = "directed", weighted = TRUE) %>% 
+    delete_edges(which(is.infinite(E(.)$weight)))
+}
+
+one_shortest_path <- function(from_vertex, pruned_graph, original_graph, interface_points) {
+  incident_edges <- incident(original_graph, v = as.integer(from_vertex), mode = "all")
+  incident_bridges <- unique(na.omit(edge_attr(original_graph, "pathfinder.bundle_id", incident_edges)))
+  bridge_points <- as.integer(unique(ends(original_graph, E(original_graph)[E(original_graph)$pathfinder.bundle_id %in% incident_bridges])))
+  
+  # Only search those points that are not associated with the current bridge
+  search_points <- setdiff(interface_points, bridge_points)
+  
+  paths <- shortest_paths(pruned_graph, from = from_vertex, 
+                          to = search_points, 
+                          mode = "out", output = "epath", 
+                          weights = E(pruned_graph)$pathfinder.distance)
+  
+  paths$search_points <- search_points
+  
+  paths$distances <- as.numeric(distances(pruned_graph, v = from_vertex, to = search_points, mode = "out", weights = E(pruned_graph)$pathfinder.distance))
+  paths
 }
