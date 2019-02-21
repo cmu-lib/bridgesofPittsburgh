@@ -46,10 +46,17 @@ pgh_plan <- drake_plan(
   pgh_edges = write_csv(write_edgelist(pgh_tidy_graph), path = file_out("osmar/output_data/pgh_edges.csv"), na = ""),
   
   simplified_graph = simplify_topology(pgh_tidy_graph, pgh_edge_bundles),
-  simplified_pgh_nodes = write_csv(write_nodelist(simplified_graph), path = file_out("osmar/output_data/simplified_pgh_nodes.csv"), na = ""),
-  simplified_pgh_edges = write_csv(write_edgelist(simplified_graph), path = file_out("osmar/output_data/simplified_pgh_edges.csv"), na = ""),
+  simplified_pgh_nodes = write_csv(write_nodelist(simplified_graph), path = file_out("osmar/output_data/simplified/simplified_pgh_nodes.csv"), na = ""),
+  simplified_pgh_edges = write_csv(write_edgelist(simplified_graph), path = file_out("osmar/output_data/simplified/simplified_pgh_edges.csv"), na = ""),
   
-  write_lines(toJSON(pgh_edge_bundles, pretty = TRUE), path = "osmar/output_data/pgh_bundles.json"),
+  interbridge_distances = interface_distance_matrix(pgh_tidy_graph, pgh_edge_bundles),
+  interbridge_distance_matrix = write.csv(interbridge_distances$bridge_distance_matrix, 
+                                          file = file_out("osmar/output_data/interbridge_distance/interbridge_distance_matrix.csv"),
+                                          na = ""
+  ),
+  bridge_node_correspondence = write_csv(interbridge_distances$bridge_node_correspondence,
+                                         path = file_out("osmar/output_data/interbridge_distance/bridge_node_correspondence.csv"),
+                                         na = ""),
 
   test_run = greedy_search(pgh_tidy_graph, edge_bundles = pgh_edge_bundles, 
                            distances = E(pgh_tidy_graph)$distance, starting_point = 1),

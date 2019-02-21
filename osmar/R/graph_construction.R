@@ -138,6 +138,7 @@ interface_distance_matrix <- function(graph, edge_bundles) {
     container[match(x$search_points, interface_points)] <- x$distances
     container
   })
+
   
   long_dist <- data_frame(
     from = rep(seq_along(interface_points), length(interface_points)),
@@ -145,13 +146,23 @@ interface_distance_matrix <- function(graph, edge_bundles) {
     distance = unlist(bridge_distances)
   )
   
-  bridge_distance_matrix <- bridge_distances %>% do.call(rbind, .)
+  ordered_bridge_ids <- unique(na.omit(E(graph)$bridge_id))
   
-  ggplot(long_dist, aes(x = from, y = to)) +
-    geom_tile(aes(color = distance))
+  bundle_node_correspondence <- map_df(res, function(x) {
+    data_frame(
+      node_index = x$from_vertex,
+      bridge_id = ordered_bridge_ids[x$incident_bridges]
+    )
+  })
     
-  bdg <- graph_from_adjacency_matrix(bridge_distance_matrix, mode = "directed", weighted = TRUE) %>% 
-    delete_edges(which(is.infinite(E(.)$weight)))
+  bridge_distance_matrix <- bridge_distances %>% do.call(rbind, .)
+  rownames(bridge_distance_matrix) <- interface_points
+  colnames(bridge_distance_matrix) <- interface_points
+  
+  list(
+    bridge_node_correspondence = bundle_node_correspondence,
+    bridge_distance_matrix = bridge_distance_matrix
+  )
 }
 
 one_shortest_path <- function(from_vertex, pruned_graph, original_graph, interface_points) {
@@ -168,6 +179,9 @@ one_shortest_path <- function(from_vertex, pruned_graph, original_graph, interfa
                           weights = E(pruned_graph)$pathfinder.distance)
   
   paths$search_points <- search_points
+  
+  paths$incident_bridges <- incident_bridges
+  paths$from_vertex <- from_vertex
   
   paths$distances <- as.numeric(distances(pruned_graph, v = from_vertex, to = search_points, mode = "out", weights = E(pruned_graph)$pathfinder.distance))
   paths
