@@ -1,6 +1,6 @@
 # Bridge distance matrices
 
-`bridge_node_correspondence.csv` contains a CSV with 2 columns:
+`bridge_node_correspondence.csv` contains a CSV with 2 columns listing which bridge entry/exit nodes belong to which bridge:
 - `node_index` maps to the `id` column in `osmar/output_data/pgh_nodes.csv`
 - `bridge_id` maps to the `bridge_id` column in `osmar/output_data/pgh_edges.csv`. It indicates that this `node_index` is an entry/exit point for that bridge. Note: most nodes are an entry/exit point for only one bridge, however there are ~4 nodes that are incident to 2 edges that belong to different bridges - for example the [overpass at East 5th Avneue and Homstead Grays Bridge](https://www.openstreetmap.org/relation/9340973) are two bridges that intersect.
 
@@ -16,10 +16,10 @@ Each has two files:
 - The first column contains the origin node index numbers (these index numbers map to the `id` column in `osmar/output_data/pgh_nodes.csv`). 
 - The first row contains the destination node index numbers. 
 - Values are distance between those two nodes in meters along the edge path. 
-    - Empty values indicate that a distance was not calculated - e.g., for `inter_distance_matrix.csv` because the origin and destination node belong to the same graph. 
+    - Empty values indicate that a distance was not calculated - e.g., for `inter_distance_matrix.csv` because the origin and destination node belong to the same bridge.
     - `Inf` values indicate that the distance was infinite, i.e. the destination node was unreachable from the origin node.
     
-`*_pathways.json` is a JSON file of nested objects. The first level of keys represent the origin node index number (these index numbers map to the `id` column in `osmar/output_data/pgh_nodes.csv`), with their child keys representing the target index number. Each of these child keys points to an array of edge index ids describing the pathway from origin to target in the full graph. These edge index ids map to the `id` column in `osmar/output_data/pgh_edges.csv`. Where no path was available, the array is empty:
+`*_pathways.json` is a JSON file of nested objects. The first level of keys represent the origin node index number (these index numbers map to the `id` column in `osmar/output_data/pgh_nodes.csv`), with their child keys representing the target index number. Each of these child keys points to an array of edge index ids describing the shortest pathway from origin to target in the full graph. These edge index ids map to the `id` column in `osmar/output_data/pgh_edges.csv`. Where no path was available, the array is empty:
 
 ```json
 {
