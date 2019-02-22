@@ -117,72 +117,75 @@ write_nodelist <- function(graph) {
     select(id = node_id, osm_node_id = id, lat, lon, osm_label = label, neighborhood)
 }
 
-interface_distance_matrix <- function(graph, edge_bundles) {
+bridge_node_correspondence <- function(graph, edge_bundles) {
   decorated_graph <- decorate_graph(graph, edge_bundles, E(graph)$distance)
+  interface_points <- which(V(decorated_graph)$pathfinder.interface)
   
-  bridgeless_graph <- decorated_graph %>% 
-    activate(edges) %>% 
-    filter(is.na(pathfinder.bundle_id))
-  
-  interface_points <- which(V(bridgeless_graph)$pathfinder.interface)
-  
-  plan(multiprocess)
-  res <- future_map(interface_points, one_shortest_path, 
-                    pruned_graph = bridgeless_graph, original_graph = decorated_graph, 
-                    interface_points = interface_points, 
-                    .progress = TRUE)
-  
-  
-  bridge_distances <- map(res, function(x) {
-    container <- rep(NA_real_, length(interface_points))
-    container[match(x$search_points, interface_points)] <- x$distances
-    container
-  })
-
-  
-  long_dist <- data_frame(
-    from = rep(seq_along(interface_points), length(interface_points)),
-    to = rep(seq_along(interface_points), each = length(interface_points)),
-    distance = unlist(bridge_distances)
-  )
-  
-  ordered_bridge_ids <- unique(na.omit(E(graph)$bridge_id))
-  
-  bundle_node_correspondence <- map_df(res, function(x) {
-    data_frame(
-      node_index = x$from_vertex,
-      bridge_id = ordered_bridge_ids[x$incident_bridges]
-    )
-  })
-    
-  bridge_distance_matrix <- bridge_distances %>% do.call(rbind, .)
-  rownames(bridge_distance_matrix) <- interface_points
-  colnames(bridge_distance_matrix) <- interface_points
-  
-  list(
-    bridge_node_correspondence = bundle_node_correspondence,
-    bridge_distance_matrix = bridge_distance_matrix
-  )
+  as_tibble(decorated_graph, "edges") %>% 
+    filter(!is.na(bridge_id)) %>% 
+    select(from, to, bridge_id) %>% 
+    gather(direction, node_index, from:to) %>% 
+    select(node_index, bridge_id, direction) %>% 
+    arrange(node_index)
 }
 
-one_shortest_path <- function(from_vertex, pruned_graph, original_graph, interface_points) {
-  incident_edges <- incident(original_graph, v = as.integer(from_vertex), mode = "all")
-  incident_bridges <- unique(na.omit(edge_attr(original_graph, "pathfinder.bundle_id", incident_edges)))
-  bridge_points <- as.integer(unique(ends(original_graph, E(original_graph)[E(original_graph)$pathfinder.bundle_id %in% incident_bridges])))
+interface_distance_matrix <- function(graph, bridge_point_map, keep_paths = c("all", "inter", "intra")) {
+  stopifnot(inherits(graph, "pathfinder_graph"))
   
-  # Only search those points that are not associated with the current bridge
-  search_points <- setdiff(interface_points, bridge_points)
+  interface_points <- which(V(graph)$pathfinder.interface)
   
-  paths <- shortest_paths(pruned_graph, from = from_vertex, 
-                          to = search_points, 
-                          mode = "out", output = "epath", 
-                          weights = E(pruned_graph)$pathfinder.distance)
+  # Calculate full distance matrices between all interface points
+  all_distances <- distances(graph, v = interface_points,
+                                    to = interface_points, mode = "out", 
+                                    weights = E(graph)$pathfinder.distance)
+  rownames(all_distances) <- interface_points
+  colnames(all_distances) <- interface_points
   
-  paths$search_points <- search_points
+  plan(multiprocess)
+  suppressWarnings({
+    all_paths <- future_map(interface_points, ~shortest_paths(graph,
+                                                              from = .x,
+                                                              to = interface_points, 
+                                                              mode = "out", output = "epath", 
+                                                              weights = E(graph)$pathfinder.distance),
+                            .progress = TRUE)
+  })
   
-  paths$incident_bridges <- incident_bridges
-  paths$from_vertex <- from_vertex
+  orig_edge_ids <- edge_attr(graph, "pathfinder.edge_id")
   
-  paths$distances <- as.numeric(distances(pruned_graph, v = from_vertex, to = search_points, mode = "out", weights = E(pruned_graph)$pathfinder.distance))
-  paths
+  named_all_paths <- map(all_paths, function(x) {
+    map(x$epath, function(y) {
+      orig_edge_ids[as.integer(y)]
+    }) %>% 
+      set_names(interface_points)
+  }) %>% 
+    set_names(interface_points)
+  
+  # Null out all intra-bridge distances
+  diag(all_distances) <- NA_real_
+  
+  if (keep_paths == "all") {
+    # Do nothing
+  } else if (keep_paths == "inter") {
+    # Remove all distances for intra-bridge points
+    for (bi in unique(bridge_point_map$bridge_id)) {
+      mutually_exclusive_nodes <- as.character(intersect(bridge_point_map$node_index[bridge_point_map$bridge_id == bi], interface_points))
+      all_distances[mutually_exclusive_nodes, mutually_exclusive_nodes] <- NA_real_
+    }
+  } else if (keep_paths == "intra") {
+    # Remove all distances for inter-bridge poitns
+    matrix_positions <- expand.grid(as.integer(rownames(all_distances)), as.integer(colnames(all_distances)))
+    is_coincident <- mapply(function(v1, v2) {
+      any(bridge_point_map$bridge_id[bridge_point_map$node_index == v1] %in% bridge_point_map$bridge_id[bridge_point_map$node_index == v2])
+    }, matrix_positions$Var1, matrix_positions$Var2, SIMPLIFY = TRUE)
+    stopifnot(inherits(is_coincident, "logical"))
+    all_distances[!is_coincident] <- NA_real_
+  } else {
+    stop(paste0(keep_paths, " is not a valid value for keep_paths. Use 'all', 'inter', or 'intra'."))
+  }
+  
+  list(
+    distance_matrix = all_distances,
+    path_list = named_all_paths
+  )
 }
