@@ -1,0 +1,91 @@
+hood_no,hood_name,jaccard index
+1,Allegheny Center,0.060301508
+2,Allegheny West,0.050933786
+3,Allentown,0.192192192
+4,Arlington,0.124721604
+5,Arlington Heights,0.018823529
+6,Banksville,0.380434783
+7,Bedford Dwellings,0.0375
+8,Beechview,0.719665272
+9,Beltzhoover,0.221238938
+10,Bloomfield,0.18328841
+11,Bluff,0.164634146
+12,Bon Air,0.222222222
+13,Brighton Heights,0.592592593
+14,Brookline,0.766666667
+15,California-Kirkbride,0.095354523
+16,Carrick,0.510152284
+17,Central Business District,0.50297619
+18,Central Lawrenceville,0.293956044
+19,Central Northside,0.187804878
+20,Central Oakland,0.143884892
+21,Chartiers City,0.1
+22,Chateau,0.178268251
+23,Crafton Heights,0.215311005
+24,Crawford-Roberts,0.167364017
+25,Duquesne Heights,0.285024155
+26,East Allegheny,0.158783784
+27,East Carnegie,0.09383378
+28,East Hills,0.385416667
+29,East Liberty,0.314049587
+30,Elliott,0.288607595
+31,Esplen,0.631578947
+32,Fairywood,0.830769231
+33,Fineview,0.15776699
+34,Friendship,0.068100358
+35,Garfield,0.353571429
+36,Glen Hazel,0.098837209
+37,Greenfield,0.463302752
+38,Hays,0.556390977
+39,Hazelwood,0.410022779
+40,Highland Park,0.329545455
+41,Homewood North,0.276450512
+42,Homewood South,0.34751773
+43,Homewood West,0.089655172
+44,Knoxville,0.355421687
+45,Larimer,0.233236152
+46,Lincoln Place,0.562043796
+47,Lincoln-Lemington-Belmar,0.811518325
+48,Lower Lawrenceville,0.186629526
+49,Manchester,0.117845118
+50,Marshall-Shadeland,0.339805825
+51,Middle Hill,0.190376569
+52,Morningside,0.263636364
+54,Mount Washington,0.37704918
+53,Mt. Oliver,0.140740741
+55,New Homestead,0.358490566
+56,North Oakland,0.159144893
+57,North Shore,0.13973064
+58,Northview Heights,0.161676647
+59,Oakwood,0.056300268
+60,Overbrook,0.189814815
+61,Perry North,0.575609756
+62,Perry South,0.413875598
+63,Point Breeze,0.216763006
+64,Point Breeze North,0.067669173
+65,Polish Hill,0.104018913
+66,Regent Square,0.294871795
+67,Ridgemont,0.18125
+68,Shadyside,0.235460993
+69,Sheraden,0.586486486
+70,South Oakland,0.289351852
+71,South Shore,0.098360656
+72,South Side Flats,0.506944444
+73,South Side Slopes,0.280412371
+74,Spring Garden,0.14507772
+75,Spring Hill-City View,0.775193798
+76,Squirrel Hill North,0.279635258
+77,Squirrel Hill South,0.466666667
+78,St. Clair,0.116788321
+79,Stanton Heights,0.328185328
+80,Strip District,0.255434783
+81,Summer Hill,0.295081967
+82,Swisshelm Park,0.818181818
+83,Terrace Village,0.069721116
+84,Troy Hill,0.377990431
+85,Upper Hill,0.10251046
+86,Upper Lawrenceville,0.21719457
+87,West End,0.284883721
+88,West Oakland,0.072261072
+89,Westwood,0.285340314
+90,Windgap,0.127937337
