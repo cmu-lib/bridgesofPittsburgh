@@ -22,6 +22,7 @@ library(konigsbergr)
 library(pathfinder)
 library(jsonlite)
 library(htmltools)
+library(bigosm)
 
 # Load all functions
 dir_walk("osmar/R", source)
@@ -99,3 +100,29 @@ pgh_plan <- drake_plan(
     ),
   mapshot(leaflet_map, url = file_out(fs::path(getwd(), "osmar/output_data/pgh_leaflet.html")))
 )
+
+city_bbs <- read_tsv(file = "https://raw.githubusercontent.com/dSHARP-CMU/boundingbox-cities/master/boundbox.txt", col_names = c("city", "ymax", "xmax", "ymin", "xmin"), col_types = "cnnnn")
+
+city_plan <- drake_plan(
+  city_xml = GET("https://overpass-api.de/api/map?bbox=xmin__,ymin__,xmax__,ymax__", write_disk(file_out("cities/city.xml"))),
+  city_osm = read_big_osm(file_in("cities/city.xml"), way_keys = "highway"),
+  city_base_graph = base_konigsberg_graph(city_osm),
+  city_marked_graph = konigsberg_graph(city_base_graph, path_filter = automobile_highways, bridge_filter = main_bridges),
+  city_pathway = cross_all_bridges(city_marked_graph, cheat = TRUE),
+  city_visual = view_konigsberg_path(city_marked_graph, city_pathway)
+)
+
+route_plan <- pmap_df(city_bbs, function(city, ymax, xmax, ymin, xmin) {
+  city_slug <- str_replace_all(city, " ", "")
+  
+  city_plan %>% 
+    mutate(
+      target = str_replace(target, "city", city_slug),
+      command = str_replace_all(command, pattern = c("city" = city_slug,
+                                                     "xmin__" = xmin,
+                                                     "xmax__" = xmax,
+                                                     "ymin__" = ymin,
+                                                     "ymax__" = ymax)))
+})
+
+str_subset(route_plan$target, "osm")
