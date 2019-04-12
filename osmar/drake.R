@@ -106,6 +106,16 @@ pgh_plan <- drake_plan(
   river_pathway_sf_rda = save(river_pathway_sf, file = file_out("osmar/output_data/completed_paths/river_pathway_sf.rda")),
   river_bridge_centroid_sf_rda = save(river_bridge_centroid_sf, file = file_out("osmar/output_data/completed_paths/river_bridge_centroid_sf.rda")),
   
+  # Pedestrian path
+  pedestrian_graph = konigsberg_graph(download_osm, path_filter = pedestrian_highways, bridge_filter = main_bridges),
+  pedestrian_pathway = cross_all_bridges(pedestrian_graph),
+  pedestrian_map = view_konigsberg_path(pedestrian_graph, pedestrian_pathway),
+  pedestrian_pathway_sf = produce_pathway_sf(graph = pedestrian_graph, pathway = pedestrian_pathway),
+  pedestrian_bridge_centroid_sf = bridge_centroids(graph = pedestrian_graph, pathway = pedestrian_pathway),
+  pedestrian_pathway_sf_rda = save(pedestrian_pathway_sf, file = file_out("osmar/output_data/completed_paths/pedestrian_pathway_sf.rda")),
+  pedestrian_bridge_centroid_sf_rda = save(pedestrian_bridge_centroid_sf, file = file_out("osmar/output_data/completed_paths/pedestrian_bridge_centroid_sf.rda")),
+  
+  
   # For visualization purposes only keep the graph within city limits + any
   # additional edges traversed by the pathway
   pathway_sf = produce_pathway_sf(graph = pgh_tidy_graph, pathway = full_pathway),
