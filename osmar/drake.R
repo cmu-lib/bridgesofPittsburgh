@@ -104,14 +104,14 @@ pgh_plan <- drake_plan(
   river_pathway_sf = produce_pathway_sf(graph = pgh_tidy_graph, pathway = river_pathway),
   river_bridge_centroid_sf = bridge_centroids(graph = pgh_tidy_graph, pathway = river_pathway),
   river_pathway_sf_rda = save(river_pathway_sf, file = file_out("osmar/output_data/completed_paths/river_pathway_sf.rda")),
-  river_bridge_centroid_sf_rda = save(river_bridge_centroid_sf, file = file_out("osmar/output_data/river_bridge_centroid_sf.rda")),
+  river_bridge_centroid_sf_rda = save(river_bridge_centroid_sf, file = file_out("osmar/output_data/completed_paths/river_bridge_centroid_sf.rda")),
   
   # For visualization purposes only keep the graph within city limits + any
   # additional edges traversed by the pathway
   pathway_sf = produce_pathway_sf(graph = pgh_tidy_graph, pathway = full_pathway),
   bridge_centroid_sf = bridge_centroids(graph = pgh_tidy_graph, pathway = full_pathway),
   pathway_sf_rda = save(pathway_sf, file = file_out("osmar/output_data/completed_paths/pathway_sf.rda")),
-  bridge_centroid_sf_rda = save(bridge_centroid_sf, file = file_out("osmar/output_data/bridge_centroid_sf.rda"))
+  bridge_centroid_sf_rda = save(bridge_centroid_sf, file = file_out("osmar/output_data/completed_paths/bridge_centroid_sf.rda"))
 )
 
 city_bbs <- read_tsv(file = "https://raw.githubusercontent.com/dSHARP-CMU/boundingbox-cities/master/boundbox.txt", col_names = c("city", "ymax", "xmax", "ymin", "xmin"), col_types = "cnnnn")
