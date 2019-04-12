@@ -48,49 +48,6 @@ filter_bridges_to_nodes <- function(graph, node_ids) {
     )
 }
 
-simplify_topology <- function(graph, edge_bundles) {
-  undirected_network <- graph %>% 
-    decorate_graph(edge_bundles, E(graph)$distance) %>% 
-    as.undirected(edge.attr.comb = list(id = "first", 
-                                        label = "first", 
-                                        is_bridge = "first", 
-                                        distance = "first", 
-                                        within_boundaries = "first",
-                                        bridge_id = "first", "ignore")) %>% 
-    as_tbl_graph()
-  
-  two_degree <- get_prunable_nodes(undirected_network)
-  
-  while (length(two_degree > 0)) {
-    s1 <- two_degree[1]
-    endpoints <- adjacent_vertices(undirected_network, v = s1)[[1]]
-    edges_to_remove <- incident_edges(undirected_network, v = s1)[[1]]
-    
-    new_distance <- sum(edge_attr(undirected_network, "distance", index = edges_to_remove))
-    new_bridge_id <- first(na.omit(edge_attr(undirected_network, "bridge_id", index = edges_to_remove)))
-    new_bridge_label <- first(na.omit(edge_attr(undirected_network, "label", index = edges_to_remove)))
-    new_bridge_in_bounds <- any(edge_attr(undirected_network, "within_boundaries", index = edges_to_remove))
-    new_bridge_is_bridge <- any(edge_attr(undirected_network, "is_bridge", index = edges_to_remove))
-    
-    undirected_network <- add_edges(undirected_network, endpoints, 
-                                    attr = list(distance = new_distance, 
-                                                bridge_id = new_bridge_id,
-                                                label = new_bridge_label,
-                                                within_boundaries = new_bridge_in_bounds,
-                                                is_bridge = new_bridge_is_bridge))
-    undirected_network <- delete_vertices(undirected_network, v = s1)
-    
-    two_degree <- get_prunable_nodes(undirected_network)
-    message("Remaining nodes: ", length(two_degree))
-  }
-  
-  as_tbl_graph(undirected_network)
-}
-
-get_prunable_nodes <- function(graph) {
-  which(!V(graph)$pathfinder.interface & degree(graph) == 2)
-}
-
 write_edgelist <- function(graph) {
   
   if (all(!(edge_attr_names(graph) %in% c("bridge_relation", "bridge", "highway")))) {

@@ -4,6 +4,7 @@ pkgconfig::set_config(
   "drake::strings_in_dots" = "literals",
   "drake::verbose" = 4)
 
+suppressPackageStartupMessages({
 library(drake)
 library(osmar)
 library(tidyverse)
@@ -23,6 +24,8 @@ library(pathfinder)
 library(jsonlite)
 library(htmltools)
 library(bigosm)
+library(simplygraph)
+})
 
 # Load all functions
 dir_walk("osmar/R", source)
@@ -68,37 +71,47 @@ pgh_plan <- drake_plan(
   pgh_nodes = write_csv(write_nodelist(pgh_tidy_graph), path = file_out("osmar/output_data/pgh_nodes.csv"), na = ""),
   pgh_edges = write_csv(write_edgelist(pgh_tidy_graph), path = file_out("osmar/output_data/pgh_edges.csv"), na = ""),
   
-  simplified_graph = simplify_topology(pgh_tidy_graph, pgh_edge_bundles),
-  simplified_pgh_nodes = write_csv(write_nodelist(simplified_graph), path = file_out("osmar/output_data/simplified/simplified_pgh_nodes.csv"), na = ""),
-  simplified_pgh_edges = write_csv(write_edgelist(simplified_graph), path = file_out("osmar/output_data/simplified/simplified_pgh_edges.csv"), na = ""),
-  
+  flat_graph = as.undirected(pgh_decorated_graph, mode = "collapse", edge.attr.comb = list(id = "first", pathfinder.distance = "sum", "ignore")) %>% 
+    as_tbl_graph() %>% 
+    activate(edges) %>% 
+    left_join(select(write_edgelist(pgh_tidy_graph), -from, -to, -distance), by = "id"),
+  simplified_graph = simplify_topology(flat_graph, protected_nodes = which(vertex_attr(flat_graph, "pathfinder.interface"))),
+  simplified_pgh_nodes = as_tbl_graph(simplified_graph) %>% 
+    write_nodelist() %>% 
+    write_csv(path = file_out("osmar/output_data/simplified/simplified_pgh_nodes.csv"), na = ""),
+  simplified_pgh_edges = as_tbl_graph(simplified_graph) %>% 
+    activate(edges) %>% 
+    rename(label = osm_label, distance = pathfinder.distance) %>% 
+    write_edgelist() %>% 
+    write_csv(path = file_out("osmar/output_data/simplified/simplified_pgh_edges.csv"), na = ""),
+
   pgh_node_corr_tbl = write_csv(pgh_bridge_node_correspondence, na = "",
                                          path = file_out("osmar/output_data/distance_matrices/bridge_node_correspondence.csv")),
 
-  test_run = greedy_search(pgh_tidy_graph, edge_bundles = pgh_edge_bundles, 
-                           distances = E(pgh_tidy_graph)$distance, starting_point = 1),
-  path_result = write_lines(toJSON(test_run$epath, pretty = TRUE), path = file_out("osmar/output_data/paths/edge_steps.json")),
-  path_summary = write_csv(glance(test_run), na = "", path = file_out("osmar/output_data/paths/path_summary.csv")),
-  path_details = write_csv(augment(test_run), na = "", path = file_out("osmar/output_data/paths/path_details.csv")),
-  path_as_text = bridge_text_table(pgh_tidy_graph, test_run),
+  full_pathway = greedy_search(pgh_tidy_graph, edge_bundles = pgh_edge_bundles, 
+                           distances = E(pgh_tidy_graph)$distance, starting_point = V(pgh_tidy_graph)[id == 5312910192]),
+  path_result = write_lines(toJSON(full_pathway$epath, pretty = TRUE), path = file_out("osmar/output_data/completed_paths/edge_steps.json")),
+  path_summary = write_csv(glance(full_pathway), na = "", path = file_out("osmar/output_data/completed_paths/path_summary.csv")),
+  path_details = write_csv(augment(full_pathway), na = "", path = file_out("osmar/output_data/completed_paths/path_details.csv")),
+  path_as_text = bridge_text_table(pgh_tidy_graph, full_pathway),
   bridges_only_path_text = filter(path_as_text, is_bridge == TRUE),
-  write_lines(bridge_text_html(path_as_text), path = file_out("osmar/output_data/paths/path_ordered_list.html")),
-  write_lines(bridge_text_html(bridges_only_path_text), path = file_out("osmar/output_data/paths/path_ordered_list_bridges_only.html")),
+  write_lines(bridge_text_html(path_as_text), path = file_out("osmar/output_data/completed_paths/path_ordered_list.html")),
+  write_lines(bridge_text_html(bridges_only_path_text), path = file_out("osmar/output_data/completed_paths/path_ordered_list_bridges_only.html")),
+  
+  # River bridges only
+  river_bridges = read_csv(file_in("osmar/input_data/river_bridges.csv"), col_types = "n")[["bridge_id"]],
+  river_pathway = cross_specific_bridges(pgh_tidy_graph, required_bridges = river_bridges, starting_node = 5312910192),
+  river_pathway_sf = produce_pathway_sf(graph = pgh_tidy_graph, pathway = river_pathway),
+  river_bridge_centroid_sf = bridge_centroids(graph = pgh_tidy_graph, pathway = river_pathway),
+  river_pathway_sf_rda = save(river_pathway_sf, file = file_out("osmar/output_data/completed_paths/river_pathway_sf.rda")),
+  river_bridge_centroid_sf_rda = save(river_bridge_centroid_sf, file = file_out("osmar/output_data/river_bridge_centroid_sf.rda")),
   
   # For visualization purposes only keep the graph within city limits + any
   # additional edges traversed by the pathway
-  pathway_sf = produce_pathway_sf(graph = pgh_tidy_graph, pathway = test_run),
-  bridge_centroid_sf = bridge_centroids(graph = pgh_tidy_graph, pathway = test_run),
-  pathway_sf_rda = save(pathway_sf, file = file_out("osmar/output_data/paths/pathway_sf.rda")),
-  bridge_centroid_sf_rda = save(bridge_centroid_sf, file = file_out("osmar/output_data/bridge_centroid_sf.rda")),
-  
-  # Generate a standalone leaflet map
-  leaflet_map = mapview(x = pathway_sf,
-                        zcol = "total_times_bridge_crossed",
-    color = c("#2B83BA", "#ABDDA4", "#FDAE61"),
-    lwd = 4
-    ),
-  mapshot(leaflet_map, url = file_out(fs::path(getwd(), "osmar/output_data/pgh_leaflet.html")))
+  pathway_sf = produce_pathway_sf(graph = pgh_tidy_graph, pathway = full_pathway),
+  bridge_centroid_sf = bridge_centroids(graph = pgh_tidy_graph, pathway = full_pathway),
+  pathway_sf_rda = save(pathway_sf, file = file_out("osmar/output_data/completed_paths/pathway_sf.rda")),
+  bridge_centroid_sf_rda = save(bridge_centroid_sf, file = file_out("osmar/output_data/bridge_centroid_sf.rda"))
 )
 
 city_bbs <- read_tsv(file = "https://raw.githubusercontent.com/dSHARP-CMU/boundingbox-cities/master/boundbox.txt", col_names = c("city", "ymax", "xmax", "ymin", "xmin"), col_types = "cnnnn")
