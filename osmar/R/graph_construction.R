@@ -83,6 +83,7 @@ bridge_node_correspondence <- function(graph, edge_bundles) {
     select(from, to, bridge_id) %>% 
     gather(direction, node_index, from:to) %>% 
     select(node_index, bridge_id, direction) %>% 
+    filter(node_index %in% interface_points) %>% 
     arrange(node_index)
 }
 
