@@ -75,7 +75,7 @@ pgh_plan <- drake_plan(
     as_tbl_graph() %>% 
     activate(edges) %>% 
     left_join(select(write_edgelist(pgh_tidy_graph), -from, -to, -distance), by = "id"),
-  simplified_graph = simplify_topology(flat_graph, protected_nodes = which(vertex_attr(flat_graph, "pathfinder.interface"))),
+  simplified_graph = simplify_topology(flat_graph, protected_nodes = which(vertex_attr(flat_graph, "pathfinder.interface")), edge_attr_comb = list(pathfinder.distance = sum, .default.combiner = first)),
   simplified_pgh_nodes = as_tbl_graph(simplified_graph) %>% 
     write_nodelist() %>% 
     write_csv(path = file_out("osmar/output_data/simplified/simplified_pgh_nodes.csv"), na = ""),
