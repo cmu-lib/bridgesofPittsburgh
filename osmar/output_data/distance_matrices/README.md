@@ -6,9 +6,9 @@
 
 Each of the additional directories contains distance and path information for three versions of the graph:
 
-- `all` The entire graph, including both bridges and roads
-- `inter_bridge` The graph with all bridge edges removed
-- `intra_bridge` The graph with all non-bridge edges removed
+- `all` Distances between entry/exit nodes calculated on the entire graph, including both bridges and roads
+- `inter_bridge` Distances between entry/exit nodes calculated on the graph with all bridge edges removed
+- `intra_bridge` Distances between entry/exit nodes calculated on the graph with all non-bridge edges removed
 
 Each has two files:
 
