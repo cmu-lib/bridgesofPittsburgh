@@ -71,7 +71,7 @@ pgh_plan <- drake_plan(
   pgh_nodes = write_csv(write_nodelist(pgh_tidy_graph), path = file_out("osmar/output_data/pgh_nodes.csv"), na = ""),
   pgh_edges = write_csv(write_edgelist(pgh_tidy_graph), path = file_out("osmar/output_data/pgh_edges.csv"), na = ""),
   
-  flat_graph = as.undirected(pgh_decorated_graph, mode = "collapse", edge.attr.comb = list(id = "first", pathfinder.distance = "sum", "ignore")) %>% 
+  flat_graph = as.undirected(pgh_decorated_graph, mode = "collapse", edge.attr.comb = list(id = "first", pathfinder.distance = "first", "ignore")) %>% 
     as_tbl_graph() %>% 
     activate(edges) %>% 
     left_join(select(write_edgelist(pgh_tidy_graph), -from, -to, -distance), by = "id"),
