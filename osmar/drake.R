@@ -124,10 +124,8 @@ pgh_plan <- drake_plan(
   bridge_centroid_sf_rda = save(bridge_centroid_sf, file = file_out("osmar/output_data/completed_paths/bridge_centroid_sf.rda"))
 )
 
-city_bbs <- read_tsv(file = "https://raw.githubusercontent.com/dSHARP-CMU/boundingbox-cities/master/boundbox.txt", col_names = c("city", "ymax", "xmax", "ymin", "xmin"), col_types = "cnnnn")
-
+# Template plan for computing city pathways from source XML files
 city_plan <- drake_plan(
-  city_xml = GET("https://overpass-api.de/api/map?bbox=xmin__,ymin__,xmax__,ymax__", write_disk(file_out("cities/city.xml"))),
   city_osm = read_big_osm(file_in("cities/city.xml"), way_keys = "highway"),
   city_base_graph = base_konigsberg_graph(city_osm),
   city_marked_graph = konigsberg_graph(city_base_graph, path_filter = automobile_highways, bridge_filter = main_bridges),
@@ -135,17 +133,23 @@ city_plan <- drake_plan(
   city_visual = view_konigsberg_path(city_marked_graph, city_pathway)
 )
 
-route_plan <- pmap_df(city_bbs, function(city, ymax, xmax, ymin, xmin) {
-  city_slug <- str_replace_all(city, " ", "")
-  
-  city_plan %>% 
-    mutate(
-      target = str_replace(target, "city", city_slug),
-      command = str_replace_all(command, pattern = c("city" = city_slug,
-                                                     "xmin__" = xmin,
-                                                     "xmax__" = xmax,
-                                                     "ymin__" = ymin,
-                                                     "ymax__" = ymax)))
+# Take that template and replicate it, filling in the actual city name across all targets
+route_plan <- dir_ls("cities") %>% 
+  path_file() %>% 
+  path_ext_remove() %>% 
+  map_df(function(city_slug) {
+    city_plan %>% 
+      mutate(
+        target = str_replace(target, "city", city_slug),
+        command = str_replace_all(command, pattern = c("city" = city_slug)))
 })
 
-str_subset(route_plan$target, "osm")
+allpaths <- route_plan %>% 
+  filter(str_detect(target, "pathway")) %>% 
+  gather_plan(target = "all_paths")
+
+path_analysis <- bind_plans(
+  route_plan,
+  allpaths,
+  drake_plan(glanced_paths = map_df(all_paths, glance, .id = "city") %>% mutate(city = str_replace(city, "_pathway", "")))
+)
