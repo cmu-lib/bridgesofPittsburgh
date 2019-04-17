@@ -150,5 +150,5 @@ allpaths <- route_plan %>%
 path_analysis <- bind_plans(
   route_plan,
   allpaths,
-  drake_plan(glanced_paths = map_df(all_paths, glance, .id = "city") %>% mutate(city = str_replace(city, "_pathway", "")))
+  drake_plan(glanced_paths = map_df(all_paths, glance_path, .id = "city") %>% mutate(city = str_replace(city, "_pathway", "")))
 )
