@@ -24,7 +24,6 @@ library(pathfinder)
 library(jsonlite)
 library(htmltools)
 library(bigosm)
-library(simplygraph)
 })
 
 # Load all functions
