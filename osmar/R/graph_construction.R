@@ -87,63 +87,60 @@ bridge_node_correspondence <- function(graph, edge_bundles) {
     arrange(node_index)
 }
 
-interface_distance_matrix <- function(graph, bridge_point_map, keep_paths = c("all", "inter", "intra")) {
-  stopifnot(inherits(graph, "pathfinder_graph"))
-  
+full_matrix <- function(graph) {
+  general_distance_matrix(graph)
+}
+
+inter_bridge_matrix <- function(graph, node_sibling_lookup) {
+  bridgeless_graph <- delete_edges(graph, edges = which(!is.na(E(graph)$pathfinder.bundle_id)))
+  general_distance_matrix(bridgeless_graph, node_sibling_lookup)
+}
+
+intra_bridge_matrix <- function(graph) {
+  bridge_only_graph <- delete_edges(graph, edges = which(is.na(E(graph)$pathfinder.bundle_id)))
+  general_distance_matrix(bridge_only_graph)
+}
+
+general_distance_matrix <- function(graph, node_sibling_lookup = NULL) {
   interface_points <- which(V(graph)$pathfinder.interface)
-  
-  # Calculate full distance matrices between all interface points
-  all_distances <- distances(graph, v = interface_points,
-                                    to = interface_points, mode = "out", 
-                                    weights = E(graph)$pathfinder.distance)
-  rownames(all_distances) <- interface_points
-  colnames(all_distances) <- interface_points
-  
-  plan(multiprocess)
-  suppressWarnings({
-    all_paths <- future_map(interface_points, ~shortest_paths(graph,
-                                                              from = .x,
-                                                              to = interface_points, 
-                                                              mode = "out", output = "epath", 
-                                                              weights = E(graph)$pathfinder.distance),
-                            .progress = TRUE)
-  })
-  
   orig_edge_ids <- edge_attr(graph, "pathfinder.edge_id")
+  distance_matrix <- distances(graph, 
+                               v = interface_points,
+                               to = interface_points,
+                               mode = "out",
+                               weights = E(graph)$pathfinder.distance)
   
-  named_all_paths <- map(all_paths, function(x) {
-    map(x$epath, function(y) {
-      orig_edge_ids[as.integer(y)]
-    }) %>% 
-      set_names(interface_points)
-  }) %>% 
-    set_names(interface_points)
+  diag(distance_matrix) <- NA_real_
+  colnames(distance_matrix) <- interface_points
+  rownames(distance_matrix) <- interface_points
   
-  # Null out all intra-bridge distances
-  diag(all_distances) <- NA_real_
-  
-  if (keep_paths == "all") {
-    # Do nothing
-  } else if (keep_paths == "inter") {
-    # Remove all distances for intra-bridge points
-    for (bi in unique(bridge_point_map$bridge_id)) {
-      mutually_exclusive_nodes <- as.character(intersect(bridge_point_map$node_index[bridge_point_map$bridge_id == bi], interface_points))
-      all_distances[mutually_exclusive_nodes, mutually_exclusive_nodes] <- NA_real_
+  if (!is.null(node_sibling_lookup)) {
+    for (i in as.character(interface_points)) {
+      exclusion_points <- node_sibling_lookup[[i]]
+      distance_matrix[exclusion_points, exclusion_points] <- NA_real_
     }
-  } else if (keep_paths == "intra") {
-    # Remove all distances for inter-bridge poitns
-    matrix_positions <- expand.grid(as.integer(rownames(all_distances)), as.integer(colnames(all_distances)))
-    is_coincident <- mapply(function(v1, v2) {
-      any(bridge_point_map$bridge_id[bridge_point_map$node_index == v1] %in% bridge_point_map$bridge_id[bridge_point_map$node_index == v2])
-    }, matrix_positions$Var1, matrix_positions$Var2, SIMPLIFY = TRUE)
-    stopifnot(inherits(is_coincident, "logical"))
-    all_distances[!is_coincident] <- NA_real_
-  } else {
-    stop(paste0(keep_paths, " is not a valid value for keep_paths. Use 'all', 'inter', or 'intra'."))
   }
   
-  list(
-    distance_matrix = all_distances,
-    path_list = named_all_paths
-  )
+  suppressWarnings({
+    paths <- parallel::mclapply(interface_points, function(x) {
+      shortest_paths(graph,
+                     from = x,
+                     to = interface_points, 
+                     mode = "out", output = "epath", 
+                     weights = E(graph)$pathfinder.distance)
+    }, mc.preschedule = TRUE, mc.cores = 8)
+  })
+    
+    named_all_paths <- lapply(paths, function(x) {
+      lapply(x$epath, function(y) {
+        orig_edge_ids[as.integer(y)]
+      }) %>% 
+        set_names(interface_points)
+    }) %>% 
+      set_names(interface_points)
+  
+    list(
+      distance_matrix = distance_matrix,
+      path_list = named_all_paths
+    )
 }

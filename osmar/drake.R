@@ -13,7 +13,7 @@ library(igraph)
 library(rgdal)
 library(assertr)
 library(httr)
-library(furrr)
+library(parallel)
 library(geosphere)
 library(sf)
 library(fs)
@@ -46,14 +46,14 @@ pgh_plan <- drake_plan(
     left_join(select(st_set_geometry(node_communities, NULL), id, neighborhood = hood) %>% distinct(id, .keep_all = TRUE), by = "id"),
   pgh_edge_bundles = collect_edge_bundles(pgh_tidy_graph),
   pgh_bridge_node_correspondence = bridge_node_correspondence(pgh_tidy_graph, pgh_edge_bundles),
+  node_sibling_lookup = lapply(pgh_bridge_node_correspondence$node_index, function(x) 
+    as.character(unique(pgh_bridge_node_correspondence$node_index[pgh_bridge_node_correspondence$bridge_id == pgh_bridge_node_correspondence$bridge_id[pgh_bridge_node_correspondence$node_index == x]]))) %>% 
+    set_names(as.character(pgh_bridge_node_correspondence$node_index)),
   
   pgh_decorated_graph = decorate_graph(pgh_tidy_graph, pgh_edge_bundles, E(pgh_tidy_graph)$distance),
-  pgh_bridgeless_graph = pgh_decorated_graph %>% activate(edges) %>% filter(is.na(pathfinder.bundle_id)),
-  pgh_bridges_only_graph = pgh_decorated_graph %>% activate(edges) %>% filter(!is.na(pathfinder.bundle_id)),
-  
-  pgh_all_distances = interface_distance_matrix(pgh_decorated_graph, pgh_bridge_node_correspondence, keep_paths = "all"),
-  pgh_bridgeless_distances = interface_distance_matrix(pgh_bridgeless_graph, pgh_bridge_node_correspondence, keep_paths = "inter"),
-  pgh_bridge_only_distances = interface_distance_matrix(pgh_bridges_only_graph, pgh_bridge_node_correspondence, keep_paths = "intra"),
+  pgh_all_distances = full_matrix(pgh_decorated_graph),
+  pgh_bridgeless_distances = inter_bridge_matrix(pgh_decorated_graph, node_sibling_lookup),
+  pgh_bridge_only_distances = intra_bridge_matrix(pgh_decorated_graph),
   
   pgh_all_distances_matrix = write.csv(pgh_all_distances$distance_matrix, na = "",
                                        file = file_out("osmar/output_data/distance_matrices/all/all_distance_matrix.csv")),
@@ -147,8 +147,15 @@ allpaths <- route_plan %>%
   filter(str_detect(target, "pathway")) %>% 
   gather_plan(target = "all_paths")
 
+venice_plan <- drake_plan(
+  Venice_pedestrian_marked_graph = konigsberg_graph(Venice_base_graph, path_filter = pedestrian_highways, bridge_filter = all_bridges),
+  Venice_pedestrian_pathway = cross_all_bridges(Venice_pedestrian_marked_graph, cheat = TRUE),
+  Venice_pedestrian_visual = view_konigsberg_path(Venice_pedestrian_marked_graph, Venice_pedestrian_pathway)
+)
+
 path_analysis <- bind_plans(
   route_plan,
+  venice_plan,
   allpaths,
   drake_plan(glanced_paths = map_df(all_paths, glance_path, .id = "city") %>% mutate(city = str_replace(city, "_pathway", "")))
 )
