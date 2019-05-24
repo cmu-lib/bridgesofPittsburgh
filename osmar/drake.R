@@ -91,7 +91,7 @@ pgh_plan <- drake_plan(
                            distances = E(pgh_tidy_graph)$distance, starting_point = V(pgh_tidy_graph)[id == 5312910192]),
   path_result = write_lines(toJSON(full_pathway$epath, pretty = TRUE), path = file_out("osmar/output_data/completed_paths/edge_steps.json")),
   path_summary = write_csv(glance(full_pathway), na = "", path = file_out("osmar/output_data/completed_paths/path_summary.csv")),
-  path_details = write_csv(augment(full_pathway), na = "", path = file_out("osmar/output_data/completed_paths/path_details.csv")),
+  path_details = write_csv(augment_edges(full_pathway), na = "", path = file_out("osmar/output_data/completed_paths/path_details.csv")),
   path_as_text = bridge_text_table(pgh_tidy_graph, full_pathway),
   bridges_only_path_text = filter(path_as_text, is_bridge == TRUE),
   write_lines(bridge_text_html(path_as_text), path = file_out("osmar/output_data/completed_paths/path_ordered_list.html")),
