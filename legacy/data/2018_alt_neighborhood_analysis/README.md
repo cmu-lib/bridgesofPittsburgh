@@ -1,0 +1,2 @@
+- **2018_alt_neighborhood_analysis_** <br>
+This folder includes an alternate direction that we started to follow for the neighborhood analysis, working with the data as a bipartite network, but ultimately determined was not going to give us the answers we wanted. We then turned to Jaccard Indices (see the 2019_final_community_analysis)
